@@ -17,7 +17,21 @@ type Router interface {
 func New(cfs ...ConfigFunc) (Router, error) {
 	rt := Default()
 	for _, cf := range cfs {
-		cf(rt)
+		err := cf(rt)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return rt, nil
+}
+
+func NewDecl(cfs ...ConfigFunc) Router {
+	rt := Default()
+	for _, cf := range cfs {
+		err := cf(rt)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return rt
 }

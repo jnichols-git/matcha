@@ -7,15 +7,17 @@ import (
 )
 
 // RouteConfigFuncs can be applied to a Route at creation.
-type RouteConfigFunc func(Route)
+type ConfigFunc func(Route) error
 
-func WithMethods(methods ...string) func(Route) {
-	return func(r Route) {
+// Filter out requests that don't have a method included in methods
+func WithMethods(methods ...string) ConfigFunc {
+	return func(r Route) error {
 		r.Attach(func(r *http.Request) *http.Request {
 			if !slices.Contains(methods, r.Method) {
 				return nil
 			}
 			return r
 		})
+		return nil
 	}
 }
