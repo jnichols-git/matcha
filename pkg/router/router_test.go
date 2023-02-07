@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CloudRETIC/router/pkg/route"
-	"github.com/CloudRETIC/router/pkg/router/params"
+	"github.com/cloudretic/router/pkg/route"
+	"github.com/cloudretic/router/pkg/router/params"
 )
 
 type routeTestCase struct {
@@ -112,7 +112,7 @@ var complexRoutes []routeTestCase = []routeTestCase{
 	},
 }
 
-func TestBasicRoutesl(t *testing.T) {
+func TestBasicRoutes(t *testing.T) {
 	// Setup router
 	r := Default()
 	setupRouter(r, basicRoutes)

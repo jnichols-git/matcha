@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/CloudRETIC/router/pkg/route"
+	"github.com/cloudretic/router/pkg/route"
 )
 
 type defaultRouter struct {

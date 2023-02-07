@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/CloudRETIC/router/pkg/router/params"
+	"github.com/cloudretic/router/pkg/router/params"
 )
 
 // LITERALS

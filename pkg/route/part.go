@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/CloudRETIC/router/pkg/regex"
+	"github.com/cloudretic/router/pkg/regex"
 )
 
 const (
