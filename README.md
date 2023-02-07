@@ -57,12 +57,17 @@ Routes are defined with a string expression delimited by `/`. Creating a route w
 - Regex: Text enclosed in squiggly brackets `{}`, will match any token that is matched **in full** by the contained expression. You should use back-quotes for these routes.
 - Static: Any other text.
 
-In the below example, staticRoute will handle requests to `/static`, regexRoute will handle requests to other combination of 5 alphabet letters, and wildcardRoute will handle all other requests (that don't extend beyond that route). The latter two will also store a parameter `word` that contains the value that was matched.
+There is also syntax to alter the behavior of an entire route:
+
+- Partial: Any route ending in `+` will match requests up to the root exactly, then use the Part with the `+` appended to repeatedly match against longer requests. If the last Part is a wildcard, the entire trailing route will be stored in the wildcard (including the leading `/`).
 
 ```go
+// Create with New
 staticRoute, err := route.New("/static")
 regexRoute, err := route.New(`/[word]{[a-zA-Z]{5}}`)
+// Declare and panic if failed
 wildcardRoute := route.Declare("/[word]")
+partialRoute := route.Declare("/static/file/[filename]")
 ```
 
 Routes will match GET requests by default; if you want to change that behavior, use `WithMethods`. This will cause the route to no longer match GET requests unless you specify otherwise.
