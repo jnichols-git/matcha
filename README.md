@@ -21,10 +21,10 @@
 You can create a Router with a series of Routes, add Routes after creation, or both, using `WithRoute` and `AddRoute`.
 
 ```go
-r, err := router.New(
-    WithRoute(route.NewDecl("/someEndpoint"), someHandler)
+r := router.Declare(
+    WithRoute(route.Declare("/someEndpoint"), someHandler)
 )
-r.AddRoute(route.NewDecl("/soeOtherEndpoint"), someOtherHandler)
+r.AddRoute(route.Declare("/soeOtherEndpoint"), someOtherHandler)
 ```
 
 Routes will be handled in the order they are received, and **must match an incoming request URL exactly** in order to call their handler.
@@ -32,7 +32,7 @@ Routes will be handled in the order they are received, and **must match an incom
 You can also add a specific handler that's called in the event that no route matches using `WithNotFound` or `AddNotFound` in the same way (the router will return an empty 404 by default). Doing so will override any previously-set handler for this case.
 
 ```go
-r, err := router.New(
+r := router.Declare(
     WithRoute(...),
     WithNotFound(notFoundHandler)
 )
@@ -42,7 +42,10 @@ r.AddNotFound(otherNotFoundHandler)
 If you define custom Middleware, you can attach it to a Router using `Attach`.
 
 ```go
-router, _ := router.New()
+router, err := router.New()
+if err != nil {
+    ...
+}
 router.Attach(someMiddleware)
 ```
 
@@ -54,12 +57,17 @@ Routes are defined with a string expression delimited by `/`. Creating a route w
 - Regex: Text enclosed in squiggly brackets `{}`, will match any token that is matched **in full** by the contained expression. You should use back-quotes for these routes.
 - Static: Any other text.
 
-In the below example, staticRoute will handle requests to `/static`, regexRoute will handle requests to other combination of 5 alphabet letters, and wildcardRoute will handle all other requests (that don't extend beyond that route). The latter two will also store a parameter `word` that contains the value that was matched.
+There is also syntax to alter the behavior of an entire route:
+
+- Partial: Any route ending in `+` will match requests up to the root exactly, then use the Part with the `+` appended to repeatedly match against longer requests. If the last Part is a wildcard, the entire trailing route will be stored in the wildcard (including the leading `/`).
 
 ```go
+// Create with New
 staticRoute, err := route.New("/static")
 regexRoute, err := route.New(`/[word]{[a-zA-Z]{5}}`)
-wildcardRoute, err := route.New("/[word]")
+// Declare and panic if failed
+wildcardRoute := route.Declare("/[word]")
+partialRoute := route.Declare("/static/file/[filename]")
 ```
 
 Routes will match GET requests by default; if you want to change that behavior, use `WithMethods`. This will cause the route to no longer match GET requests unless you specify otherwise.
@@ -73,6 +81,36 @@ If you define custom Middleware, you can attach it to a Route using `Attach`.
 ```go
 route := route.New("/")
 route.Attach(someMiddleware)
+```
+
+### New vs. Declare
+
+Routes and Routers can both be created via the package function `New` or `Declare`. `New` returns the object and an error (if one occurs), while `Declare` only returns the object, and will panic if creation fails. It is recommended that you use `New` if you need to create or configure a router at runtime, and `Declare` if you're creating a static router when the program starts.
+
+```go
+infoRoute, err := route.New("/info")
+if err != nil {
+    ...
+}
+fileRoute, err := route.New("/file/[filePath]+")
+if err != nil {
+    ...
+}
+rt, err := router.New(
+    WithRoute(infoRoute, infoHandler),
+    WithRoute(fileRoute, fileHandler),
+)
+if err != nil {
+    ...
+}
+```
+
+```go
+// Panics if there's an error creating the router
+rt := router.Declare(
+    WithRoute(route.Declare("/info"), infoHandler),
+    WithRoute(route.Declare("/file/[filePath]+"), fileHandler)
+)
 ```
 
 ### Middleware

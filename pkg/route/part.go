@@ -8,12 +8,19 @@ import (
 )
 
 const (
+	// part matching
 	regexp_wildcard = string(`\[(.*?)\](.*)`)
 	regexp_regex    = string(`{(.*)}`)
+	// handy constants to have around
+	regexp_anyWord = string(`\w+`)
 )
 
+// Regex used for parsing tokens
 var regexp_wildcard_compiled *regexp.Regexp = regexp.MustCompile(regexp_wildcard)
 var regexp_regex_compiled *regexp.Regexp = regexp.MustCompile(regexp_regex)
+
+// Compiled regex for any word
+var regexp_anyWord_compiled *regexp.Regexp = regexp.MustCompile(regexp_anyWord)
 
 // Parts are the main body of a Route, and are an interface defining
 // a Match function against tokens in a request URL.
@@ -22,6 +29,14 @@ type Part interface {
 	// If it does, it should return the request, with any modifications done on
 	// behalf of the Part (usually wildcard tokens)
 	Match(req *http.Request, token string) *http.Request
+}
+
+// paramParts may or may not store some parameter.
+// This is for internal use in package route only, so that extensions of Part/Route can specialize behavior
+// for Parts that do or don't have parameters.
+type paramPart interface {
+	ParameterName() string
+	SetParameterName(string)
 }
 
 // Parse a token into a route Part.

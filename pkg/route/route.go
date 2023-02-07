@@ -11,6 +11,10 @@ type Route interface {
 	//
 	// Route implementations must ensure Hash is always unique for two different Routes.
 	Hash() string
+	// Get the length of the route.
+	//
+	// Route implementations may determine how to represent their own length.
+	Length() int
 	// Attach middleware to the route.
 	//
 	// Route implementations may define the order that middleware is handled.
@@ -23,7 +27,14 @@ type Route interface {
 
 // Create a new Route based on a string expression.
 func New(expr string, confs ...ConfigFunc) (Route, error) {
-	r, err := build_defaultRoute(expr)
+	// Determine route type
+	var r Route
+	var err error
+	if isPartialRouteExpr(expr) {
+		r, err = build_partialRoute(expr)
+	} else {
+		r, err = build_defaultRoute(expr)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +49,7 @@ func New(expr string, confs ...ConfigFunc) (Route, error) {
 
 // Create a new Route based on a string expression, and panic if this fails.
 // You should not use this unless you are creating a route on program start and do not intend to modify the route after the fact.
-func NewDecl(expr string, confs ...ConfigFunc) Route {
+func Declare(expr string, confs ...ConfigFunc) Route {
 	r, err := New(expr, confs...)
 	if err != nil {
 		panic(err)
