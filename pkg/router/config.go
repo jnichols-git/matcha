@@ -15,7 +15,7 @@ func WithRoute(r route.Route, h http.Handler) ConfigFunc {
 	}
 }
 
-func WithNotFoundHandler(h http.Handler) ConfigFunc {
+func WithNotFound(h http.Handler) ConfigFunc {
 	return func(rt Router) {
 		rt.AddNotFound(h)
 	}

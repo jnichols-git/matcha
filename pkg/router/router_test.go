@@ -87,7 +87,7 @@ func runEvalRequest(t *testing.T,
 func TestNewRouter(t *testing.T) {
 	_, err := New(
 		WithRoute(route.ForceNew("/"), okHandler("root")),
-		WithNotFoundHandler(nfHandler()),
+		WithNotFound(nfHandler()),
 	)
 	if err != nil {
 		t.Fatal(err)
