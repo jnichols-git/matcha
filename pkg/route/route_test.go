@@ -76,8 +76,8 @@ func TestPartialRoute(t *testing.T) {
 			if !ok {
 				t.Errorf("Expected a filename param")
 			} else {
-				if param != "README.md" {
-					t.Errorf("Expected filename param %s, got %s", "README.md", param)
+				if param != "/README.md" {
+					t.Errorf("Expected filename param %s, got %s", "/README.md", param)
 				}
 			}
 		}
@@ -89,8 +89,8 @@ func TestPartialRoute(t *testing.T) {
 			if !ok {
 				t.Errorf("Expected a filename param")
 			} else {
-				if param != "complex/path/file.txt" {
-					t.Errorf("Expected filename param %s, got %s", "complex/path/file.txt", param)
+				if param != "/complex/path/file.txt" {
+					t.Errorf("Expected filename param %s, got %s", "/complex/path/file.txt", param)
 				}
 			}
 		}

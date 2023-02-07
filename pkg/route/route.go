@@ -49,7 +49,7 @@ func New(expr string, confs ...ConfigFunc) (Route, error) {
 
 // Create a new Route based on a string expression, and panic if this fails.
 // You should not use this unless you are creating a route on program start and do not intend to modify the route after the fact.
-func NewDecl(expr string, confs ...ConfigFunc) Route {
+func Declare(expr string, confs ...ConfigFunc) Route {
 	r, err := New(expr, confs...)
 	if err != nil {
 		panic(err)

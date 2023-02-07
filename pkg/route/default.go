@@ -55,11 +55,11 @@ func (part *wildcardPart) Match(req *http.Request, token string) *http.Request {
 	return req
 }
 
-func (part *wildcardPart) Parameter() string {
+func (part *wildcardPart) ParameterName() string {
 	return part.param
 }
 
-func (part *wildcardPart) SetParameter(s string) {
+func (part *wildcardPart) SetParameterName(s string) {
 	part.param = s
 }
 
@@ -93,11 +93,11 @@ func (part *regexPart) Match(req *http.Request, token string) *http.Request {
 	return req
 }
 
-func (part *regexPart) Parameter() string {
+func (part *regexPart) ParameterName() string {
 	return part.param
 }
 
-func (part *regexPart) SetParameter(s string) {
+func (part *regexPart) SetParameterName(s string) {
 	part.param = s
 }
 

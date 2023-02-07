@@ -34,8 +34,8 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 	// If the subpart has a parameter, move it to the result.
 	// This has no real effect if the subPart has an empty parameter (intended behavior)
 	if subPartWithParam, ok := subPart.(paramPart); ok {
-		result.param = subPartWithParam.Parameter()
-		subPartWithParam.SetParameter("")
+		result.param = subPartWithParam.ParameterName()
+		subPartWithParam.SetParameterName("")
 	}
 	result.subPart = subPart
 
@@ -53,20 +53,16 @@ func (part *partialEndPart) Match(req *http.Request, token string) *http.Request
 		return req
 	}
 	// If there's a match, get the current path from params and append the token
-	currentPath, ok := params.Get(req, part.param)
-	if ok {
-		req = params.Set(req, part.param, currentPath+"/"+token)
-	} else {
-		req = params.Set(req, part.param, token)
-	}
+	currentPath, _ := params.Get(req, part.param)
+	req = params.Set(req, part.param, currentPath+"/"+token)
 	return req
 }
 
-func (part *partialEndPart) Parameter() string {
+func (part *partialEndPart) ParameterName() string {
 	return part.param
 }
 
-func (part *partialEndPart) SetParameter(s string) {
+func (part *partialEndPart) SetParameterName(s string) {
 	part.param = s
 }
 

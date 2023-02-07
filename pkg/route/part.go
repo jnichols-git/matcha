@@ -35,8 +35,8 @@ type Part interface {
 // This is for internal use in package route only, so that extensions of Part/Route can specialize behavior
 // for Parts that do or don't have parameters.
 type paramPart interface {
-	Parameter() string
-	SetParameter(string)
+	ParameterName() string
+	SetParameterName(string)
 }
 
 // Parse a token into a route Part.

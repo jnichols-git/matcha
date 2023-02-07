@@ -25,7 +25,7 @@ func New(cfs ...ConfigFunc) (Router, error) {
 	return rt, nil
 }
 
-func NewDecl(cfs ...ConfigFunc) Router {
+func Declare(cfs ...ConfigFunc) Router {
 	rt := Default()
 	for _, cf := range cfs {
 		err := cf(rt)

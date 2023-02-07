@@ -19,7 +19,7 @@ func okHandler(body string) http.HandlerFunc {
 	}
 }
 
-// Return a handler that writes 404 with body "not found"
+// Return a handler that writes http.StatusNotFound with body "not found"
 func nfHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -86,7 +86,7 @@ func runEvalRequest(t *testing.T,
 // Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
 func TestNewRouter(t *testing.T) {
 	_, err := New(
-		WithRoute(route.NewDecl("/"), okHandler("root")),
+		WithRoute(route.Declare("/"), okHandler("root")),
 		WithNotFound(nfHandler()),
 	)
 	if err != nil {
@@ -96,32 +96,41 @@ func TestNewRouter(t *testing.T) {
 
 func TestBasicRoutes(t *testing.T) {
 	r, err := New(
-		WithRoute(route.NewDecl("/"), okHandler("root")),
-		WithRoute(route.NewDecl("/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.NewDecl(`/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.NewDecl(`/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare("/"), okHandler("root")),
+		WithRoute(route.Declare("/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.Declare(`/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.Declare(`/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare(`/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
-		"code": 200,
+		"code": http.StatusOK,
 		"body": "root",
 	})
 	runEvalRequest(t, s, "/test", reqGen(http.MethodGet), map[string]any{
-		"code": 200,
+		"code": http.StatusOK,
 		"body": "test",
 	})
 	runEvalRequest(t, s, "/route/word", reqGen(http.MethodGet), map[string]any{
-		"code": 200,
+		"code": http.StatusOK,
 		"body": "letters",
 	})
 	runEvalRequest(t, s, "/route/id01", reqGen(http.MethodGet), map[string]any{
-		"code": 200,
+		"code": http.StatusOK,
 		"body": "id01",
 	})
 	runEvalRequest(t, s, "/route/n0tID", reqGen(http.MethodGet), map[string]any{
-		"code": 404,
+		"code": http.StatusNotFound,
+	})
+	runEvalRequest(t, s, "/static/file/docs/README.md", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "/docs/README.md",
+	})
+	runEvalRequest(t, s, "/static/file", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusInternalServerError,
+		"body": "router param filename not found",
 	})
 }
