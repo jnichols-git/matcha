@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/CloudRETIC/router/pkg/route"
 	"github.com/CloudRETIC/router/pkg/router/params"
 )
 
@@ -20,7 +21,7 @@ type routeTestCase struct {
 
 func setupRouter(rt Router, tcs []routeTestCase) {
 	for _, tc := range tcs {
-		Handle(rt, tc.routeExpr, tc.handle)
+		Handle(rt, route.ForceNew(tc.routeExpr), tc.handle)
 	}
 }
 

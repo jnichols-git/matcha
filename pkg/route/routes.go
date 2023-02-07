@@ -7,15 +7,15 @@ import (
 )
 
 type defaultRoute struct {
-	parts   []Part
-	handler http.Handler
+	origExpr string
+	parts    []Part
 }
 
-func build_defaultRoute(expr string, handler http.Handler) (*defaultRoute, error) {
+func build_defaultRoute(expr string) (*defaultRoute, error) {
 	tokens := path.TokenizeString(expr)
 	route := &defaultRoute{
-		parts:   make([]Part, 0),
-		handler: handler,
+		origExpr: expr,
+		parts:    make([]Part, 0),
 	}
 	for _, token := range tokens {
 		if part, err := parse(token); err != nil {
@@ -25,6 +25,10 @@ func build_defaultRoute(expr string, handler http.Handler) (*defaultRoute, error
 		}
 	}
 	return route, nil
+}
+
+func (route *defaultRoute) Hash() string {
+	return route.origExpr
 }
 
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
@@ -39,8 +43,4 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		}
 	}
 	return req
-}
-
-func (route *defaultRoute) Handler() http.Handler {
-	return route.handler
 }

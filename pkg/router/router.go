@@ -7,15 +7,11 @@ import (
 )
 
 type Router interface {
-	AddRoute(r route.Route)
+	AddRoute(r route.Route, h http.Handler)
 	ServeHTTP(w http.ResponseWriter, req *http.Request)
 }
 
-func Handle(rt Router, expr string, handler http.Handler) error {
-	r, err := route.New(expr, handler)
-	if err != nil {
-		return err
-	}
-	rt.AddRoute(r)
+func Handle(rt Router, r route.Route, handler http.Handler) error {
+	rt.AddRoute(r, handler)
 	return nil
 }
