@@ -3,10 +3,12 @@ package router
 import (
 	"net/http"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/route"
 )
 
 type defaultRouter struct {
+	mws      []middleware.Middleware
 	routes   []route.Route
 	handlers map[string]http.Handler
 }
@@ -16,6 +18,10 @@ func Default() *defaultRouter {
 		routes:   make([]route.Route, 0),
 		handlers: make(map[string]http.Handler),
 	}
+}
+
+func (rt *defaultRouter) Attach(mw middleware.Middleware) {
+	rt.mws = append(rt.mws, mw)
 }
 
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
