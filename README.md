@@ -80,3 +80,9 @@ route.Attach(someMiddleware)
 Middleware is defined as  `type Middleware func(*http.Request)*http.Request`. When middleware is attached to a Router or Route, they will be called in-order, and the request will be updated with each one. Middleware can also reject requests by returning `nil`.
 
 Middleware are currently called in the order that they are attached for all implementations of Router and Route.
+
+## Maintainers
+
+Name | Role | Pronouns | GitHub Username | Contact
+---|---|---|---|---
+Jake Nichols | Creator | they/them | jakenichols2719 | jnichols@cloudretic.com
