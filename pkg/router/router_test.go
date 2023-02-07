@@ -1,160 +1,127 @@
 package router
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/cloudretic/router/pkg/route"
 	"github.com/cloudretic/router/pkg/router/params"
 )
 
-type routeTestCase struct {
-	name       string
-	routeExpr  string
-	req        func(url string) *http.Request
-	handle     http.Handler
-	expectBody string
-}
-
-func setupRouter(rt Router, tcs []routeTestCase) {
-	for _, tc := range tcs {
-		Handle(rt, route.ForceNew(tc.routeExpr), tc.handle)
+// Return a handler that writes OK to all requests
+func okHandler(body string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(body))
 	}
 }
 
-func body(a *http.Response) string {
-	abody, _ := io.ReadAll(a.Body)
-	return string(abody)
-}
-
-// Run a test case.
-// Runs tc.req() through s, then compares its result against ts.handle directly.
-// Returns the HTTP response time from the test.
-func runTestCase(t *testing.T, s *httptest.Server, tc routeTestCase) time.Duration {
-	ts := time.Now()
-	resp, err := http.DefaultClient.Do(tc.req(s.URL))
-	te := time.Now()
-	if err != nil {
-		t.Fatal(err)
-	}
-	rb := body(resp)
-	if rb != tc.expectBody {
-		t.Errorf("Expected response %s, got %s", tc.expectBody, rb)
-	}
-	return te.Sub(ts)
-}
-
-func runTestBench(b *testing.B, s *httptest.Server, tc routeTestCase) {
-	resp, err := http.DefaultClient.Do(tc.req(s.URL))
-	if err != nil {
-		b.Fatal(err)
-	}
-	rb := body(resp)
-	if rb != tc.expectBody {
-		b.Errorf("Expected response %s, got %s", tc.expectBody, rb)
+// Return a handler that writes 404 with body "not found"
+func nfHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("not found"))
 	}
 }
 
-func req(method, path string) func(url string) *http.Request {
-	return func(url string) *http.Request {
+// Return a handler that writes OK and a body containing the requested router param.
+// If the param doesn't exist, writes internal error and "router param %s not found".
+// This shouldn't happen unless something about router params is failing.
+func rpHandler(rp string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		p, ok := params.Get(r, rp)
+		if !ok {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("router param %s not found", rp)))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(p))
+		}
+	}
+}
+
+func reqGen(method string) func(url, path string) *http.Request {
+	return func(url, path string) *http.Request {
 		req, _ := http.NewRequest(method, url+path, nil)
 		return req
 	}
 }
 
-func testHandlerOKEmptyBody() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+func runEvalRequest(t *testing.T,
+	s *httptest.Server, path string, genReqTo func(string, string) *http.Request, expect map[string]any) {
+	t.Run(path, func(t *testing.T) {
+		req := genReqTo(s.URL, path)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for k, v := range expect {
+			switch k {
+			case "code":
+				if res.StatusCode != v.(int) {
+					t.Errorf("expected code %d, got %d", v.(int), res.StatusCode)
+				}
+			case "body":
+				if res.Body == nil {
+					t.Error("response has no body")
+					break
+				}
+				body, err := io.ReadAll(res.Body)
+				if err != nil {
+					t.Error(err)
+					break
+				}
+				if string(body) != v.(string) {
+					t.Errorf("expected body %s, got %s", v.(string), string(body))
+				}
+			}
+		}
 	})
 }
 
-func testHandlerOKWildcardBody(wc string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p, _ := params.Get(r, wc)
-		w.Write([]byte(p))
-	})
-}
-
-var basicRoutes []routeTestCase = []routeTestCase{
-	{"root", "/", req(http.MethodGet, "/"), testHandlerOKEmptyBody(), ""},
-	{"string literal", "/test", req(http.MethodGet, "/test"), testHandlerOKEmptyBody(), ""},
-	{"empty wildcard", "/test/[wildcard]", req(http.MethodGet, "/test/testEmptyWildcard"), testHandlerOKWildcardBody("wildcard"), "testEmptyWildcard"},
-	{"regex wildcard", `/rg/[rgexpr]{\w+}`, req(http.MethodGet, "/test/testWord"), testHandlerOKWildcardBody("rgexpr"), "testWord"},
-}
-
-var complexRoutes []routeTestCase = []routeTestCase{
-	{
-		"root",
-		"/",
-		req(http.MethodGet, "/"), testHandlerOKEmptyBody(),
-		"",
-	},
-	{
-		"device/[uuid]{...}/data",
-		`/device/[uuid]{^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$}/data`,
-		req(http.MethodGet, "/device/123e4567-e89b-12d3-a456-426655440000/data"), testHandlerOKWildcardBody("uuid"),
-		"123e4567-e89b-12d3-a456-426655440000",
-	},
-	{
-		"device/[uuid]{...}/register",
-		`/device/[uuid]{^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$}/register`,
-		req(http.MethodGet, "/device/123e4567-e89b-12d3-a456-426655440000/register"), testHandlerOKWildcardBody("uuid"),
-		"123e4567-e89b-12d3-a456-426655440000",
-	},
-	{
-		"user/[uuid]{...}/dashboard",
-		`/user/[uuid]{^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$}/dashboard`,
-		req(http.MethodGet, "/user/123e4567-e89b-12d3-a456-426655440000/dashboard"), testHandlerOKWildcardBody("uuid"),
-		"123e4567-e89b-12d3-a456-426655440000",
-	},
+// Test all options of New().
+// Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
+func TestNewRouter(t *testing.T) {
+	_, err := New(
+		WithRoute(route.ForceNew("/"), okHandler("root")),
+		WithNotFoundHandler(nfHandler()),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestBasicRoutes(t *testing.T) {
-	// Setup router
-	r := Default()
-	setupRouter(r, basicRoutes)
-	// Run cases
-	s := httptest.NewServer(r)
-	for _, tc := range basicRoutes {
-		runTestCase(t, s, tc)
+	r, err := New(
+		WithRoute(route.ForceNew("/"), okHandler("root")),
+		WithRoute(route.ForceNew("/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.ForceNew(`/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.ForceNew(`/route/[id]{[\w]{4}}`), rpHandler("id")),
+	)
+	if err != nil {
+		t.Fatal(err)
 	}
-}
-
-func TestComplexRoutes(t *testing.T) {
-	// Setup router
-	r := Default()
-	setupRouter(r, complexRoutes)
-	// Run cases
 	s := httptest.NewServer(r)
-	for _, tc := range complexRoutes {
-		runTestCase(t, s, tc)
-	}
-}
-
-func BenchmarkBasicRoutes(b *testing.B) {
-	// Setup router
-	r := Default()
-	setupRouter(r, basicRoutes)
-	// Run cases
-	s := httptest.NewServer(r)
-	for i := 0; i < b.N; i++ {
-		tc := basicRoutes[i%len(basicRoutes)]
-		runTestBench(b, s, tc)
-	}
-	b.StopTimer()
-}
-
-func BenchmarkComplexRoutes(b *testing.B) {
-	// Setup router
-	r := Default()
-	setupRouter(r, basicRoutes)
-	// Run cases
-	s := httptest.NewServer(r)
-	for i := 0; i < b.N; i++ {
-		tc := basicRoutes[i%len(basicRoutes)]
-		runTestBench(b, s, tc)
-	}
+	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
+		"code": 200,
+		"body": "root",
+	})
+	runEvalRequest(t, s, "/test", reqGen(http.MethodGet), map[string]any{
+		"code": 200,
+		"body": "test",
+	})
+	runEvalRequest(t, s, "/route/word", reqGen(http.MethodGet), map[string]any{
+		"code": 200,
+		"body": "letters",
+	})
+	runEvalRequest(t, s, "/route/id01", reqGen(http.MethodGet), map[string]any{
+		"code": 200,
+		"body": "id01",
+	})
+	runEvalRequest(t, s, "/route/n0tID", reqGen(http.MethodGet), map[string]any{
+		"code": 404,
+	})
 }

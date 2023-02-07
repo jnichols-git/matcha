@@ -12,8 +12,7 @@ type RouteConfigFunc func(Route)
 func WithMethods(methods ...string) func(Route) {
 	return func(r Route) {
 		r.Attach(func(r *http.Request) *http.Request {
-			method := r.Method
-			if !slices.Contains(methods, method) {
+			if !slices.Contains(methods, r.Method) {
 				return nil
 			}
 			return r

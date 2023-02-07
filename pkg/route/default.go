@@ -34,8 +34,8 @@ func (route *defaultRoute) Hash() string {
 	return route.origExpr
 }
 
-func (route *defaultRoute) Attach(middleware.Middleware) {
-
+func (route *defaultRoute) Attach(mw middleware.Middleware) {
+	route.mws = append(route.mws, mw)
 }
 
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
@@ -51,7 +51,6 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			return nil
 		}
 	}
-
 	for i, part := range route.parts {
 		if req = part.Match(req, tokens[i]); req == nil {
 			return nil

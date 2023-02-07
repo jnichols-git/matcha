@@ -10,10 +10,14 @@ import (
 type Router interface {
 	Attach(mw middleware.Middleware)
 	AddRoute(r route.Route, h http.Handler)
+	AddNotFound(h http.Handler)
 	ServeHTTP(w http.ResponseWriter, req *http.Request)
 }
 
-func Handle(rt Router, r route.Route, handler http.Handler) error {
-	rt.AddRoute(r, handler)
-	return nil
+func New(cfs ...ConfigFunc) (Router, error) {
+	rt := Default()
+	for _, cf := range cfs {
+		cf(rt)
+	}
+	return rt, nil
 }

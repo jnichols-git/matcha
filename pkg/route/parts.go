@@ -70,7 +70,7 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 func (part *regexPart) Match(req *http.Request, token string) *http.Request {
 	// Match against regex
 	matched := part.expr.FindString(token)
-	if matched == "" {
+	if matched != token {
 		return nil
 	}
 	// If a parameter is set, act as a wildcard param.
