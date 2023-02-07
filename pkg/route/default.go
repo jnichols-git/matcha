@@ -6,7 +6,6 @@ import (
 
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
-	"github.com/cloudretic/router/pkg/router/params"
 )
 
 //=====PARTS=====
@@ -25,11 +24,11 @@ func build_stringPart(val string) (*stringPart, error) {
 	return &stringPart{val}, nil
 }
 
-func (part *stringPart) Match(req *http.Request, token string) *http.Request {
+func (part *stringPart) Match(rmc *routeMatchContext, token string) bool {
 	if part.val == token {
-		return req
+		return true
 	} else {
-		return nil
+		return false
 	}
 }
 
@@ -48,11 +47,11 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 	return &wildcardPart{param}, nil
 }
 
-func (part *wildcardPart) Match(req *http.Request, token string) *http.Request {
+func (part *wildcardPart) Match(rmc *routeMatchContext, token string) bool {
 	if part.param != "" {
-		req = params.Set(req, part.param, token)
+		rmc.params[part.param] = token
 	}
-	return req
+	return true
 }
 
 func (part *wildcardPart) ParameterName() string {
@@ -79,18 +78,18 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 	}
 }
 
-func (part *regexPart) Match(req *http.Request, token string) *http.Request {
+func (part *regexPart) Match(rmc *routeMatchContext, token string) bool {
 	// Match against regex
 	matched := part.expr.FindString(token)
 	if matched != token {
-		return nil
+		return false
 	}
 	// If a parameter is set, act as a wildcard param.
 	if part.param != "" {
 		// If a token matched, store the matched value as a route Param
-		req = params.Set(req, part.param, matched)
+		rmc.params[part.param] = matched
 	}
-	return req
+	return true
 }
 
 func (part *regexPart) ParameterName() string {
@@ -108,6 +107,7 @@ type defaultRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
 	parts    []Part
+	rmc      *routeMatchContext
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -119,12 +119,18 @@ func build_defaultRoute(expr string) (*defaultRoute, error) {
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
+		rmc:      newRMC(),
 	}
 	for _, token := range tokens {
-		if part, err := parse(token); err != nil {
+		part, err := parse(token)
+		if err != nil {
 			return nil, err
-		} else {
-			route.parts = append(route.parts, part)
+		}
+		if parampart, ok := part.(paramPart); ok {
+			pn := parampart.ParameterName()
+			if pn != "" {
+				route.rmc.params[pn] = ""
+			}
 		}
 	}
 	return route, nil
@@ -156,7 +162,8 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	req = req.Clone(req.Context())
+	// req = req.Clone(req.Context())
+	route.rmc.reset()
 	// Check for path length
 	tokens := path.TokenizeString(req.URL.Path)
 	if len(tokens) != len(route.parts) {
@@ -169,9 +176,9 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		}
 	}
 	for i, part := range route.parts {
-		if req = part.Match(req, tokens[i]); req == nil {
+		if ok := part.Match(route.rmc, tokens[i]); !ok {
 			return nil
 		}
 	}
-	return req
+	return route.rmc.apply(req)
 }

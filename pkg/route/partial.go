@@ -5,7 +5,6 @@ import (
 
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
-	"github.com/cloudretic/router/pkg/router/params"
 )
 
 // =====PARTS=====
@@ -44,18 +43,17 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 
 // partialEndPart assumes that it's starting at the first partial token.
 // For example, in route /file/[filename]{.+}, partialEndPart will start on any token after file
-func (part *partialEndPart) Match(req *http.Request, token string) *http.Request {
-	req = part.subPart.Match(req, token)
-	if req == nil {
-		return nil
+func (part *partialEndPart) Match(rmc *routeMatchContext, token string) bool {
+	ok := part.subPart.Match(rmc, token)
+	if !ok {
+		return false
 	}
 	if part.param == "" {
-		return req
+		return true
 	}
+	rmc.params[part.param] = rmc.params[part.param] + "/" + token
 	// If there's a match, get the current path from params and append the token
-	currentPath, _ := params.Get(req, part.param)
-	req = params.Set(req, part.param, currentPath+"/"+token)
-	return req
+	return true
 }
 
 func (part *partialEndPart) ParameterName() string {
@@ -79,6 +77,7 @@ type partialRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
 	parts    []Part
+	rmc      *routeMatchContext
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -90,6 +89,7 @@ func build_partialRoute(expr string) (*partialRoute, error) {
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
+		rmc:      newRMC(),
 	}
 	for i, token := range tokens {
 		var part Part
@@ -98,6 +98,12 @@ func build_partialRoute(expr string) (*partialRoute, error) {
 			part, err = parse(token)
 		} else {
 			part, err = parse_partialEndPart(token)
+		}
+		if parampart, ok := part.(paramPart); ok {
+			pn := parampart.ParameterName()
+			if pn != "" {
+				route.rmc.params[pn] = ""
+			}
 		}
 		if err != nil {
 			return nil, err
@@ -138,7 +144,8 @@ func (route *partialRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	req = req.Clone(req.Context())
+	//req = req.Clone(req.Context())
+	route.rmc.reset()
 	// check length; tokens should be > parts
 	tokens := path.TokenizeString(req.URL.Path)
 	if len(tokens) < len(route.parts)-1 {
@@ -159,10 +166,10 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		} else {
 			p = route.parts[len(route.parts)-1]
 		}
-		if req = p.Match(req, token); req == nil {
+		if ok := p.Match(route.rmc, token); !ok {
 			return nil
 		}
 	}
 	// If there were no empty tokens to begin with, run the last rou
-	return req
+	return route.rmc.apply(req)
 }
