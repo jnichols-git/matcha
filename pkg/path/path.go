@@ -4,17 +4,14 @@ package path
 
 import (
 	"strings"
+
+	"github.com/cloudretic/go-collections/pkg/slices"
 )
 
 // Tokenize a string over / in-order
 // Filters out any blank results
 func TokenizeString(s string) []string {
 	tokens := strings.Split(s, "/")
-	out := make([]string, 0)
-	for _, token := range tokens {
-		if token != "" {
-			out = append(out, token)
-		}
-	}
-	return out
+	tokens, _ = slices.FilterFunc(tokens, func(token string) bool { return token == "" })
+	return tokens
 }

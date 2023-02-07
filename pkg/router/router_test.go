@@ -86,7 +86,7 @@ func runEvalRequest(t *testing.T,
 // Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
 func TestNewRouter(t *testing.T) {
 	_, err := New(
-		WithRoute(route.ForceNew("/"), okHandler("root")),
+		WithRoute(route.NewDecl("/"), okHandler("root")),
 		WithNotFound(nfHandler()),
 	)
 	if err != nil {
@@ -96,10 +96,10 @@ func TestNewRouter(t *testing.T) {
 
 func TestBasicRoutes(t *testing.T) {
 	r, err := New(
-		WithRoute(route.ForceNew("/"), okHandler("root")),
-		WithRoute(route.ForceNew("/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.ForceNew(`/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.ForceNew(`/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.NewDecl("/"), okHandler("root")),
+		WithRoute(route.NewDecl("/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.NewDecl(`/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.NewDecl(`/route/[id]{[\w]{4}}`), rpHandler("id")),
 	)
 	if err != nil {
 		t.Fatal(err)

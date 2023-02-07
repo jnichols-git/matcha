@@ -22,9 +22,9 @@ You can create a Router with a series of Routes, add Routes after creation, or b
 
 ```go
 r, err := router.New(
-    WithRoute(route.ForceNew("/someEndpoint"), someHandler)
+    WithRoute(route.NewDecl("/someEndpoint"), someHandler)
 )
-r.AddRoute(route.ForceNew("/soeOtherEndpoint"), someOtherHandler)
+r.AddRoute(route.NewDecl("/soeOtherEndpoint"), someOtherHandler)
 ```
 
 Routes will be handled in the order they are received, and **must match an incoming request URL exactly** in order to call their handler.
