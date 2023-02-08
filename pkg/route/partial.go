@@ -119,28 +119,6 @@ func build_partialRoute(expr string) (*partialRoute, error) {
 			break
 		}
 	}
-	/*
-		for i, token := range tokens {
-			var part Part
-			var err error
-			if i < len(tokens)-1 {
-				part, err = parse(token)
-			} else {
-				part, err = parse_partialEndPart(token)
-			}
-			if parampart, ok := part.(paramPart); ok {
-				pn := parampart.ParameterName()
-				if pn != "" {
-					route.rmc.params[pn] = ""
-				}
-			}
-			if err != nil {
-				return nil, err
-			} else {
-				route.parts = append(route.parts, part)
-			}
-		}
-	*/
 	return route, nil
 }
 
@@ -203,21 +181,6 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			break
 		}
 	}
-	/*
-		// Iterate through tokens and match on the corresponding part, or the last part when extending past
-		for i, token := range tokens {
-			// Match against current part, or last available if tokens are extending past the length of the route
-			var p Part
-			if i < len(route.parts) {
-				p = route.parts[i]
-			} else {
-				p = route.parts[len(route.parts)-1]
-			}
-			if ok := p.Match(route.rmc, token); !ok {
-				return nil
-			}
-		}
-	*/
 	// If there were no empty tokens to begin with, run the last rou
 	return route.rmc.apply(req)
 }
