@@ -9,8 +9,12 @@ import (
 
 type param string
 
-func Set(req *http.Request, k, v string) *http.Request {
-	return req.WithContext(context.WithValue(req.Context(), param(k), v))
+func Set(req *http.Request, kvs map[string]string) *http.Request {
+	ctx := req.Context()
+	for k, v := range kvs {
+		ctx = context.WithValue(ctx, param(k), v)
+	}
+	return req.WithContext(ctx)
 }
 
 func Get(req *http.Request, k string) (string, bool) {

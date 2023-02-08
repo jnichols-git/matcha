@@ -1,8 +1,9 @@
 package route
 
 import (
-	"context"
 	"net/http"
+
+	"github.com/cloudretic/router/pkg/router/params"
 )
 
 //type routeMatchParam [2]string
@@ -24,9 +25,5 @@ func (rmc *routeMatchContext) reset() {
 }
 
 func (rmc *routeMatchContext) apply(req *http.Request) *http.Request {
-	ctx := req.Context()
-	for k, v := range rmc.params {
-		ctx = context.WithValue(ctx, k, v)
-	}
-	return req.WithContext(ctx)
+	return params.Set(req, rmc.params)
 }

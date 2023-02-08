@@ -132,6 +132,7 @@ func build_defaultRoute(expr string) (*defaultRoute, error) {
 				route.rmc.params[pn] = ""
 			}
 		}
+		route.parts = append(route.parts, part)
 	}
 	return route, nil
 }
@@ -162,7 +163,6 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	// req = req.Clone(req.Context())
 	route.rmc.reset()
 	// Check for path length
 	tokens := path.TokenizeString(req.URL.Path)
@@ -176,9 +176,11 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		}
 	}
 	for i, part := range route.parts {
+		//fmt.Println(route.rmc)
 		if ok := part.Match(route.rmc, tokens[i]); !ok {
 			return nil
 		}
+		//fmt.Println(route.rmc)
 	}
 	return route.rmc.apply(req)
 }

@@ -130,7 +130,7 @@ func TestBasicRoutes(t *testing.T) {
 		"body": "/docs/README.md",
 	})
 	runEvalRequest(t, s, "/static/file", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusInternalServerError,
-		"body": "router param filename not found",
+		"code": http.StatusOK,
+		"body": "",
 	})
 }
