@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
@@ -21,7 +22,7 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 	// get subToken from token (exclude +)
 	subToken := token[:len(token)-1]
 	// if subToken is empty, use an unqualified anyWord
-	if subToken == "" {
+	if subToken == "/" {
 		result.subPart = &regexPart{"", regexp_anyWord_compiled}
 		return result, nil
 	}
@@ -51,7 +52,7 @@ func (part *partialEndPart) Match(rmc *routeMatchContext, token string) bool {
 	if part.param == "" {
 		return true
 	}
-	rmc.params[part.param] = rmc.params[part.param] + "/" + token
+	rmc.params[part.param] = rmc.params[part.param] + token
 	// If there's a match, get the current path from params and append the token
 	return true
 }
@@ -84,33 +85,62 @@ type partialRoute struct {
 //
 // See interface Route.
 func build_partialRoute(expr string) (*partialRoute, error) {
-	tokens := path.TokenizeString(expr)
 	route := &partialRoute{
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
 		rmc:      newRMC(),
 	}
-	for i, token := range tokens {
+
+	tokenCt := strings.Count(expr, "/")
+	var token string
+	var partIdx int
+	for next := 0; next < len(expr); {
+		token, next = path.Next(expr, next)
 		var part Part
 		var err error
-		if i < len(tokens)-1 {
+		if partIdx < tokenCt-1 {
 			part, err = parse(token)
 		} else {
 			part, err = parse_partialEndPart(token)
 		}
-		if parampart, ok := part.(paramPart); ok {
-			pn := parampart.ParameterName()
+		if err != nil {
+			return nil, err
+		}
+		if pp, ok := part.(paramPart); ok {
+			pn := pp.ParameterName()
 			if pn != "" {
 				route.rmc.params[pn] = ""
 			}
 		}
-		if err != nil {
-			return nil, err
-		} else {
-			route.parts = append(route.parts, part)
+		route.parts = append(route.parts, part)
+		partIdx++
+		if next == -1 {
+			break
 		}
 	}
+	/*
+		for i, token := range tokens {
+			var part Part
+			var err error
+			if i < len(tokens)-1 {
+				part, err = parse(token)
+			} else {
+				part, err = parse_partialEndPart(token)
+			}
+			if parampart, ok := part.(paramPart); ok {
+				pn := parampart.ParameterName()
+				if pn != "" {
+					route.rmc.params[pn] = ""
+				}
+			}
+			if err != nil {
+				return nil, err
+			} else {
+				route.parts = append(route.parts, part)
+			}
+		}
+	*/
 	return route, nil
 }
 
@@ -146,9 +176,10 @@ func (route *partialRoute) Attach(mw middleware.Middleware) {
 func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
 	//req = req.Clone(req.Context())
 	route.rmc.reset()
+	expr := req.URL.Path
 	// check length; tokens should be > parts
-	tokens := path.TokenizeString(req.URL.Path)
-	if len(tokens) < len(route.parts)-1 {
+	//tokens := path.TokenizeString(req.URL.Path)
+	if strings.Count(expr, "/") < len(route.parts)-1 {
 		return nil
 	}
 	// Run any attached middleware
@@ -157,19 +188,36 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			return nil
 		}
 	}
-	// Iterate through tokens and match on the corresponding part, or the last part when extending past
-	for i, token := range tokens {
-		// Match against current part, or last available if tokens are extending past the length of the route
-		var p Part
-		if i < len(route.parts) {
-			p = route.parts[i]
-		} else {
-			p = route.parts[len(route.parts)-1]
-		}
-		if ok := p.Match(route.rmc, token); !ok {
+	var token string
+	var partIdx int
+	for next := 0; next < len(expr); {
+		part := route.parts[partIdx]
+		token, next = path.Next(expr, next)
+		if ok := part.Match(route.rmc, token); !ok {
 			return nil
 		}
+		if partIdx+1 < len(route.parts) {
+			partIdx++
+		}
+		if next == -1 {
+			break
+		}
 	}
+	/*
+		// Iterate through tokens and match on the corresponding part, or the last part when extending past
+		for i, token := range tokens {
+			// Match against current part, or last available if tokens are extending past the length of the route
+			var p Part
+			if i < len(route.parts) {
+				p = route.parts[i]
+			} else {
+				p = route.parts[len(route.parts)-1]
+			}
+			if ok := p.Match(route.rmc, token); !ok {
+				return nil
+			}
+		}
+	*/
 	// If there were no empty tokens to begin with, run the last rou
 	return route.rmc.apply(req)
 }

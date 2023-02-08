@@ -8,8 +8,8 @@ import (
 
 const (
 	// part matching
-	regexp_wildcard = string(`\A\[(.*?)\](.*)`)
-	regexp_regex    = string(`{(.*)}`)
+	regexp_wildcard = string(`/\[(.*?)\](.*)`)
+	regexp_regex    = string(`[/\]]{(.*)}`)
 	// handy constants to have around
 	regexp_anyWord = string(`\w+`)
 )

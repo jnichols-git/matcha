@@ -12,7 +12,7 @@ func use(any) {}
 
 // Static route
 //
-// 435 ns/op, 848 B/op, 9 allocs/op
+// 185 ns/op, 256 B/op, 1 allocs/op
 func BenchmarkStringRoute(b *testing.B) {
 	rt := Declare("/a/b/c/d/e/f/g/h")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
@@ -25,7 +25,7 @@ func BenchmarkStringRoute(b *testing.B) {
 
 // Wildcard route
 //
-// 1259 ns/op, 3536 B/op, 41 allocs/op
+// 787 ns/op, 896 B/op, 25 allocs/op
 func BenchmarkWildcardRoute(b *testing.B) {
 	rt := Declare("/[a]/[b]/[c]/[d]/[e]/[f]/[g]/[h]")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
@@ -38,7 +38,7 @@ func BenchmarkWildcardRoute(b *testing.B) {
 
 // Regex route
 //
-// 787.5 ns/op, 853 B/op, 9 allocs/op
+// 469 ns/op, 257 B/op, 1 allocs/op
 func BenchmarkRegexRoute(b *testing.B) {
 	rt := Declare("/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)

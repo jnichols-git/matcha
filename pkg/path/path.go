@@ -4,14 +4,15 @@ package path
 
 import (
 	"strings"
-
-	"github.com/cloudretic/go-collections/pkg/slices"
 )
 
-// Tokenize a string over / in-order
-// Filters out any blank results
-func TokenizeString(s string) []string {
-	tokens := strings.Split(s, "/")
-	tokens, _ = slices.FilterFunc(tokens, func(token string) bool { return token == "" })
-	return tokens
+// Return the next token from a path, starting at position last, and the position to use with the next call.
+// Returns "" if no token could be found
+func Next(path string, last int) (string, int) {
+	end := strings.Index(path[last+1:], "/")
+	if end == -1 {
+		return path[last:], -1
+	} else {
+		return path[last : last+end+1], last + end + 1
+	}
 }

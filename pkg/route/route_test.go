@@ -17,6 +17,10 @@ func TestStringRoute(t *testing.T) {
 	if req = rt.MatchAndUpdateContext(req); req == nil {
 		t.Errorf("Expected route to match")
 	}
+	req, _ = http.NewRequest(http.MethodGet, "http://url.com/test2", nil)
+	if req = rt.MatchAndUpdateContext(req); req != nil {
+		t.Errorf("Expected route to not match")
+	}
 }
 
 func TestWildcardRoute(t *testing.T) {

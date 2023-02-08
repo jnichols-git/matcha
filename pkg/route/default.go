@@ -3,6 +3,7 @@ package route
 import (
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
@@ -48,6 +49,7 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 }
 
 func (part *wildcardPart) Match(rmc *routeMatchContext, token string) bool {
+	token = token[1:]
 	if part.param != "" {
 		rmc.params[part.param] = token
 	}
@@ -79,6 +81,7 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 }
 
 func (part *regexPart) Match(rmc *routeMatchContext, token string) bool {
+	token = token[1:]
 	// Match against regex
 	matched := part.expr.FindString(token)
 	if matched != token {
@@ -114,25 +117,29 @@ type defaultRoute struct {
 //
 // See interface Route.
 func build_defaultRoute(expr string) (*defaultRoute, error) {
-	tokens := path.TokenizeString(expr)
 	route := &defaultRoute{
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
 		rmc:      newRMC(),
 	}
-	for _, token := range tokens {
+	var token string
+	for next := 0; next < len(expr); {
+		token, next = path.Next(expr, next)
 		part, err := parse(token)
 		if err != nil {
 			return nil, err
 		}
-		if parampart, ok := part.(paramPart); ok {
-			pn := parampart.ParameterName()
+		if pp, ok := part.(paramPart); ok {
+			pn := pp.ParameterName()
 			if pn != "" {
 				route.rmc.params[pn] = ""
 			}
 		}
 		route.parts = append(route.parts, part)
+		if next == -1 {
+			break
+		}
 	}
 	return route, nil
 }
@@ -165,8 +172,8 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
 	route.rmc.reset()
 	// Check for path length
-	tokens := path.TokenizeString(req.URL.Path)
-	if len(tokens) != len(route.parts) {
+	expr := req.URL.Path
+	if strings.Count(expr, "/") != len(route.parts) {
 		return nil
 	}
 	// Run any attached middleware
@@ -175,12 +182,19 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			return nil
 		}
 	}
-	for i, part := range route.parts {
-		//fmt.Println(route.rmc)
-		if ok := part.Match(route.rmc, tokens[i]); !ok {
+
+	var token string
+	var partIdx int
+	for next := 0; next < len(expr); {
+		part := route.parts[partIdx]
+		token, next = path.Next(expr, next)
+		if ok := part.Match(route.rmc, token); !ok {
 			return nil
 		}
-		//fmt.Println(route.rmc)
+		partIdx++
+		if next == -1 {
+			break
+		}
 	}
 	return route.rmc.apply(req)
 }
