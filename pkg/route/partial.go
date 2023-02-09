@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -44,15 +45,15 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 
 // partialEndPart assumes that it's starting at the first partial token.
 // For example, in route /file/[filename]{.+}, partialEndPart will start on any token after file
-func (part *partialEndPart) Match(rmc *routeMatchContext, token string) bool {
-	ok := part.subPart.Match(rmc, token)
+func (part *partialEndPart) Match(ctx *routeMatchContext, token string) bool {
+	ok := part.subPart.Match(ctx, token)
 	if !ok {
 		return false
 	}
 	if part.param == "" {
 		return true
 	}
-	rmc.params[part.param] = rmc.params[part.param] + token
+	setParam(ctx, part.param, GetParam(ctx, part.param)+token)
 	// If there's a match, get the current path from params and append the token
 	return true
 }
@@ -78,7 +79,7 @@ type partialRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
 	parts    []Part
-	rmc      *routeMatchContext
+	ctx      *routeMatchContext
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -89,7 +90,7 @@ func build_partialRoute(expr string) (*partialRoute, error) {
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
-		rmc:      newRMC(),
+		ctx:      newRMC(),
 	}
 
 	tokenCt := strings.Count(expr, "/")
@@ -110,7 +111,7 @@ func build_partialRoute(expr string) (*partialRoute, error) {
 		if pp, ok := part.(paramPart); ok {
 			pn := pp.ParameterName()
 			if pn != "" {
-				route.rmc.params[pn] = ""
+				route.ctx.Allocate(pn)
 			}
 		}
 		route.parts = append(route.parts, part)
@@ -153,7 +154,7 @@ func (route *partialRoute) Attach(mw middleware.Middleware) {
 // See interface Route.
 func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
 	//req = req.Clone(req.Context())
-	route.rmc.reset()
+	route.ctx.ResetOnto(req.Context())
 	expr := req.URL.Path
 	// check length; tokens should be > parts
 	//tokens := path.TokenizeString(req.URL.Path)
@@ -171,7 +172,8 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	for next := 0; next < len(expr); {
 		part := route.parts[partIdx]
 		token, next = path.Next(expr, next)
-		if ok := part.Match(route.rmc, token); !ok {
+		fmt.Println(token, next)
+		if ok := part.Match(route.ctx, token); !ok {
 			return nil
 		}
 		if partIdx+1 < len(route.parts) {
@@ -182,5 +184,5 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		}
 	}
 	// If there were no empty tokens to begin with, run the last rou
-	return route.rmc.apply(req)
+	return req.WithContext(route.ctx)
 }

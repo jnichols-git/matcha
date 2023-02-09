@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/cloudretic/router/pkg/route"
-	"github.com/cloudretic/router/pkg/router/params"
 )
 
 // Return a handler that writes OK to all requests
@@ -32,8 +31,8 @@ func nfHandler() http.HandlerFunc {
 // This shouldn't happen unless something about router params is failing.
 func rpHandler(rp string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		p, ok := params.Get(r, rp)
-		if !ok {
+		p := route.GetParam(r.Context(), rp)
+		if p == "" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("router param %s not found", rp)))
 		} else {
@@ -130,7 +129,7 @@ func TestBasicRoutes(t *testing.T) {
 		"body": "/docs/README.md",
 	})
 	runEvalRequest(t, s, "/static/file", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "",
+		"code": http.StatusInternalServerError,
+		"body": "router param filename not found",
 	})
 }

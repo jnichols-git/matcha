@@ -27,7 +27,7 @@ type Part interface {
 	// Match should return nil if the Part doesn't match the token.
 	// If it does, it should return the request, with any modifications done on
 	// behalf of the Part (usually wildcard tokens)
-	Match(rmc *routeMatchContext, token string) bool
+	Match(ctx *routeMatchContext, token string) bool
 }
 
 // paramParts may or may not store some parameter.

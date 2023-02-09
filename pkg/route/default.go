@@ -25,7 +25,7 @@ func build_stringPart(val string) (*stringPart, error) {
 	return &stringPart{val}, nil
 }
 
-func (part *stringPart) Match(rmc *routeMatchContext, token string) bool {
+func (part *stringPart) Match(ctx *routeMatchContext, token string) bool {
 	if part.val == token {
 		return true
 	} else {
@@ -48,10 +48,10 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 	return &wildcardPart{param}, nil
 }
 
-func (part *wildcardPart) Match(rmc *routeMatchContext, token string) bool {
+func (part *wildcardPart) Match(ctx *routeMatchContext, token string) bool {
 	token = token[1:]
 	if part.param != "" {
-		rmc.params[part.param] = token
+		setParam(ctx, part.param, token)
 	}
 	return true
 }
@@ -80,7 +80,7 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 	}
 }
 
-func (part *regexPart) Match(rmc *routeMatchContext, token string) bool {
+func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
 	token = token[1:]
 	// Match against regex
 	matched := part.expr.FindString(token)
@@ -90,7 +90,7 @@ func (part *regexPart) Match(rmc *routeMatchContext, token string) bool {
 	// If a parameter is set, act as a wildcard param.
 	if part.param != "" {
 		// If a token matched, store the matched value as a route Param
-		rmc.params[part.param] = matched
+		setParam(ctx, part.param, token)
 	}
 	return true
 }
@@ -110,7 +110,7 @@ type defaultRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
 	parts    []Part
-	rmc      *routeMatchContext
+	ctx      *routeMatchContext
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -121,7 +121,7 @@ func build_defaultRoute(expr string) (*defaultRoute, error) {
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
 		parts:    make([]Part, 0),
-		rmc:      newRMC(),
+		ctx:      newRMC(),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -133,7 +133,7 @@ func build_defaultRoute(expr string) (*defaultRoute, error) {
 		if pp, ok := part.(paramPart); ok {
 			pn := pp.ParameterName()
 			if pn != "" {
-				route.rmc.params[pn] = ""
+				route.ctx.Allocate(pn)
 			}
 		}
 		route.parts = append(route.parts, part)
@@ -170,7 +170,7 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	route.rmc.reset()
+	route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path
 	if strings.Count(expr, "/") != len(route.parts) {
@@ -188,7 +188,7 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	for next := 0; next < len(expr); {
 		part := route.parts[partIdx]
 		token, next = path.Next(expr, next)
-		if ok := part.Match(route.rmc, token); !ok {
+		if ok := part.Match(route.ctx, token); !ok {
 			return nil
 		}
 		partIdx++
@@ -196,5 +196,5 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			break
 		}
 	}
-	return route.rmc.apply(req)
+	return req.WithContext(route.ctx)
 }

@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-
-	"github.com/cloudretic/router/pkg/router/params"
 )
 
 func TestStringRoute(t *testing.T) {
@@ -24,13 +22,22 @@ func TestStringRoute(t *testing.T) {
 }
 
 func TestWildcardRoute(t *testing.T) {
-	rt, err := New("/[any]")
+	rt, err := New("/[param1]/[param2]/[param3]")
 	if err != nil {
 		t.Fatal(err)
 	}
-	req, _ := http.NewRequest(http.MethodGet, "http://url.com/test", nil)
+	req, _ := http.NewRequest(http.MethodGet, "http://url.com/test1/test2/test3", nil)
 	if req = rt.MatchAndUpdateContext(req); req == nil {
 		t.Errorf("Expected route to match")
+	}
+	if p1 := GetParam(req.Context(), "param1"); p1 == "" || p1 != "test1" {
+		t.Errorf("Expected route param param1=test1; got %s", p1)
+	}
+	if p2 := GetParam(req.Context(), "param2"); p2 == "" || p2 != "test2" {
+		t.Errorf("Expected route param param2=test2; got %s", p2)
+	}
+	if p3 := GetParam(req.Context(), "param3"); p3 == "" || p3 != "test3" {
+		t.Errorf("Expected route param param3=test3; got %s", p3)
 	}
 }
 
@@ -76,8 +83,8 @@ func TestPartialRoute(t *testing.T) {
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("Expected route to match")
 		} else {
-			param, ok := params.Get(req, "filename")
-			if !ok {
+			param := GetParam(req.Context(), "filename")
+			if param == "" {
 				t.Errorf("Expected a filename param")
 			} else {
 				if param != "/README.md" {
@@ -89,8 +96,8 @@ func TestPartialRoute(t *testing.T) {
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("Expected route to match")
 		} else {
-			param, ok := params.Get(req, "filename")
-			if !ok {
+			param := GetParam(req.Context(), "filename")
+			if param == "" {
 				t.Errorf("Expected a filename param")
 			} else {
 				if param != "/complex/path/file.txt" {
