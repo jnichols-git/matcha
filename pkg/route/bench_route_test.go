@@ -25,7 +25,7 @@ func BenchmarkStringRoute(b *testing.B) {
 
 // Wildcard route
 //
-// 787 ns/op, 896 B/op, 25 allocs/op
+// 396 ns/op, 256 B/op, 1 allocs/op
 func BenchmarkWildcardRoute(b *testing.B) {
 	rt := Declare("/[a]/[b]/[c]/[d]/[e]/[f]/[g]/[h]")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
@@ -41,6 +41,19 @@ func BenchmarkWildcardRoute(b *testing.B) {
 // 469 ns/op, 257 B/op, 1 allocs/op
 func BenchmarkRegexRoute(b *testing.B) {
 	rt := Declare("/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}")
+	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
+	var out *http.Request
+	for i := 0; i < b.N; i++ {
+		out = rt.MatchAndUpdateContext(req)
+	}
+	use(out)
+}
+
+// Partial route
+//
+// 520 ns/op, 257 B/op, 1 allocs/op
+func BenchmarkPartialRoute(b *testing.B) {
+	rt := Declare("/+")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {

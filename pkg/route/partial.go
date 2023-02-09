@@ -1,7 +1,6 @@
 package route
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -172,7 +171,6 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	for next := 0; next < len(expr); {
 		part := route.parts[partIdx]
 		token, next = path.Next(expr, next)
-		fmt.Println(token, next)
 		if ok := part.Match(route.ctx, token); !ok {
 			return nil
 		}
