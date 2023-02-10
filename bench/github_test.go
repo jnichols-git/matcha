@@ -327,7 +327,7 @@ func loadCloudReticRouter(routes []route) http.Handler {
 
 	rt, _ := router.New()
 	for _, rout := range routes {
-		r, _ := crroute.New(rout.Path, crroute.WithMethods(rout.Method))
+		r, _ := crroute.New(rout.Method, rout.Path)
 		rt.AddRoute(r, h)
 	}
 	return rt

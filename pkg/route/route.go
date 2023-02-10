@@ -26,14 +26,14 @@ type Route interface {
 }
 
 // Create a new Route based on a string expression.
-func New(expr string, confs ...ConfigFunc) (Route, error) {
+func New(method, expr string, confs ...ConfigFunc) (Route, error) {
 	// Determine route type
 	var r Route
 	var err error
 	if isPartialRouteExpr(expr) {
-		r, err = build_partialRoute(expr)
+		r, err = build_partialRoute(method, expr)
 	} else {
-		r, err = build_defaultRoute(expr)
+		r, err = build_defaultRoute(method, expr)
 	}
 	if err != nil {
 		return nil, err
@@ -49,8 +49,8 @@ func New(expr string, confs ...ConfigFunc) (Route, error) {
 
 // Create a new Route based on a string expression, and panic if this fails.
 // You should not use this unless you are creating a route on program start and do not intend to modify the route after the fact.
-func Declare(expr string, confs ...ConfigFunc) Route {
-	r, err := New(expr, confs...)
+func Declare(method, expr string, confs ...ConfigFunc) Route {
+	r, err := New(method, expr, confs...)
 	if err != nil {
 		panic(err)
 	}

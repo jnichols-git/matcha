@@ -77,6 +77,7 @@ func isPartialRouteExpr(s string) bool {
 type partialRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
+	method   string
 	parts    []Part
 	ctx      *routeMatchContext
 }
@@ -84,10 +85,11 @@ type partialRoute struct {
 // Tokenize and parse a route expression into a partialRoute.
 //
 // See interface Route.
-func build_partialRoute(expr string) (*partialRoute, error) {
+func build_partialRoute(method, expr string) (*partialRoute, error) {
 	route := &partialRoute{
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
+		method:   method,
 		parts:    make([]Part, 0),
 		ctx:      newRMC(),
 	}
@@ -152,11 +154,11 @@ func (route *partialRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	//req = req.Clone(req.Context())
+	if req.Method != route.method {
+		return nil
+	}
 	route.ctx.ResetOnto(req.Context())
 	expr := req.URL.Path
-	// check length; tokens should be > parts
-	//tokens := path.TokenizeString(req.URL.Path)
 	if strings.Count(expr, "/") < len(route.parts)-1 {
 		return nil
 	}

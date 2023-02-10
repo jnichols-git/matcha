@@ -109,6 +109,7 @@ func (part *regexPart) SetParameterName(s string) {
 type defaultRoute struct {
 	origExpr string
 	mws      []middleware.Middleware
+	method   string
 	parts    []Part
 	ctx      *routeMatchContext
 }
@@ -116,10 +117,11 @@ type defaultRoute struct {
 // Tokenize and parse a route expression into a defaultRoute.
 //
 // See interface Route.
-func build_defaultRoute(expr string) (*defaultRoute, error) {
+func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 	route := &defaultRoute{
 		origExpr: expr,
 		mws:      make([]middleware.Middleware, 0),
+		method:   method,
 		parts:    make([]Part, 0),
 		ctx:      newRMC(),
 	}
@@ -170,6 +172,9 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
+	if req.Method != route.method {
+		return nil
+	}
 	route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path

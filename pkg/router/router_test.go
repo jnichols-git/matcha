@@ -85,7 +85,7 @@ func runEvalRequest(t *testing.T,
 // Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
 func TestNewRouter(t *testing.T) {
 	_, err := New(
-		WithRoute(route.Declare("/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithNotFound(nfHandler()),
 	)
 	if err != nil {
@@ -95,11 +95,11 @@ func TestNewRouter(t *testing.T) {
 
 func TestBasicRoutes(t *testing.T) {
 	r, err := New(
-		WithRoute(route.Declare("/"), okHandler("root")),
-		WithRoute(route.Declare("/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.Declare(`/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.Declare(`/route/[id]{[\w]{4}}`), rpHandler("id")),
-		WithRoute(route.Declare(`/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	if err != nil {
 		t.Fatal(err)

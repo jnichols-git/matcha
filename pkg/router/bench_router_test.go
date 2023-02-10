@@ -37,11 +37,11 @@ func declareReq(path string) *http.Request {
 // 1519 ns/op, 1387 B/op, 12 allocs/op
 func BenchmarkBasicRouter(b *testing.B) {
 	rt := Declare(
-		WithRoute(route.Declare("/", route.WithMethods(http.MethodGet)), okHandler("root")),
-		WithRoute(route.Declare("/[wildcard]", route.WithMethods(http.MethodGet)), rpHandler("wildcard")),
-		WithRoute(route.Declare(`/route/{[a-zA-Z]+}`, route.WithMethods(http.MethodGet)), okHandler("letters")),
-		WithRoute(route.Declare(`/route/[id]{[\w]{4}}`, route.WithMethods(http.MethodGet)), rpHandler("id")),
-		WithRoute(route.Declare(`/static/file/[filename]{\w+(?:\.\w+)?}+`, route.WithMethods(http.MethodGet)), rpHandler("filename")),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	benchReqs := []*http.Request{
 		declareReq("/"),
