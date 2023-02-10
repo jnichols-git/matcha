@@ -1,7 +1,6 @@
 package route
 
 import (
-	"net/http"
 	"regexp"
 
 	"github.com/cloudretic/router/pkg/regex"
@@ -9,8 +8,8 @@ import (
 
 const (
 	// part matching
-	regexp_wildcard = string(`\[(.*?)\](.*)`)
-	regexp_regex    = string(`{(.*)}`)
+	regexp_wildcard = string(`/\[(.*?)\](.*)`)
+	regexp_regex    = string(`[/\]]{(.*)}`)
 	// handy constants to have around
 	regexp_anyWord = string(`\w+`)
 )
@@ -28,7 +27,7 @@ type Part interface {
 	// Match should return nil if the Part doesn't match the token.
 	// If it does, it should return the request, with any modifications done on
 	// behalf of the Part (usually wildcard tokens)
-	Match(req *http.Request, token string) *http.Request
+	Match(ctx *routeMatchContext, token string) bool
 }
 
 // paramParts may or may not store some parameter.

@@ -33,7 +33,7 @@ func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 }
 
 func (rt *defaultRouter) AddNotFound(h http.Handler) {
-
+	rt.notfound = h
 }
 
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
