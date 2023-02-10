@@ -33,6 +33,13 @@ func (part *stringPart) Match(ctx *routeMatchContext, token string) bool {
 	}
 }
 
+func (part *stringPart) Eq(other Part) bool {
+	if otherSp, ok := other.(*stringPart); ok {
+		return otherSp.val == part.val
+	}
+	return false
+}
+
 // WILDCARDS
 
 // Wildcard route Parts store parameters for use by the router in handlers.
@@ -54,6 +61,13 @@ func (part *wildcardPart) Match(ctx *routeMatchContext, token string) bool {
 		setParam(ctx, part.param, token)
 	}
 	return true
+}
+
+func (part *wildcardPart) Eq(other Part) bool {
+	if otherWp, ok := other.(*wildcardPart); ok {
+		return otherWp.param == part.param
+	}
+	return false
 }
 
 func (part *wildcardPart) ParameterName() string {
@@ -93,6 +107,13 @@ func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
 		setParam(ctx, part.param, token)
 	}
 	return true
+}
+
+func (part *regexPart) Eq(other Part) bool {
+	if otherRp, ok := other.(*regexPart); ok {
+		return otherRp.expr.String() == part.expr.String() && otherRp.param == part.param
+	}
+	return false
 }
 
 func (part *regexPart) ParameterName() string {

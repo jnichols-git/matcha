@@ -28,6 +28,9 @@ type Part interface {
 	// If it does, it should return the request, with any modifications done on
 	// behalf of the Part (usually wildcard tokens)
 	Match(ctx *routeMatchContext, token string) bool
+	// Compare to another part.
+	// Should return equal iff the result of Match would be the exact same, given the same context and token.
+	Eq(other Part) bool
 }
 
 // paramParts may or may not store some parameter.

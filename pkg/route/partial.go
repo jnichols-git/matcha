@@ -57,6 +57,16 @@ func (part *partialEndPart) Match(ctx *routeMatchContext, token string) bool {
 	return true
 }
 
+func (part *partialEndPart) Eq(other Part) bool {
+	if otherPep, ok := other.(*partialEndPart); ok {
+		if otherPep.param != part.param {
+			return false
+		}
+		return part.subPart.Eq(otherPep.subPart)
+	}
+	return false
+}
+
 func (part *partialEndPart) ParameterName() string {
 	return part.param
 }
