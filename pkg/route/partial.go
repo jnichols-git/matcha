@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 )
 
@@ -49,12 +48,25 @@ func (part *partialEndPart) Match(ctx *routeMatchContext, token string) bool {
 	if !ok {
 		return false
 	}
-	if part.param == "" {
-		return true
-	}
-	setParam(ctx, part.param, GetParam(ctx, part.param)+token)
 	// If there's a match, get the current path from params and append the token
+	if ctx != nil && part.param != "" {
+		setParam(ctx, part.param, GetParam(ctx, part.param)+token)
+	}
 	return true
+}
+
+func (part *partialEndPart) Eq(other Part) bool {
+	if otherPep, ok := other.(*partialEndPart); ok {
+		if otherPep.param != part.param {
+			return false
+		}
+		return part.subPart.Eq(otherPep.subPart)
+	}
+	return false
+}
+
+func (part *partialEndPart) Expr() string {
+	return "*"
 }
 
 func (part *partialEndPart) ParameterName() string {
@@ -76,7 +88,7 @@ func isPartialRouteExpr(s string) bool {
 // an exact match
 type partialRoute struct {
 	origExpr string
-	mws      []middleware.Middleware
+	method   string
 	parts    []Part
 	ctx      *routeMatchContext
 }
@@ -84,10 +96,10 @@ type partialRoute struct {
 // Tokenize and parse a route expression into a partialRoute.
 //
 // See interface Route.
-func build_partialRoute(expr string) (*partialRoute, error) {
+func build_partialRoute(method, expr string) (*partialRoute, error) {
 	route := &partialRoute{
 		origExpr: expr,
-		mws:      make([]middleware.Middleware, 0),
+		method:   method,
 		parts:    make([]Part, 0),
 		ctx:      newRMC(),
 	}
@@ -138,11 +150,22 @@ func (route *partialRoute) Length() int {
 	return len(route.parts) - 1
 }
 
-// Attach middleware to the route. Middleware is handled in attachment order.
+// Get a Part from the route.
+// For partialRoutes, in line with Length(), the adaptive part cannot be acquired through Part().
 //
 // See interface Route.
-func (route *partialRoute) Attach(mw middleware.Middleware) {
-	route.mws = append(route.mws, mw)
+func (route *partialRoute) Part(idx int) Part {
+	if idx < route.Length() {
+		return route.parts[idx]
+	}
+	return nil
+}
+
+// Return the route method.
+//
+// See interface Route.
+func (route *partialRoute) Method() string {
+	return route.method
 }
 
 // Match a request and update its context.
@@ -152,20 +175,15 @@ func (route *partialRoute) Attach(mw middleware.Middleware) {
 //
 // See interface Route.
 func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
-	//req = req.Clone(req.Context())
+	if req.Method != route.method {
+		return nil
+	}
 	route.ctx.ResetOnto(req.Context())
 	expr := req.URL.Path
-	// check length; tokens should be > parts
-	//tokens := path.TokenizeString(req.URL.Path)
 	if strings.Count(expr, "/") < len(route.parts)-1 {
 		return nil
 	}
-	// Run any attached middleware
-	for _, mw := range route.mws {
-		if req = mw(req); req == nil {
-			return nil
-		}
-	}
+
 	var token string
 	var partIdx int
 	for next := 0; next < len(expr); {

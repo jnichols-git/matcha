@@ -7,7 +7,7 @@ import (
 )
 
 func TestStringRoute(t *testing.T) {
-	rt, err := New("/test")
+	rt, err := New(http.MethodGet, "/test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestStringRoute(t *testing.T) {
 }
 
 func TestWildcardRoute(t *testing.T) {
-	rt, err := New("/[param1]/[param2]/[param3]")
+	rt, err := New(http.MethodGet, "/[param1]/[param2]/[param3]")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func TestWildcardRoute(t *testing.T) {
 }
 
 func TestRegexRoute(t *testing.T) {
-	rt, err := New("/{[a-zA-Z]{4}}")
+	rt, err := New(http.MethodGet, "/{[a-zA-Z]{4}}")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestRegexRoute(t *testing.T) {
 
 func TestPartialRoute(t *testing.T) {
 	t.Run("basics", func(t *testing.T) {
-		rt, err := New(`/partial/+`)
+		rt, err := New(http.MethodGet, `/partial/+`)
 		if reflect.TypeOf(rt) != reflect.TypeOf(&partialRoute{}) {
 			t.Fatalf("/partial/+ should create a partialRoute, got %s", reflect.TypeOf(rt).String())
 		}
@@ -75,7 +75,7 @@ func TestPartialRoute(t *testing.T) {
 		}
 	})
 	t.Run("filename", func(t *testing.T) {
-		rt, err := New(`/file/[filename]{\w+(?:\.\w+)?}+`)
+		rt, err := New(http.MethodGet, `/file/[filename]{\w+(?:\.\w+)?}+`)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -109,7 +109,7 @@ func TestPartialRoute(t *testing.T) {
 }
 
 func TestMethodRoute(t *testing.T) {
-	rt, err := New("/test", WithMethods(http.MethodPost))
+	rt, err := New(http.MethodPost, "/test")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 )
 
@@ -33,6 +32,17 @@ func (part *stringPart) Match(ctx *routeMatchContext, token string) bool {
 	}
 }
 
+func (part *stringPart) Eq(other Part) bool {
+	if otherSp, ok := other.(*stringPart); ok {
+		return otherSp.val == part.val
+	}
+	return false
+}
+
+func (part *stringPart) Expr() string {
+	return part.val
+}
+
 // WILDCARDS
 
 // Wildcard route Parts store parameters for use by the router in handlers.
@@ -50,10 +60,21 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 
 func (part *wildcardPart) Match(ctx *routeMatchContext, token string) bool {
 	token = token[1:]
-	if part.param != "" {
+	if ctx != nil && part.param != "" {
 		setParam(ctx, part.param, token)
 	}
 	return true
+}
+
+func (part *wildcardPart) Eq(other Part) bool {
+	if otherWp, ok := other.(*wildcardPart); ok {
+		return otherWp.param == part.param
+	}
+	return false
+}
+
+func (part *wildcardPart) Expr() string {
+	return "*"
 }
 
 func (part *wildcardPart) ParameterName() string {
@@ -88,11 +109,22 @@ func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
 		return false
 	}
 	// If a parameter is set, act as a wildcard param.
-	if part.param != "" {
+	if ctx != nil && part.param != "" {
 		// If a token matched, store the matched value as a route Param
 		setParam(ctx, part.param, token)
 	}
 	return true
+}
+
+func (part *regexPart) Eq(other Part) bool {
+	if otherRp, ok := other.(*regexPart); ok {
+		return otherRp.expr.String() == part.expr.String() && otherRp.param == part.param
+	}
+	return false
+}
+
+func (part *regexPart) Expr() string {
+	return "*"
 }
 
 func (part *regexPart) ParameterName() string {
@@ -108,7 +140,7 @@ func (part *regexPart) SetParameterName(s string) {
 // defaultRoute is the default behavior for router, which is to match requests exactly.
 type defaultRoute struct {
 	origExpr string
-	mws      []middleware.Middleware
+	method   string
 	parts    []Part
 	ctx      *routeMatchContext
 }
@@ -116,10 +148,10 @@ type defaultRoute struct {
 // Tokenize and parse a route expression into a defaultRoute.
 //
 // See interface Route.
-func build_defaultRoute(expr string) (*defaultRoute, error) {
+func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 	route := &defaultRoute{
 		origExpr: expr,
-		mws:      make([]middleware.Middleware, 0),
+		method:   method,
 		parts:    make([]Part, 0),
 		ctx:      newRMC(),
 	}
@@ -159,28 +191,35 @@ func (route *defaultRoute) Length() int {
 	return len(route.parts)
 }
 
-// Attach middleware to the route. Middleware is handled in attachment order.
+// Get a part from the route.
 //
 // See interface Route.
-func (route *defaultRoute) Attach(mw middleware.Middleware) {
-	route.mws = append(route.mws, mw)
+func (route *defaultRoute) Part(idx int) Part {
+	if idx >= route.Length() {
+		return nil
+	}
+	return route.parts[idx]
+}
+
+// Return the route method.
+//
+// See interface Route.
+func (route *defaultRoute) Method() string {
+	return route.method
 }
 
 // Match a request and update its context.
 //
 // See interface Route.
 func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Request {
+	if req.Method != route.method {
+		return nil
+	}
 	route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path
 	if strings.Count(expr, "/") != len(route.parts) {
 		return nil
-	}
-	// Run any attached middleware
-	for _, mw := range route.mws {
-		if req = mw(req); req == nil {
-			return nil
-		}
 	}
 
 	var token string

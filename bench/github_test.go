@@ -327,13 +327,13 @@ func loadCloudReticRouter(routes []route) http.Handler {
 
 	rt, _ := router.New()
 	for _, rout := range routes {
-		r, _ := crroute.New(rout.Path, crroute.WithMethods(rout.Method))
+		r, _ := crroute.New(rout.Method, rout.Path)
 		rt.AddRoute(r, h)
 	}
 	return rt
 }
 
-// 1,429,306 ns/op, 58,635 B/op, 406 allocs/op
+// 296,177 ns/op, 58,635 B/op, 406 allocs/op
 func BenchmarkCloudReticRouter_GithubAll(b *testing.B) {
 	rt := loadCloudReticRouter(githubAPI)
 	benchRoutes(b, rt, githubAPI)
