@@ -34,7 +34,7 @@ func declareReq(path string) *http.Request {
 // Basic router benchmark.
 // For more involved benchmarks, see /bench. This serves as a baseline value, not a robust example under load.
 //
-// 1519 ns/op, 1387 B/op, 12 allocs/op
+// 1,258 ns/op, 1,387 B/op, 12 allocs/op
 func BenchmarkBasicRouter(b *testing.B) {
 	rt := Declare(
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
