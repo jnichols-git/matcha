@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/cloudretic/router/pkg/middleware"
+	"github.com/cloudretic/router/pkg/path"
 	"github.com/cloudretic/router/pkg/route"
 )
 
 type defaultRouter struct {
 	mws      []middleware.Middleware
-	routes   []route.Route
+	routes   map[string][]route.Route
 	handlers map[string]http.Handler
 	notfound http.Handler
 }
@@ -17,7 +18,7 @@ type defaultRouter struct {
 func Default() *defaultRouter {
 	return &defaultRouter{
 		mws:      make([]middleware.Middleware, 0),
-		routes:   make([]route.Route, 0),
+		routes:   make(map[string][]route.Route),
 		handlers: make(map[string]http.Handler),
 		notfound: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 	}
@@ -28,7 +29,13 @@ func (rt *defaultRouter) Attach(mw middleware.Middleware) {
 }
 
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
-	rt.routes = append(rt.routes, r)
+	prefix := r.Part(0).Expr()
+	if rt.routes[prefix] != nil {
+		rt.routes[prefix] = append(rt.routes[prefix], r)
+	} else {
+		rt.routes[prefix] = make([]route.Route, 1)
+		rt.routes[prefix][0] = r
+	}
 	rt.handlers[r.Hash()] = h
 }
 
@@ -42,11 +49,22 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	for _, r := range rt.routes {
-		reqWithContext := r.MatchAndUpdateContext(req)
-		if reqWithContext != nil {
-			rt.handlers[r.Hash()].ServeHTTP(w, reqWithContext)
-			return
+	reqPrefix, _ := path.Next(req.URL.Path, 0)
+	if routes, ok := rt.routes[reqPrefix]; ok {
+		for _, r := range routes {
+			reqWithContext := r.MatchAndUpdateContext(req)
+			if reqWithContext != nil {
+				rt.handlers[r.Hash()].ServeHTTP(w, reqWithContext)
+				return
+			}
+		}
+	} else if routes, ok := rt.routes["*"]; ok {
+		for _, r := range routes {
+			reqWithContext := r.MatchAndUpdateContext(req)
+			if reqWithContext != nil {
+				rt.handlers[r.Hash()].ServeHTTP(w, reqWithContext)
+				return
+			}
 		}
 	}
 	rt.notfound.ServeHTTP(w, req)

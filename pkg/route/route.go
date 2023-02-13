@@ -2,8 +2,6 @@ package route
 
 import (
 	"net/http"
-
-	"github.com/cloudretic/router/pkg/middleware"
 )
 
 type Route interface {
@@ -15,10 +13,15 @@ type Route interface {
 	//
 	// Route implementations may determine how to represent their own length.
 	Length() int
-	// Attach middleware to the route.
+	// Get the part at idx.
+	// Returns nil if there is no part.
 	//
-	// Route implementations may define the order that middleware is handled.
-	Attach(middleware.Middleware)
+	// Route implementations must implement this definition exactly.
+	Part(idx int) Part
+	// Get the method of the route.
+	//
+	// Route implementations must return a nonempty string containing exactly one method, compliant with http.MethodX
+	Method() string
 	// Match a request and update its context.
 	//
 	// Route implementations must return nil if a request does not match the Route, but may otherwise define any return behavior.
