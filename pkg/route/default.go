@@ -124,7 +124,7 @@ func (part *regexPart) Eq(other Part) bool {
 }
 
 func (part *regexPart) Expr() string {
-	return part.expr.String()
+	return "*"
 }
 
 func (part *regexPart) ParameterName() string {

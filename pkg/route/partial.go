@@ -66,7 +66,7 @@ func (part *partialEndPart) Eq(other Part) bool {
 }
 
 func (part *partialEndPart) Expr() string {
-	return part.subPart.Expr() + "+"
+	return "*"
 }
 
 func (part *partialEndPart) ParameterName() string {
