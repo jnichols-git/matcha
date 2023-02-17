@@ -57,11 +57,5 @@ func Declare(method, expr string, confs ...ConfigFunc) Route {
 	if err != nil {
 		panic(err)
 	}
-	for _, conf := range confs {
-		err = conf(r)
-		if err != nil {
-			panic(err)
-		}
-	}
 	return r
 }
