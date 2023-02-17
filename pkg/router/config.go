@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -21,6 +22,13 @@ func WithRoute(r route.Route, h http.Handler) ConfigFunc {
 func WithNotFound(h http.Handler) ConfigFunc {
 	return func(rt Router) error {
 		rt.AddNotFound(h)
+		return nil
+	}
+}
+
+func WithMiddleware(mw middleware.Middleware) ConfigFunc {
+	return func(rt Router) error {
+		rt.Attach(mw)
 		return nil
 	}
 }

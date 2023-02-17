@@ -84,7 +84,7 @@ func runEvalRequest(t *testing.T,
 // Test all options of New().
 // Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
 func TestNewRouter(t *testing.T) {
-	_, err := New(
+	_, err := New(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithNotFound(nfHandler()),
 	)
@@ -94,7 +94,7 @@ func TestNewRouter(t *testing.T) {
 }
 
 func TestBasicRoutes(t *testing.T) {
-	r, err := New(
+	r, err := New(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),

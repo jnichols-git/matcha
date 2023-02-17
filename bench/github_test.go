@@ -325,7 +325,7 @@ var cloudReticRouterHandlerTest http.HandlerFunc = func(w http.ResponseWriter, r
 func loadCloudReticRouter(routes []route) http.Handler {
 	h := cloudReticRouterHandlerTest
 
-	rt, _ := router.New()
+	rt, _ := router.New(router.Default())
 	for _, rout := range routes {
 		r, _ := crroute.New(rout.Method, rout.Path)
 		rt.AddRoute(r, h)

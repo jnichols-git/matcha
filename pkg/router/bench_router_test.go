@@ -36,7 +36,7 @@ func declareReq(path string) *http.Request {
 //
 // 1,258 ns/op, 1,387 B/op, 12 allocs/op
 func BenchmarkBasicRouter(b *testing.B) {
-	rt := Declare(
+	rt := Declare(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),

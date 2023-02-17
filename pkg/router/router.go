@@ -14,24 +14,22 @@ type Router interface {
 	ServeHTTP(w http.ResponseWriter, req *http.Request)
 }
 
-func New(cfs ...ConfigFunc) (Router, error) {
-	rt := Default()
+func New(with Router, cfs ...ConfigFunc) (Router, error) {
 	for _, cf := range cfs {
-		err := cf(rt)
+		err := cf(with)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return rt, nil
+	return with, nil
 }
 
-func Declare(cfs ...ConfigFunc) Router {
-	rt := Default()
+func Declare(with Router, cfs ...ConfigFunc) Router {
 	for _, cf := range cfs {
-		err := cf(rt)
+		err := cf(with)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return rt
+	return with
 }
