@@ -45,7 +45,7 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, mw := range rt.mws {
-		if req = mw(req); req == nil {
+		if req = mw(w, req); req == nil {
 			return
 		}
 	}

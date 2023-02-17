@@ -24,6 +24,7 @@ func build_stringPart(val string) (*stringPart, error) {
 	return &stringPart{val}, nil
 }
 
+// stringParts match a literal token exactly.
 func (part *stringPart) Match(ctx *routeMatchContext, token string) bool {
 	if part.val == token {
 		return true
@@ -58,6 +59,7 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 	return &wildcardPart{param}, nil
 }
 
+// wildcardParts match any value.
 func (part *wildcardPart) Match(ctx *routeMatchContext, token string) bool {
 	token = token[1:]
 	if ctx != nil && part.param != "" {
@@ -101,6 +103,7 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 	}
 }
 
+// regexParts match any token that matches the regex value.
 func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
 	token = token[1:]
 	// Match against regex
