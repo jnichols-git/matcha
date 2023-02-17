@@ -2,55 +2,44 @@
 
 `cloudretic/router` is an actively developed HTTP router for Go, primarily developed for CloudRETIC's API handlers but free to use by anyone under the Apache 2.0 license.
 
+## Features
+
+`router` supports:
+
+- Static string routes
+- Wildcard parameters
+- Regex route validation
+- Partial route matching
+- Middleware
+
 ## Installation
 
-`go get github.com/cloudretic/router`
+`go get github.com/cloudretic/router@version`
 
-## Usage
+Supported versions:
 
-### Components
+- `latest (v0.0)`
 
-`router` has three main components:
+## Basic Usage
 
-- Routers implement `http.Handler` and handle incoming requests using a combination of Routes and Middleware.
-- Routes are derived from a string expression and match against `*http.Request`s.
-- Middleware acts on `*http.Requests`, usually to either transform or reject them.
-
-### New vs. Declare
-
-Routes and Routers can both be created via the package function `New` or `Declare`. `New` returns the object and an error (if one occurs), while `Declare` only returns the object, and will panic if creation fails. It is recommended that you use `New` if you need to create or configure a router at runtime, and `Declare` if you're creating a static router when the program starts.
+Create routes using `route.New` or `route.Declare` and a route expression:
 
 ```go
-infoRoute, err := route.New("/info")
-if err != nil {
-    ...
-}
-fileRoute, err := route.New("/file/[filePath]+")
-if err != nil {
-    ...
-}
-rt, err := router.New(
-    WithRoute(infoRoute, infoHandler),
-    WithRoute(fileRoute, fileHandler),
-)
-if err != nil {
-    ...
-}
+rt, err := route.New("/static")
 ```
 
+Create a router using `router.New` or `router.Declare` with a router type and configuration functions:
+
 ```go
-// Panics if there's an error creating the router
-rt := router.Declare(
-    WithRoute(route.Declare("/info"), infoHandler),
-    WithRoute(route.Declare("/file/[filePath]+"), fileHandler)
+r, err := router.New(
+    router.Default(),
+    router.WithRoute(route.New("/static"), someHandler),
+    router.WithMiddleware(someMiddleware),
+    ...
 )
 ```
 
-### Middleware
-
-Middleware is defined as  `type Middleware func(*http.Request)*http.Request`. When middleware is attached to a Router or Route, they will be called in-order, and the request will be updated with each one. Middleware can also reject requests by returning `nil`.
-
-Middleware are currently called in the order that they are attached for all implementations of Router and Route.
+See `docs/` for information on implementing more advanced features.
 
 ## Maintainers
 

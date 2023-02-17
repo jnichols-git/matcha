@@ -12,7 +12,7 @@ r := router.Declare(
 r.AddRoute(route.Declare("/someOtherEndpoint"), someOtherHandler)
 ```
 
-Routes will be handled in the order they are received, and **must match an incoming request URL exactly** in order to call their handler.
+Routes will be handled in the order they are added.
 
 You can also add a specific handler that's called in the event that no route matches using `WithNotFound` or `AddNotFound` in the same way (the router will return an empty 404 by default). Doing so will override any previously-set handler for this case.
 
