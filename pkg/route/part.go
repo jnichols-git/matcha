@@ -31,8 +31,6 @@ type Part interface {
 	// Compare to another part.
 	// Should return equal iff the result of Match would be the exact same, given the same context and token.
 	Eq(other Part) bool
-	// Get an expression for the part.
-	Expr() string
 }
 
 // paramParts may or may not store some parameter.

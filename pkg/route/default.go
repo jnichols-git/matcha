@@ -40,10 +40,6 @@ func (part *stringPart) Eq(other Part) bool {
 	return false
 }
 
-func (part *stringPart) Expr() string {
-	return part.val
-}
-
 // WILDCARDS
 
 // Wildcard route Parts store parameters for use by the router in handlers.
@@ -73,10 +69,6 @@ func (part *wildcardPart) Eq(other Part) bool {
 		return otherWp.param == part.param
 	}
 	return false
-}
-
-func (part *wildcardPart) Expr() string {
-	return "*"
 }
 
 func (part *wildcardPart) ParameterName() string {
@@ -124,10 +116,6 @@ func (part *regexPart) Eq(other Part) bool {
 		return otherRp.expr.String() == part.expr.String() && otherRp.param == part.param
 	}
 	return false
-}
-
-func (part *regexPart) Expr() string {
-	return "*"
 }
 
 func (part *regexPart) ParameterName() string {
@@ -179,6 +167,18 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 	return route, nil
 }
 
+// Get the route prefix.
+//
+// See interface Route.
+func (route *defaultRoute) Prefix() string {
+	switch r := route.parts[0].(type) {
+	case *stringPart:
+		return r.val
+	default:
+		return "*"
+	}
+}
+
 // Get a string value unique to the route.
 //
 // See interface Route.
@@ -192,16 +192,6 @@ func (route *defaultRoute) Hash() string {
 // See interface Route.
 func (route *defaultRoute) Length() int {
 	return len(route.parts)
-}
-
-// Get a part from the route.
-//
-// See interface Route.
-func (route *defaultRoute) Part(idx int) Part {
-	if idx >= route.Length() {
-		return nil
-	}
-	return route.parts[idx]
 }
 
 // Return the route method.

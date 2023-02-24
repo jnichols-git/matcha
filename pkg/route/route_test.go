@@ -17,11 +17,39 @@ func TestStringRouteNew(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		// hash
+		if hash := rt.Hash(); hash != "/test" {
+			t.Errorf("expected hash '/test', got %s", hash)
+		}
+		// length
+		if length := rt.Length(); length != 1 {
+			t.Errorf("expected length 1, got %d", length)
+		}
+		// prefix
+		if prefix := rt.Prefix(); prefix != "/test" {
+			t.Errorf("expected prefix '/test', got '%s'", prefix)
+		}
+		// method
+		if method := rt.Method(); method != http.MethodGet {
+			t.Errorf("expected method '%s', got '%s'", http.MethodGet, method)
+		}
+		// valid request
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/test", nil)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		}
+		// incorrect path
 		req, _ = http.NewRequest(http.MethodGet, "http://url.com/test2", nil)
+		if req = rt.MatchAndUpdateContext(req); req != nil {
+			t.Errorf("expected route to not match")
+		}
+		// incorrect path length
+		req, _ = http.NewRequest(http.MethodGet, "http://url.com/static/test", nil)
+		if req = rt.MatchAndUpdateContext(req); req != nil {
+			t.Errorf("expected route to not match")
+		}
+		// incorrect method
+		req, _ = http.NewRequest(http.MethodPost, "http://url.com/test", nil)
 		if req = rt.MatchAndUpdateContext(req); req != nil {
 			t.Errorf("expected route to not match")
 		}
@@ -46,6 +74,22 @@ func TestWildcardRouteNew(t *testing.T) {
 		rt, err := New(http.MethodGet, "/[param1]/[param2]/[param3]")
 		if err != nil {
 			t.Fatal(err)
+		}
+		// hash
+		if hash := rt.Hash(); hash != "/[param1]/[param2]/[param3]" {
+			t.Errorf("expected hash '/[param1]/[param2]/[param3]', got %s", hash)
+		}
+		// length
+		if length := rt.Length(); length != 3 {
+			t.Errorf("expected length 3, got %d", length)
+		}
+		// prefix
+		if prefix := rt.Prefix(); prefix != "*" {
+			t.Errorf("expected prefix '*', got '%s'", prefix)
+		}
+		// method
+		if method := rt.Method(); method != http.MethodGet {
+			t.Errorf("expected method '%s', got '%s'", http.MethodGet, method)
 		}
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/test1/test2/test3", nil)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
@@ -86,6 +130,22 @@ func TestRegexRouteNew(t *testing.T) {
 		rt, err := New(http.MethodGet, "/{[a-zA-Z]{4}}")
 		if err != nil {
 			t.Fatal(err)
+		}
+		// hash
+		if hash := rt.Hash(); hash != "/{[a-zA-Z]{4}}" {
+			t.Errorf("expected hash '/test', got %s", hash)
+		}
+		// length
+		if length := rt.Length(); length != 1 {
+			t.Errorf("expected length 1, got %d", length)
+		}
+		// prefix
+		if prefix := rt.Prefix(); prefix != "*" {
+			t.Errorf("expected prefix '*', got '%s'", prefix)
+		}
+		// method
+		if method := rt.Method(); method != http.MethodGet {
+			t.Errorf("expected method '%s', got '%s'", http.MethodGet, method)
 		}
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/test", nil)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
@@ -135,6 +195,22 @@ func TestPartialRouteNew(t *testing.T) {
 		}
 		if err != nil {
 			t.Fatal(err)
+		}
+		// hash
+		if hash := rt.Hash(); hash != "/partial/+" {
+			t.Errorf("expected hash '/partial/+', got %s", hash)
+		}
+		// length (partial routes do *not* include the extension in their length!)
+		if length := rt.Length(); length != 1 {
+			t.Errorf("expected length 1, got %d", length)
+		}
+		// prefix
+		if prefix := rt.Prefix(); prefix != "/partial" {
+			t.Errorf("expected prefix '/partial', got '%s'", prefix)
+		}
+		// method
+		if method := rt.Method(); method != http.MethodGet {
+			t.Errorf("expected method '%s', got '%s'", http.MethodGet, method)
 		}
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/partial/any/path", nil)
 		if req = rt.MatchAndUpdateContext(req); req == nil {

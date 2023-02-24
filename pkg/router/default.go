@@ -29,7 +29,7 @@ func (rt *defaultRouter) Attach(mw middleware.Middleware) {
 }
 
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
-	prefix := r.Part(0).Expr()
+	prefix := r.Prefix()
 	if rt.routes[prefix] != nil {
 		rt.routes[prefix] = append(rt.routes[prefix], r)
 	} else {
