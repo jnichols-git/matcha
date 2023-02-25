@@ -252,6 +252,35 @@ func TestPartialRouteNew(t *testing.T) {
 				}
 			}
 		}
+		// invalid method
+		req, _ = http.NewRequest(http.MethodPut, "http://url.com/file/complex/path/file.txt", nil)
+		if req = rt.MatchAndUpdateContext(req); req != nil {
+			t.Error("request shouldn't match with incorrect method")
+		}
+		// invalid name (regex validation failed)
+		req, _ = http.NewRequest(http.MethodGet, "http://url.com/file/invalid/name.txt.bck", nil)
+		if req = rt.MatchAndUpdateContext(req); req != nil {
+			t.Errorf("Expected route to fail when partial part doesn't match")
+		}
+	})
+	t.Run("valid-nested", func(t *testing.T) {
+		rt, err := New(http.MethodGet, "/nested/partial/route/[proxy]+")
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, _ := http.NewRequest(http.MethodGet, "http://url.com/nested", nil)
+		if req = rt.MatchAndUpdateContext(req); req != nil {
+			t.Errorf("Expected route to fail when too short")
+		}
+	})
+	t.Run("valid-root", func(t *testing.T) {
+		rt, err := New(http.MethodGet, "/[rt]+")
+		if err != nil {
+			t.Error(err)
+		}
+		if prefix := rt.Prefix(); prefix != "*" {
+			t.Errorf("expected prefix '*', got '%s'", prefix)
+		}
 	})
 	t.Run("invalid-regex", func(t *testing.T) {
 		rt, err := New(http.MethodGet, "/complex/{[regex}+")

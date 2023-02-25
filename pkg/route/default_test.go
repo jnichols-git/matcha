@@ -3,7 +3,14 @@ package route
 import "testing"
 
 func TestStringPart(t *testing.T) {
-	sp1, _ := build_stringPart("/sp")
+	_, err := build_stringPart("/is-this-allowed?")
+	if err == nil {
+		t.Fatalf("string part should error out when the expression isn't a valid URL path component")
+	}
+	sp1, err := build_stringPart("/sp")
+	if err != nil {
+		t.Fatalf("/sp is a valid string part, got %s", err)
+	}
 	if ok := sp1.Match(nil, "/sp"); !ok {
 		t.Errorf("string part /sp should Match token /sp")
 	}

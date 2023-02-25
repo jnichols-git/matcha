@@ -1,7 +1,10 @@
 package route
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -21,7 +24,11 @@ type stringPart struct {
 }
 
 func build_stringPart(val string) (*stringPart, error) {
-	return &stringPart{val}, nil
+	if url.PathEscape(val[1:]) != val[1:] {
+		return nil, errors.New("static part " + val + " is not a valid URL part (" + url.PathEscape(val) + ")")
+	} else {
+		return &stringPart{val}, nil
+	}
 }
 
 // stringParts match a literal token exactly.
@@ -52,6 +59,7 @@ type wildcardPart struct {
 }
 
 func build_wildcardPart(param string) (*wildcardPart, error) {
+	fmt.Println(param)
 	return &wildcardPart{param}, nil
 }
 

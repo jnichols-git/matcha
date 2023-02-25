@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/cloudretic/router/pkg/regex"
@@ -55,6 +56,9 @@ func parse(token string) (Part, error) {
 				regexExpr := groups[0]
 				return build_regexPart(wildcardExpr, regexExpr)
 			}
+		}
+		if len(wildcardExpr)+3 != len(token) {
+			return nil, fmt.Errorf("error parsing expression %s: got a wildcard part with a non-regex addition, which is invalid", token)
 		}
 		return build_wildcardPart(wildcardExpr)
 	}
