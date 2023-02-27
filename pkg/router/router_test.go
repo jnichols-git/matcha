@@ -1,6 +1,8 @@
 package router
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -40,6 +42,32 @@ func rpHandler(rp string) http.HandlerFunc {
 			w.Write([]byte(p))
 		}
 	}
+}
+
+func genericValueHandler(key string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		p := r.Context().Value(key).(string)
+		if p == "" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("context value %s not found", key)))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(p))
+		}
+	}
+}
+
+func errConf(rt Router) error {
+	return errors.New("this should cause a router to fail")
+}
+
+func testMiddleware(w http.ResponseWriter, req *http.Request) *http.Request {
+	return req.WithContext(context.WithValue(req.Context(), "mwkey", "mwval"))
+}
+
+func reject(w http.ResponseWriter, req *http.Request) *http.Request {
+	w.WriteHeader(http.StatusForbidden)
+	return nil
 }
 
 func reqGen(method string) func(url, path string) *http.Request {
@@ -87,9 +115,14 @@ func TestNewRouter(t *testing.T) {
 	_, err := New(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithNotFound(nfHandler()),
+		WithMiddleware(testMiddleware),
 	)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+	_, err = New(Default(), errConf)
+	if err == nil {
+		t.Error("router New should return an error if config returns an error")
 	}
 }
 
@@ -100,6 +133,8 @@ func TestBasicRoutes(t *testing.T) {
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
 		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
 		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		WithMiddleware(testMiddleware),
+		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -132,4 +167,26 @@ func TestBasicRoutes(t *testing.T) {
 		"code": http.StatusInternalServerError,
 		"body": "router param filename not found",
 	})
+	runEvalRequest(t, s, "/middlewareTest", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "mwval",
+	})
+}
+
+func TestDeclare(t *testing.T) {
+	// Test rejection middleware
+	r := Declare(Default(), WithMiddleware(reject))
+	s := httptest.NewServer(r)
+	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusForbidden,
+	})
+	// Test declaration fail
+	var err error
+	defer func() {
+		err = recover().(error)
+	}()
+	Declare(Default(), errConf)
+	if err == nil {
+		t.Error("expected declare to fail and panic")
+	}
 }
