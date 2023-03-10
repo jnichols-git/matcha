@@ -20,7 +20,9 @@ jobs:
         with:
           go-version: ${{matrix.go}}
         run: go version
+      - name: Fetch requirements
         run: go get ./...
+      - name: Run tests
         run: go test -coverprofile cicd/cover.out ./pkg/...
       - name: Coveralls
         uses: shogo82148/actions-goveralls@v1
