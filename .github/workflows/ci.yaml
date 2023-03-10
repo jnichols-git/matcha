@@ -23,13 +23,13 @@ jobs:
       - name: Fetch requirements
         run: go get ./...
       - name: Run tests
-        run: go test -coverprofile=cicd/cover.out ./pkg/...
+        run: go test -coverprofile=cover.out ./pkg/...
       - name: Coveralls
         uses: shogo82148/actions-goveralls@v1
         env:
           COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
         with:
-          path-to-profile: cicd/cover.out
+          path-to-profile: cover.out
           flag-name: Go-${{ matrix.go }}
           parallel: true
   finish:
