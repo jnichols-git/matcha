@@ -9,6 +9,9 @@ import (
 // Return the next token from a path, starting at position last, and the position to use with the next call.
 // Returns "" if no token could be found
 func Next(path string, last int) (string, int) {
+	if last+1 > len(path) {
+		return "", -1
+	}
 	end := strings.Index(path[last+1:], "/")
 	if end == -1 {
 		return path[last:], -1
