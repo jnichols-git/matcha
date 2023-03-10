@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
-        run: go version
       - name: Fetch requirements
         run: go get ./...
       - name: Run tests
