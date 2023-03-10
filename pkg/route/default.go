@@ -2,7 +2,6 @@ package route
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -59,7 +58,6 @@ type wildcardPart struct {
 }
 
 func build_wildcardPart(param string) (*wildcardPart, error) {
-	fmt.Println(param)
 	return &wildcardPart{param}, nil
 }
 
