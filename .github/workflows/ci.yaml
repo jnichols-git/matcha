@@ -8,7 +8,8 @@ name: Continuous Integration
 
 jobs:
   build:
-    runs-on: env_CI
+    runs-on: ubuntu-latest
+    environment: env_CI
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +34,8 @@ jobs:
           parallel: true
   finish:
     needs: build
-    runs-on: env_CI
+    runs-on: ubuntu-latest
+    environment: env_CI
     steps:
       - uses: shogo82148/actions-goveralls@v1
         with:
