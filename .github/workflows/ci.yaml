@@ -1,5 +1,5 @@
 on:
-  pull-request:
+  pull_request:
     branches:
       - main
       - v1.0
@@ -8,31 +8,34 @@ name: Continuous Integration
 
 jobs:
   build:
-    runs-on: env_CI
+    runs-on: ubuntu-latest
+    environment: env_CI
     strategy:
       fail-fast: false
       matrix:
         go: [1.19.x]
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
-        uses: actions/checkout@v3
         uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
-        run: go version
+      - name: Fetch requirements
         run: go get ./...
-        run: go test -coverprofile cicd/cover.out ./pkg/...
+      - name: Run tests
+        run: go test -coverprofile=cover.out ./pkg/...
       - name: Coveralls
         uses: shogo82148/actions-goveralls@v1
         env:
           COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
         with:
-          path-to-profile: cicd/cover.out
+          path-to-profile: cover.out
           flag-name: Go-${{ matrix.go }}
           parallel: true
   finish:
     needs: build
-    runs-on: env_CI
+    runs-on: ubuntu-latest
+    environment: env_CI
     steps:
       - uses: shogo82148/actions-goveralls@v1
         with:

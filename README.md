@@ -1,5 +1,7 @@
 # cloudretic/router
 
+[![Coverage Status](https://coveralls.io/repos/github/cloudretic/router/badge.svg)](https://coveralls.io/github/cloudretic/router)
+
 `cloudretic/router` is an actively developed HTTP router for Go, primarily developed for CloudRETIC's API handlers but free to use by anyone under the Apache 2.0 license.
 
 ## Features
