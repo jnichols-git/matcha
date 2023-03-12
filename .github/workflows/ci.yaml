@@ -3,6 +3,12 @@ on:
     branches:
       - main
       - v1.0
+      - v1.1
+  push:
+    branches:
+      - main
+      - v1.0
+      - v1.1
 
 name: Continuous Integration
 
