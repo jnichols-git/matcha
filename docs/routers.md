@@ -7,9 +7,9 @@ You can create a Router with a series of Routes, add Routes after creation, or b
 ```go
 r := router.Declare(
     router.Default(),
-    router.WithRoute(route.Declare("/someEndpoint"), someHandler)
+    router.WithRoute(route.Declare(http.MethodGet, "/someEndpoint"), someHandler)
 )
-r.AddRoute(route.Declare("/someOtherEndpoint"), someOtherHandler)
+r.AddRoute(route.Declare(http.MethodGet, "/someOtherEndpoint"), someOtherHandler)
 ```
 
 Routes will be handled in the order they are added.
@@ -39,8 +39,6 @@ router, err := router.New(
     router.WithRoute(...),
     router.WithMiddleware(someMiddleware),
 )
-if err != nil {
-    ...
-}
+if err != nil { ... }
 router.Attach(someOtherMiddleware)
 ```

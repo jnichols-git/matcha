@@ -33,9 +33,11 @@ rt, err := route.New("/static")
 Create a router using `router.New` or `router.Declare` with a router type and configuration functions:
 
 ```go
+rt, err := route.New(http.MethodGet, "/static")
+if err != nil { ... }
 r, err := router.New(
     router.Default(),
-    router.WithRoute(route.New("/static"), someHandler),
+    router.WithRoute(rt, someHandler),
     router.WithMiddleware(someMiddleware),
     ...
 )
