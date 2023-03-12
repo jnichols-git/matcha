@@ -29,7 +29,7 @@ func (rt *defaultRouter) Attach(mw middleware.Middleware) {
 }
 
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
-	prefix := r.Part(0).Expr()
+	prefix := r.Prefix()
 	if rt.routes[prefix] != nil {
 		rt.routes[prefix] = append(rt.routes[prefix], r)
 	} else {
@@ -43,6 +43,11 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
+// Implements http.Handler.
+//
+// Serve request using the registered middleware, routes, and handlers.
+// Default Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
+// path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, mw := range rt.mws {
 		if req = mw(w, req); req == nil {

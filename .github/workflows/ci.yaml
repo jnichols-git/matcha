@@ -1,0 +1,48 @@
+on:
+  pull_request:
+    branches:
+      - main
+      - v1.0
+      - v1.1
+  push:
+    branches:
+      - main
+      - v1.0
+      - v1.1
+
+name: Continuous Integration
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: env_CI
+    strategy:
+      fail-fast: false
+      matrix:
+        go: [1.20.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{matrix.go}}
+      - name: Fetch requirements
+        run: go get ./...
+      - name: Run tests
+        run: go test -coverprofile=cover.out ./pkg/...
+      - name: Coveralls
+        uses: shogo82148/actions-goveralls@v1
+        env:
+          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        with:
+          path-to-profile: cover.out
+          flag-name: Go-${{ matrix.go }}
+          parallel: true
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: env_CI
+    steps:
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          parallel-finished: true

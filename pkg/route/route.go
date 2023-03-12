@@ -5,6 +5,10 @@ import (
 )
 
 type Route interface {
+	// Get a prefix for the route.
+	//
+	// Route implementations should return a literal string for the first Part in the route, or "*" if not applicable.
+	Prefix() string
 	// Get a unique hash value for the route.
 	//
 	// Route implementations must ensure Hash is always unique for two different Routes.
@@ -13,11 +17,6 @@ type Route interface {
 	//
 	// Route implementations may determine how to represent their own length.
 	Length() int
-	// Get the part at idx.
-	// Returns nil if there is no part.
-	//
-	// Route implementations must implement this definition exactly.
-	Part(idx int) Part
 	// Get the method of the route.
 	//
 	// Route implementations must return a nonempty string containing exactly one method, compliant with http.MethodX
@@ -56,12 +55,6 @@ func Declare(method, expr string, confs ...ConfigFunc) Route {
 	r, err := New(method, expr, confs...)
 	if err != nil {
 		panic(err)
-	}
-	for _, conf := range confs {
-		err = conf(r)
-		if err != nil {
-			panic(err)
-		}
 	}
 	return r
 }

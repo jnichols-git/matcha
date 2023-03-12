@@ -116,5 +116,8 @@ func GetParam(c context.Context, key string) string {
 		val, _ := rmc.vals[param(key)]
 		return val
 	}
+	if val, ok := c.Value(param(key)).(string); ok {
+		return val
+	}
 	return ""
 }

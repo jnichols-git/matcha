@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/cloudretic/router/pkg/regex"
@@ -31,8 +32,6 @@ type Part interface {
 	// Compare to another part.
 	// Should return equal iff the result of Match would be the exact same, given the same context and token.
 	Eq(other Part) bool
-	// Get an expression for the part.
-	Expr() string
 }
 
 // paramParts may or may not store some parameter.
@@ -57,6 +56,9 @@ func parse(token string) (Part, error) {
 				regexExpr := groups[0]
 				return build_regexPart(wildcardExpr, regexExpr)
 			}
+		}
+		if len(wildcardExpr)+3 != len(token) {
+			return nil, fmt.Errorf("error parsing expression %s: got a wildcard part with a non-regex addition, which is invalid", token)
 		}
 		return build_wildcardPart(wildcardExpr)
 	}

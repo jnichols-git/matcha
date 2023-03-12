@@ -134,6 +134,18 @@ func build_partialRoute(method, expr string) (*partialRoute, error) {
 	return route, nil
 }
 
+// Get the route prefix.
+//
+// See interface Route.
+func (route *partialRoute) Prefix() string {
+	switch r := route.parts[0].(type) {
+	case *stringPart:
+		return r.val
+	default:
+		return "*"
+	}
+}
+
 // Get a string value unique to the route.
 //
 // See interface Route.
@@ -148,17 +160,6 @@ func (route *partialRoute) Hash() string {
 // See interface Route.
 func (route *partialRoute) Length() int {
 	return len(route.parts) - 1
-}
-
-// Get a Part from the route.
-// For partialRoutes, in line with Length(), the adaptive part cannot be acquired through Part().
-//
-// See interface Route.
-func (route *partialRoute) Part(idx int) Part {
-	if idx < route.Length() {
-		return route.parts[idx]
-	}
-	return nil
 }
 
 // Return the route method.
