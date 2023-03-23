@@ -116,7 +116,19 @@ func runEvalRequest(t *testing.T,
 					t.Errorf("expected body %s, got %s", v.(string), string(body))
 				}
 			case "header":
-				fmt.Println(res.Header)
+				hd := v.(http.Header)
+				for h, vsAgainst := range hd {
+					vsCheck := res.Header.Values(h)
+					if len(vsCheck) != len(vsAgainst) {
+						t.Errorf("expected headers len %d, got %d", len(vsAgainst), len(vsCheck))
+					} else {
+						for i := range vsCheck {
+							if vsCheck[i] != vsAgainst[i] {
+								t.Errorf("expected header value '%s' at %d, got '%s'", vsAgainst[i], i, vsAgainst[i])
+							}
+						}
+					}
+				}
 			}
 		}
 	})
@@ -204,31 +216,34 @@ func TestDeclare(t *testing.T) {
 	}
 }
 
+var aco = &cors.AccessControlOptions{
+	AllowOrigin:      []string{"*"},
+	AllowMethods:     []string{"*"},
+	AllowHeaders:     []string{"*"},
+	ExposeHeaders:    []string{"*"},
+	MaxAge:           1000,
+	AllowCredentials: false,
+}
+
 func TestCORS(t *testing.T) {
 	r := Declare(
 		Default(),
+		DefaultCORS(aco),
+		PreflightCORS("/", aco),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
 		WithNotFound(nfHandler()),
-		DefaultCORS(&cors.AccessControlOptions{
-			AllowOrigin:      []string{"*"},
-			AllowMethods:     []string{"*"},
-			AllowHeaders:     []string{"*"},
-			ExposeHeaders:    []string{"*"},
-			MaxAge:           1000,
-			AllowCredentials: false,
-		}),
 	)
 	s := httptest.NewServer(r)
 
 	runEvalRequest(t, s, "/", reqGenHeaders(http.MethodGet, http.Header{"Origin": {"test-origin"}}), map[string]any{
 		"code":   http.StatusOK,
 		"body":   "ok",
-		"header": nil,
+		"header": http.Header{},
 	})
 	runEvalRequest(t, s, "/", reqGenHeaders(
-		http.MethodOptions, http.Header{"Origin": {"test-origin"}, "X-Header-1": {"test-value"}},
+		http.MethodOptions, http.Header{"Origin": {"test-origin"}, "Access-Control-Request-Headers": {"X-Header-1"}},
 	), map[string]any{
 		"code":   http.StatusNoContent,
-		"header": nil,
+		"header": http.Header{"Access-Control-Allow-Headers": {"X-Header-1"}},
 	})
 }

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/cloudretic/router/pkg/cors"
@@ -27,9 +28,26 @@ func WithNotFound(h http.Handler) ConfigFunc {
 	}
 }
 
+// Give a default set of CORS headers.
 func DefaultCORS(aco *cors.AccessControlOptions) ConfigFunc {
 	return func(rt Router) error {
 		rt.Attach(cors.CORSMiddleware(aco))
+		return nil
+	}
+}
+
+// Handle preflight requests on a given route expression.
+// This will respond to OPTIONS requests on the route with a 204 (No Content) and a set of headers
+// detailing the provided access control options.
+// Fails if the provided route expression is invalid (see Route documentation)
+func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
+	return func(rt Router) error {
+		r, h, err := cors.PreflightHandler(expr, aco)
+		fmt.Println(r.Hash())
+		if err != nil {
+			return err
+		}
+		rt.AddRoute(r, h)
 		return nil
 	}
 }
