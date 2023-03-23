@@ -150,7 +150,7 @@ func (route *partialRoute) Prefix() string {
 //
 // See interface Route.
 func (route *partialRoute) Hash() string {
-	return route.origExpr
+	return route.method + " " + route.origExpr
 }
 
 // Get the length of the route.

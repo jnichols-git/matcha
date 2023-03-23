@@ -18,7 +18,7 @@ func TestStringRouteNew(t *testing.T) {
 			t.Fatal(err)
 		}
 		// hash
-		if hash := rt.Hash(); hash != "/test" {
+		if hash := rt.Hash(); hash != "GET /test" {
 			t.Errorf("expected hash '/test', got %s", hash)
 		}
 		// length
@@ -76,7 +76,7 @@ func TestWildcardRouteNew(t *testing.T) {
 			t.Fatal(err)
 		}
 		// hash
-		if hash := rt.Hash(); hash != "/[param1]/[param2]/[param3]" {
+		if hash := rt.Hash(); hash != "GET /[param1]/[param2]/[param3]" {
 			t.Errorf("expected hash '/[param1]/[param2]/[param3]', got %s", hash)
 		}
 		// length
@@ -132,7 +132,7 @@ func TestRegexRouteNew(t *testing.T) {
 			t.Fatal(err)
 		}
 		// hash
-		if hash := rt.Hash(); hash != "/{[a-zA-Z]{4}}" {
+		if hash := rt.Hash(); hash != "GET /{[a-zA-Z]{4}}" {
 			t.Errorf("expected hash '/test', got %s", hash)
 		}
 		// length
@@ -197,7 +197,7 @@ func TestPartialRouteNew(t *testing.T) {
 			t.Fatal(err)
 		}
 		// hash
-		if hash := rt.Hash(); hash != "/partial/+" {
+		if hash := rt.Hash(); hash != "GET /partial/+" {
 			t.Errorf("expected hash '/partial/+', got %s", hash)
 		}
 		// length (partial routes do *not* include the extension in their length!)
