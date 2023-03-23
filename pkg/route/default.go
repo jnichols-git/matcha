@@ -189,7 +189,7 @@ func (route *defaultRoute) Prefix() string {
 //
 // See interface Route.
 func (route *defaultRoute) Hash() string {
-	return route.origExpr
+	return route.method + " " + route.origExpr
 }
 
 // Get the length of the route.
