@@ -23,7 +23,6 @@ type CORSRequestHeaders struct {
 	Origin         string
 	RequestMethod  string
 	RequestHeaders []string
-	Cookie         string
 }
 
 // Get CORS request headers from an HTTP request.

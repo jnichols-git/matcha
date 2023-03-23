@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/cloudretic/router/pkg/cors"
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/route"
 )
@@ -26,6 +27,14 @@ func WithNotFound(h http.Handler) ConfigFunc {
 	}
 }
 
+func DefaultCORS(aco *cors.AccessControlOptions) ConfigFunc {
+	return func(rt Router) error {
+		rt.Attach(cors.CORSMiddleware(aco))
+		return nil
+	}
+}
+
+// Attach generic middleware to the Router
 func WithMiddleware(mw middleware.Middleware) ConfigFunc {
 	return func(rt Router) error {
 		rt.Attach(mw)

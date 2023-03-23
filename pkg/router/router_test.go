@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/cloudretic/router/pkg/cors"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -77,9 +79,18 @@ func reqGen(method string) func(url, path string) *http.Request {
 	}
 }
 
+func reqGenHeaders(method string, headers http.Header) func(url, path string) *http.Request {
+	return func(url, path string) *http.Request {
+		req, _ := http.NewRequest(method, url+path, nil)
+		req.Header = headers
+		return req
+	}
+}
+
 func runEvalRequest(t *testing.T,
 	s *httptest.Server, path string, genReqTo func(string, string) *http.Request, expect map[string]any) {
-	t.Run(path, func(t *testing.T) {
+	name := strings.ReplaceAll(path, "/", "-")[1:]
+	t.Run(name, func(t *testing.T) {
 		req := genReqTo(s.URL, path)
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -104,6 +115,8 @@ func runEvalRequest(t *testing.T,
 				if string(body) != v.(string) {
 					t.Errorf("expected body %s, got %s", v.(string), string(body))
 				}
+			case "header":
+				fmt.Println(res.Header)
 			}
 		}
 	})
@@ -189,4 +202,33 @@ func TestDeclare(t *testing.T) {
 	if err == nil {
 		t.Error("expected declare to fail and panic")
 	}
+}
+
+func TestCORS(t *testing.T) {
+	r := Declare(
+		Default(),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
+		WithNotFound(nfHandler()),
+		DefaultCORS(&cors.AccessControlOptions{
+			AllowOrigin:      []string{"*"},
+			AllowMethods:     []string{"*"},
+			AllowHeaders:     []string{"*"},
+			ExposeHeaders:    []string{"*"},
+			MaxAge:           1000,
+			AllowCredentials: false,
+		}),
+	)
+	s := httptest.NewServer(r)
+
+	runEvalRequest(t, s, "/", reqGenHeaders(http.MethodGet, http.Header{"Origin": {"test-origin"}}), map[string]any{
+		"code":   http.StatusOK,
+		"body":   "ok",
+		"header": nil,
+	})
+	runEvalRequest(t, s, "/", reqGenHeaders(
+		http.MethodOptions, http.Header{"Origin": {"test-origin"}, "X-Header-1": {"test-value"}},
+	), map[string]any{
+		"code":   http.StatusNoContent,
+		"header": nil,
+	})
 }

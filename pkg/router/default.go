@@ -12,6 +12,7 @@ type defaultRouter struct {
 	mws      []middleware.Middleware
 	routes   map[string][]route.Route
 	handlers map[string]http.Handler
+	options  http.Handler
 	notfound http.Handler
 }
 
@@ -20,6 +21,7 @@ func Default() *defaultRouter {
 		mws:      make([]middleware.Middleware, 0),
 		routes:   make(map[string][]route.Route),
 		handlers: make(map[string]http.Handler),
+		options:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }),
 		notfound: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 	}
 }
@@ -71,6 +73,10 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
+	}
+	if req.Method == http.MethodOptions {
+		rt.options.ServeHTTP(w, req)
+		return
 	}
 	rt.notfound.ServeHTTP(w, req)
 	return
