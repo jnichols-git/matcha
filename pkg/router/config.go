@@ -42,12 +42,19 @@ func DefaultCORS(aco *cors.AccessControlOptions) ConfigFunc {
 // Fails if the provided route expression is invalid (see Route documentation)
 func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 	return func(rt Router) error {
-		r, h, err := cors.PreflightHandler(expr, aco)
-		fmt.Println(r.Hash())
+		r, err := route.New(http.MethodOptions, expr)
 		if err != nil {
 			return err
 		}
-		rt.AddRoute(r, h)
+		f := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("hello")
+			cors.SetCORSResponseHeaders(w, r, aco)
+			w.WriteHeader(http.StatusNoContent)
+		}
+		if err != nil {
+			return err
+		}
+		rt.AddRoute(r, http.HandlerFunc(f))
 		return nil
 	}
 }
