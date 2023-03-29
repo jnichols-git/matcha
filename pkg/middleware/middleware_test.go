@@ -15,7 +15,6 @@ func TestExpectQueryParam(t *testing.T) {
 		if m(w, r) != r {
 			t.Error("ExpectQueryParam did not recognize foo was provided")
 		}
-		fmt.Println(w.Body)
 	})
 
 	t.Run("foo=", func(t *testing.T) {
@@ -25,7 +24,6 @@ func TestExpectQueryParam(t *testing.T) {
 		if m(w, r) != r {
 			t.Error("ExpectQueryParam did not recognize foo was provided")
 		}
-		fmt.Println(w.Body)
 	})
 
 	t.Run("foo without equals sign", func(t *testing.T) {
@@ -35,7 +33,6 @@ func TestExpectQueryParam(t *testing.T) {
 		if m(w, r) != r {
 			t.Error("ExpectQueryParam should not have recognized foo was provided")
 		}
-		fmt.Println(w.Body)
 	})
 
 	t.Run("foo absent", func(t *testing.T) {
@@ -45,6 +42,5 @@ func TestExpectQueryParam(t *testing.T) {
 		if m(w, r) != nil {
 			t.Error("ExpectQueryParam should not have recognized foo was provided")
 		}
-		fmt.Println(w.Body)
 	})
 }
