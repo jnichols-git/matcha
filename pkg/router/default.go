@@ -49,29 +49,37 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 // Default Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
 // path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	for _, mw := range rt.mws {
-		if req = mw(w, req); req == nil {
-			return
-		}
+	req = executeMiddleware(rt.mws, w, req)
+	if req == nil {
+		return
 	}
 	reqPrefix, _ := path.Next(req.URL.Path, 0)
-	if routes, ok := rt.routes[reqPrefix]; ok {
-		for _, r := range routes {
-			reqWithContext := r.MatchAndUpdateContext(req)
-			if reqWithContext != nil {
-				rt.handlers[r.Hash()].ServeHTTP(w, reqWithContext)
+	var routes []route.Route
+	if rts, ok := rt.routes[reqPrefix]; ok {
+		routes = rts
+	} else if rts, ok := rt.routes["*"]; ok {
+		routes = rts
+	}
+	for _, r := range routes {
+		reqWithCtx := r.MatchAndUpdateContext(req)
+		if reqWithCtx != nil {
+			reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
+			if reqWithCtx == nil {
 				return
 			}
-		}
-	} else if routes, ok := rt.routes["*"]; ok {
-		for _, r := range routes {
-			reqWithContext := r.MatchAndUpdateContext(req)
-			if reqWithContext != nil {
-				rt.handlers[r.Hash()].ServeHTTP(w, reqWithContext)
-				return
-			}
+			rt.handlers[r.Hash()].ServeHTTP(w, reqWithCtx)
+			return
 		}
 	}
 	rt.notfound.ServeHTTP(w, req)
 	return
+}
+
+func executeMiddleware(mw []middleware.Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
+	for _, m := range mw {
+		if req = m(w, req); req == nil {
+			return nil
+		}
+	}
+	return req
 }

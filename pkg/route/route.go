@@ -2,6 +2,8 @@ package route
 
 import (
 	"net/http"
+
+	"github.com/cloudretic/router/pkg/middleware"
 )
 
 type Route interface {
@@ -25,6 +27,12 @@ type Route interface {
 	//
 	// Route implementations must return nil if a request does not match the Route, but may otherwise define any return behavior.
 	MatchAndUpdateContext(*http.Request) *http.Request
+	// Attach middleware to the route.
+	//
+	// Middleware cannot be removed from a router once it is added.
+	Attach(mw middleware.Middleware)
+	// Get the middleware attached to the route.
+	Middleware() []middleware.Middleware
 }
 
 // Create a new Route based on a string expression.
