@@ -196,7 +196,7 @@ func TestConcurrent(t *testing.T) {
 			r2 := reqGen(http.MethodGet)(s.URL, "/12345")
 			r3 := reqGen(http.MethodGet)(s.URL, "/longid")
 			r4 := reqGen(http.MethodGet)(s.URL, "/id01")
-			//r5 := reqGen(http.MethodGet)(s.URL, "/static/file/some/file.txt")
+			r5 := reqGen(http.MethodGet)(s.URL, "/static/file/some/file.txt")
 			res1, err := http.DefaultClient.Do(r1)
 			if err != nil {
 				t.Error(err)
@@ -204,7 +204,7 @@ func TestConcurrent(t *testing.T) {
 			res2, _ := http.DefaultClient.Do(r2)
 			res3, _ := http.DefaultClient.Do(r3)
 			res4, _ := http.DefaultClient.Do(r4)
-			//res5, _ := http.DefaultClient.Do(r5)
+			res5, _ := http.DefaultClient.Do(r5)
 			if body := parseBody(res1); body != "root" {
 				t.Error("root", body)
 			}
@@ -217,11 +217,9 @@ func TestConcurrent(t *testing.T) {
 			if body := parseBody(res4); body != "id01" {
 				t.Error("id01", body)
 			}
-			/*
-				if body := parseBody(res5); body != "/some/file.txt" {
-					t.Error("/some/file.txt", body)
-				}
-			*/
+			if body := parseBody(res5); body != "/some/file.txt" {
+				t.Error("/some/file.txt", body)
+			}
 			wg.Done()
 		}()
 	}
