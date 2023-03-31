@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cloudretic/router/pkg/rctx"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -34,7 +35,7 @@ func nfHandler() http.HandlerFunc {
 // This shouldn't happen unless something about router params is failing.
 func rpHandler(rp string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		p := route.GetParam(r.Context(), rp)
+		p := rctx.GetParam(r.Context(), rp)
 		if p == "" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("router param %s not found", rp)))
@@ -184,7 +185,7 @@ func TestConcurrent(t *testing.T) {
 	)
 	s := httptest.NewServer(r)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 60; i++ {
+	for i := 0; i < 100; i++ {
 		parseBody := func(res *http.Response) string {
 			raw, _ := io.ReadAll(res.Body)
 			return string(raw)

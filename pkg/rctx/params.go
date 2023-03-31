@@ -1,6 +1,8 @@
 package rctx
 
-import "errors"
+import (
+	"errors"
+)
 
 type paramKey string
 
@@ -18,15 +20,19 @@ type routeParams struct {
 // PARAMETERS
 
 func newParams(size int) *routeParams {
-	return &routeParams{
-		rps:  make([]*routeParam, 0, size),
+	rps := &routeParams{
+		rps:  make([]*routeParam, size),
 		cap:  size,
 		head: 0,
 	}
+	for i := 0; i < size; i++ {
+		rps.rps[i] = &routeParam{}
+	}
+	return rps
 }
 
 func (rps *routeParams) get(key paramKey) string {
-	for i := rps.head; i > 0; i++ {
+	for i := rps.head; i > 0; i-- {
 		kv := rps.rps[i-1]
 		if kv.key == key {
 			return kv.value
@@ -39,7 +45,8 @@ func (rps *routeParams) set(key paramKey, value string) error {
 	if rps.head >= rps.cap {
 		return errors.New("placeholder error; over capacity")
 	}
-	rps.rps[rps.head] = &routeParam{key, value}
+	rps.rps[rps.head].key = key
+	rps.rps[rps.head].value = value
 	rps.head++
 	return nil
 }

@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	DefaultMaxParams = int(10)
+)
+
 type Context struct {
 	parent context.Context
 	params *routeParams
@@ -39,16 +43,25 @@ func ResetRequestContext(req *http.Request) error {
 
 // GetParam gets a parameter by its key string.
 // This automatically converts key to its underlying context key type.
-func GetParam(key string, ctx *Context) string {
-	return ctx.params.get(paramKey(key))
+func GetParam(ctx context.Context, key string) string {
+	if rctx, ok := ctx.(*Context); ok {
+		return rctx.params.get(paramKey(key))
+	}
+	if val, ok := ctx.Value(paramKey(key)).(string); ok && val != "" {
+		return val
+	}
+	return ""
 }
 
 // SetParam sets a parameter with a key string.
 // This automatically converts key to its underlying context key type.
 // Context params have a max value determined at creation, and this returns an error if the user attempts to exceed
 // the maximum number of params.
-func SetParam(key, value string, ctx *Context) error {
-	return ctx.params.set(paramKey(key), value)
+func SetParam(ctx context.Context, key, value string) error {
+	if rctx, ok := ctx.(*Context); ok {
+		return rctx.params.set(paramKey(key), value)
+	}
+	return errors.New("placeholder error; cannot SetParam on non-rctx Context")
 }
 
 // CONTEXT IMPLEMENTATION

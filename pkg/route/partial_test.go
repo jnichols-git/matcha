@@ -14,8 +14,6 @@ func TestPartialPart(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rmc := newRMC()
-	rmc.Allocate("part")
 	// Eq
 	pp1, _ := parse_partialEndPart(`/[part]{a-zA-Z+}+`)
 	if !pp0.Eq(pp1) {
