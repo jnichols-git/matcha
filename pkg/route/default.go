@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 )
 
@@ -140,6 +141,7 @@ type defaultRoute struct {
 	method   string
 	parts    []Part
 	ctx      *routeMatchContext
+	middleware []middleware.Middleware
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -151,6 +153,7 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 		method:   method,
 		parts:    make([]Part, 0),
 		ctx:      newRMC(),
+		middleware: make([]middleware.Middleware, 0),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -235,4 +238,12 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 		}
 	}
 	return req.WithContext(route.ctx)
+}
+
+func (route *defaultRoute) Attach(mw middleware.Middleware) {
+	route.middleware = append(route.middleware, mw)
+}
+
+func (route *defaultRoute) Middleware() []middleware.Middleware {
+	return route.middleware
 }

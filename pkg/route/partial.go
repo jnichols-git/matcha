@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 )
 
@@ -91,6 +92,7 @@ type partialRoute struct {
 	method   string
 	parts    []Part
 	ctx      *routeMatchContext
+	middleware []middleware.Middleware
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -202,4 +204,12 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	}
 	// If there were no empty tokens to begin with, run the last rou
 	return req.WithContext(route.ctx)
+}
+
+func (route *partialRoute) Attach(m middleware.Middleware) {
+	route.middleware = append(route.middleware, m)
+}
+
+func (route *partialRoute) Middleware() []middleware.Middleware {
+	return route.middleware
 }
