@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
+	"github.com/cloudretic/router/pkg/rctx"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -54,6 +55,7 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	reqPrefix, _ := path.Next(req.URL.Path, 0)
 	if routes, ok := rt.routes[reqPrefix]; ok {
 		for _, r := range routes {
