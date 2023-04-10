@@ -148,6 +148,11 @@ func TestImplementContext(t *testing.T) {
 	// Test nil parent
 	req = &http.Request{}
 	req = PrepareRequestContext(req, DefaultMaxParams)
+	if ctx, ok := req.Context().(*Context); !ok {
+		t.Fatal("need *rctx.Context")
+	} else {
+		ctx.parent = nil
+	}
 	if ctxdl, _ := req.Context().Deadline(); !ctxdl.IsZero() {
 		t.Errorf("expected zero deadline, got %v", ctxdl)
 	}
@@ -156,6 +161,9 @@ func TestImplementContext(t *testing.T) {
 	}
 	if v := req.Context().Value("testKey"); v != nil {
 		t.Errorf("expected nil, got %s", v)
+	}
+	if done := req.Context().Done(); done != nil {
+		t.Errorf("expected nil")
 	}
 }
 

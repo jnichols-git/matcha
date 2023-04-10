@@ -20,6 +20,9 @@ func TestPartialPart(t *testing.T) {
 		t.Error("pp0 should Eq pp1")
 	}
 	Part(pp1).(paramPart).SetParameterName("otherpart")
+	if pp1.ParameterName() != "otherpart" {
+		t.Errorf("expected otherpart, got %s", pp1.ParameterName())
+	}
 	if pp0.Eq(pp1) {
 		t.Error("pp0 should not Eq pp1 when param is different")
 	}
