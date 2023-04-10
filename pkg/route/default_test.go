@@ -1,6 +1,11 @@
 package route
 
-import "testing"
+import (
+	"net/http"
+	"testing"
+
+	"github.com/cloudretic/router/pkg/rctx"
+)
 
 func TestStringPart(t *testing.T) {
 	_, err := build_stringPart("/is-this-allowed?")
@@ -39,16 +44,17 @@ func TestWildcardPart(t *testing.T) {
 	if err != nil {
 		t.Errorf("wildcard parts should never return an error on build")
 	}
-	rmc := newRMC()
-	rmc.Allocate("wc")
+	req, _ := http.NewRequest(http.MethodGet, "mock", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	rmc := req.Context()
 	if ok := tp0.Match(rmc, "/iahs"); !ok {
 		t.Errorf("wildcard parts should match any value")
-	} else if param := GetParam(rmc, "wc"); param != "iahs" {
+	} else if param := rctx.GetParam(rmc, "wc"); param != "iahs" {
 		t.Errorf("expected wildcard to store param 'iahs', got '%s'", param)
 	}
 	if ok := tp0.Match(rmc, "/"); !ok {
 		t.Errorf("wildcard parts should match the root")
-	} else if param := GetParam(rmc, "wc"); param != "" {
+	} else if param := rctx.GetParam(rmc, "wc"); param != "" {
 		t.Errorf("expected wildcard to store param '', got '%s'", param)
 	}
 	tp1, _ := build_wildcardPart("wc")
@@ -103,14 +109,15 @@ func TestRegexPart(t *testing.T) {
 	if rp1.Eq(sp1) {
 		t.Errorf("pr1 should not Eq string part")
 	}
-	rmc := newRMC()
-	rmc.Allocate("param")
+	req, _ := http.NewRequest(http.MethodGet, "mock", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	rmc := req.Context()
 	rp2.Match(rmc, "/word")
-	if GetParam(rmc, "param") != "" {
+	if rctx.GetParam(rmc, "param") != "" {
 		t.Error("param should not be set with empty-param regexPart")
 	}
 	rp3.Match(rmc, "/word")
-	if GetParam(rmc, "param") != "word" {
-		t.Errorf("expected param 'word', got '%s'", GetParam(rmc, "param"))
+	if rctx.GetParam(rmc, "param") != "word" {
+		t.Errorf("expected param 'word', got '%s'", rctx.GetParam(rmc, "param"))
 	}
 }

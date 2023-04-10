@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
+	"github.com/cloudretic/router/pkg/rctx"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -33,7 +35,7 @@ func nfHandler() http.HandlerFunc {
 // This shouldn't happen unless something about router params is failing.
 func rpHandler(rp string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		p := route.GetParam(r.Context(), rp)
+		p := rctx.GetParam(r.Context(), rp)
 		if p == "" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("router param %s not found", rp)))
@@ -171,6 +173,57 @@ func TestBasicRoutes(t *testing.T) {
 		"code": http.StatusOK,
 		"body": "mwval",
 	})
+}
+
+func TestConcurrent(t *testing.T) {
+	r := Declare(Default(),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[a-zA-Z]+}`), rpHandler("id")),
+		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+	)
+	s := httptest.NewServer(r)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
+		parseBody := func(res *http.Response) string {
+			raw, _ := io.ReadAll(res.Body)
+			return string(raw)
+		}
+		wg.Add(1)
+		go func() {
+			r1 := reqGen(http.MethodGet)(s.URL, "/")
+			r2 := reqGen(http.MethodGet)(s.URL, "/12345")
+			r3 := reqGen(http.MethodGet)(s.URL, "/longid")
+			r4 := reqGen(http.MethodGet)(s.URL, "/id01")
+			r5 := reqGen(http.MethodGet)(s.URL, "/static/file/some/file.txt")
+			res1, err := http.DefaultClient.Do(r1)
+			if err != nil {
+				t.Error(err)
+			}
+			res2, _ := http.DefaultClient.Do(r2)
+			res3, _ := http.DefaultClient.Do(r3)
+			res4, _ := http.DefaultClient.Do(r4)
+			res5, _ := http.DefaultClient.Do(r5)
+			if body := parseBody(res1); body != "root" {
+				t.Error("root", body)
+			}
+			if body := parseBody(res2); body != "12345" {
+				t.Error("12345", body)
+			}
+			if body := parseBody(res3); body != "longid" {
+				t.Error("longid", body)
+			}
+			if body := parseBody(res4); body != "id01" {
+				t.Error("id01", body)
+			}
+			if body := parseBody(res5); body != "/some/file.txt" {
+				t.Error("/some/file.txt", body)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
 
 func TestDeclare(t *testing.T) {
