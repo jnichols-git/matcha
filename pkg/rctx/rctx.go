@@ -33,7 +33,7 @@ func ResetRequestContext(req *http.Request) error {
 	ctx := req.Context()
 	rctx, correctType := ctx.(*Context)
 	if !correctType {
-		return errors.New("placeholder error; request must have *rctx.Context when resetting")
+		return errors.New("request must have *rctx.Context when resetting")
 	}
 	rctx.params.head = 0
 	return nil
@@ -64,7 +64,7 @@ func SetParam(ctx context.Context, key, value string) error {
 	if rctx, ok := ctx.(*Context); ok {
 		return rctx.params.set(paramKey(key), value)
 	}
-	return errors.New("placeholder error; cannot SetParam on non-rctx Context")
+	return errors.New("cannot SetParam on non-rctx Context")
 }
 
 // CONTEXT IMPLEMENTATION
