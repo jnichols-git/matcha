@@ -43,11 +43,14 @@ func ResetRequestContext(req *http.Request) error {
 
 // GetParam gets a parameter by its key string.
 // This automatically converts key to its underlying context key type.
+// GetParam is unique in that it's the only native function that doesn't fail on non-*rctx.Context types;
+// it's possible that the context type changes between the route match and handling, so for other contexts
+// the key is passed to ctx.Value(paramKey(key)).
 func GetParam(ctx context.Context, key string) string {
 	if rctx, ok := ctx.(*Context); ok {
 		return rctx.params.get(paramKey(key))
 	}
-	if val, ok := ctx.Value(paramKey(key)).(string); ok && val != "" {
+	if val, ok := ctx.Value(paramKey(key)).(string); ok {
 		return val
 	}
 	return ""
@@ -106,7 +109,9 @@ func (ctx *Context) Err() error {
 func (ctx *Context) Value(key any) any {
 	if pkey, ok := key.(paramKey); ok {
 		return ctx.params.get(pkey)
-	} else {
+	} else if ctx.parent != nil {
 		return ctx.parent.Value(key)
+	} else {
+		return nil
 	}
 }
