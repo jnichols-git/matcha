@@ -29,7 +29,7 @@ func WithNotFound(h http.Handler) ConfigFunc {
 }
 
 // Give a default set of CORS headers.
-func DefaultCORS(aco *cors.AccessControlOptions) ConfigFunc {
+func DefaultCORSHeaders(aco *cors.AccessControlOptions) ConfigFunc {
 	return func(rt Router) error {
 		rt.Attach(cors.CORSMiddleware(aco))
 		return nil

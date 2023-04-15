@@ -3,9 +3,11 @@ package route
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 
+	"github.com/cloudretic/router/pkg/cors"
 	"github.com/cloudretic/router/pkg/rctx"
 )
 
@@ -358,5 +360,35 @@ func TestInvalidConfig(t *testing.T) {
 	rt, err := New(http.MethodGet, "/static/path", invalidConfigFunc)
 	if err == nil || rt != nil {
 		t.Errorf("expected New to fail if ConfigFunc returns error")
+	}
+}
+
+func TestCORS(t *testing.T) {
+	var aco = &cors.AccessControlOptions{
+		AllowOrigin:      []string{"*"},
+		AllowMethods:     []string{"*"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		MaxAge:           1000,
+		AllowCredentials: false,
+	}
+	rt, err := New(http.MethodGet, "/static/path", CORSHeaders(aco))
+	if err != nil || len(rt.Middleware()) != 1 {
+		t.Fatal(err)
+	}
+	u, _ := url.Parse("http://test.com/static/path")
+	req := &http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Header: http.Header{
+			"Origin": {"origin.com"},
+		},
+	}
+
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	req = rt.MatchAndUpdateContext(req)
+	headers := req.Header
+	if headers.Get("Origin") != "origin.com" {
+		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
 	}
 }

@@ -283,7 +283,7 @@ var aco = &cors.AccessControlOptions{
 func TestCORS(t *testing.T) {
 	r := Declare(
 		Default(),
-		DefaultCORS(aco),
+		DefaultCORSHeaders(aco),
 		PreflightCORS("/", aco),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
 		WithNotFound(nfHandler()),

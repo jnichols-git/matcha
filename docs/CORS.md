@@ -22,9 +22,13 @@ All of these can be empty, a list, or `*`, which indicates that any value is all
 
 ## Setting Up CORS
 
-`Router` has two configuration functions that manipulate CORS headers: `DefaultCORS`, which acts as *middleware* to set CORS headers globally on all responses, and `PreflightCORS`, which acts as a *handler* on the given route to respond to `OPTIONS` request with a full set of CORS headers. `PreflightCORS` will override any defaults *for preflight requests only*; currently, CORS headers on simple requests need to be set manually in the handler to override defaults.
+There are three ways to set CORS headers on responses.
 
-To manually manipulate CORS headers, `package cors` provides `SetCORSResponseHeaders` that will set the headers based on an `*AccessControlOptions`.
+- `Router` can set the default headers for all routes using the `DefaultCORSHeaders` configuration function.
+- `Route` can set the headers for itself only using the `CORSHeaders` configuration function.
+- `PreflightCORS` can be used to define an OPTIONS route that returns the given access control headers. *`router` does not currently automatically generate these routes.*
+
+To manually manipulate CORS headers, `package cors` provides `SetCORSResponseHeaders` that will set the headers based on an `*AccessControlOptions` object. This can be used in the event that the above options don't fit your use case. We'd encourage you to submit an issue on GitHub if your use case isn't immediately supported.
 
 ## Example
 
