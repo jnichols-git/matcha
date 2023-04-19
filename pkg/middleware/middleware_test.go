@@ -46,60 +46,75 @@ func TestExpectQueryParam(t *testing.T) {
 }
 
 func TestLogRequests(t *testing.T) {
-	t.Run("log requests", func(t *testing.T) {
+	t.Run("log request with no origin", func(t *testing.T) {
 		var builder strings.Builder
 		mw := LogRequests(&builder)
-		r := mw(nil, httptest.NewRequest(http.MethodGet, "https://example.com/", nil))
-		if r == nil {
-			t.Fatal("request was nil, should be defined")
+		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+		req = mw(nil, req)
+		if req == nil {
+			t.Fatal("request was nil, should be unchanged")
 		}
 
-		result := builder.String()
-		if result != "GET https://example.com/\n" {
+		log, err := ParseLog(builder.String())
+		if err != nil {
+			t.Fatalf("error parsing log entry: %v", err)
+		}
+		if log.Origin != "" {
 			t.Fatalf(
-				"incorrect log for request %s %s:\n  got %v",
-				r.Method,
-				r.URL.String(),
-				result,
+				"log includes origin where there should be none, got %s",
+				log.Origin,
+			)
+		}
+		if log.Method != http.MethodGet {
+			t.Fatalf(
+				"log should be for a GET request, got method %s",
+				log.Method,
+			)
+		}
+		logURL := log.URL.String()
+		reqURL := req.URL.String()
+		if logURL != reqURL {
+			t.Fatalf(
+				"log should have same URL as request; expected %s but got %s",
+				reqURL,
+				logURL,
 			)
 		}
 	})
 
-	t.Run("log requests if", func(t *testing.T) {
+	t.Run("log request with an origin", func(t *testing.T) {
 		var builder strings.Builder
-		methodIsGet := func(r *http.Request) bool {
-			return r.Method == http.MethodGet
-		}
-		mw := LogRequestsIf(methodIsGet, &builder)
-
-		r := mw(nil, httptest.NewRequest(http.MethodGet, "https://example.com/", nil))
-		if r == nil {
-			t.Fatal("request was nil, should be defined")
+		mw := LogRequests(&builder)
+		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+		req.Header.Set("Origin", "origin.com")
+		req = mw(nil, req)
+		if req == nil {
+			t.Fatal("request was nil, should be unchanged")
 		}
 
-		result := builder.String()
-		if result != "GET https://example.com/\n" {
+		log, err := ParseLog(builder.String())
+		if err != nil {
+			t.Fatalf("error parsing log entry: %v", err)
+		}
+		if log.Origin != "origin.com" {
 			t.Fatalf(
-				"incorrect log for request %s %s:\n  got %v",
-				r.Method,
-				r.URL.String(),
-				result,
+				"log should have an origin of origin.com, got %s",
+				log.Origin,
 			)
 		}
-
-		builder.Reset()
-		r = mw(nil, httptest.NewRequest(http.MethodPost, "https://example.com/", nil))
-		if r == nil {
-			t.Fatal("request was nil, should be defined")
-		}
-
-		result = builder.String()
-		if result != "" {
+		if log.Method != http.MethodGet {
 			t.Fatalf(
-				"incorrect log for request %s %s:\n  got %v",
-				r.Method,
-				r.URL.String(),
-				result,
+				"log should be for a GET request, got method %s",
+				log.Method,
+			)
+		}
+		logURL := log.URL.String()
+		reqURL := req.URL.String()
+		if logURL != reqURL {
+			t.Fatalf(
+				"log should have same URL as request; expected %s but got %s",
+				reqURL,
+				logURL,
 			)
 		}
 	})
