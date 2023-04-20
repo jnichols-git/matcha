@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/cloudretic/router/pkg/rctx"
 )
 
 func invalidConfigFunc(r Route) error {
@@ -92,16 +94,17 @@ func TestWildcardRouteNew(t *testing.T) {
 			t.Errorf("expected method '%s', got '%s'", http.MethodGet, method)
 		}
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/test1/test2/test3", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		}
-		if p1 := GetParam(req.Context(), "param1"); p1 == "" || p1 != "test1" {
+		if p1 := rctx.GetParam(req.Context(), "param1"); p1 == "" || p1 != "test1" {
 			t.Errorf("expected route param param1=test1; got %s", p1)
 		}
-		if p2 := GetParam(req.Context(), "param2"); p2 == "" || p2 != "test2" {
+		if p2 := rctx.GetParam(req.Context(), "param2"); p2 == "" || p2 != "test2" {
 			t.Errorf("expected route param param2=test2; got %s", p2)
 		}
-		if p3 := GetParam(req.Context(), "param3"); p3 == "" || p3 != "test3" {
+		if p3 := rctx.GetParam(req.Context(), "param3"); p3 == "" || p3 != "test3" {
 			t.Errorf("expected route param param3=test3; got %s", p3)
 		}
 	})
@@ -110,16 +113,17 @@ func TestWildcardRouteDeclare(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		rt := Declare(http.MethodGet, "/[param1]/[param2]/[param3]")
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/test1/test2/test3", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		}
-		if p1 := GetParam(req.Context(), "param1"); p1 == "" || p1 != "test1" {
+		if p1 := rctx.GetParam(req.Context(), "param1"); p1 == "" || p1 != "test1" {
 			t.Errorf("expected route param param1=test1; got %s", p1)
 		}
-		if p2 := GetParam(req.Context(), "param2"); p2 == "" || p2 != "test2" {
+		if p2 := rctx.GetParam(req.Context(), "param2"); p2 == "" || p2 != "test2" {
 			t.Errorf("expected route param param2=test2; got %s", p2)
 		}
-		if p3 := GetParam(req.Context(), "param3"); p3 == "" || p3 != "test3" {
+		if p3 := rctx.GetParam(req.Context(), "param3"); p3 == "" || p3 != "test3" {
 			t.Errorf("expected route param param3=test3; got %s", p3)
 		}
 	})
@@ -227,10 +231,11 @@ func TestPartialRouteNew(t *testing.T) {
 			t.Fatal(err)
 		}
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/file/README.md", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		} else {
-			param := GetParam(req.Context(), "filename")
+			param := rctx.GetParam(req.Context(), "filename")
 			if param == "" {
 				t.Errorf("expected a filename param")
 			} else {
@@ -240,10 +245,11 @@ func TestPartialRouteNew(t *testing.T) {
 			}
 		}
 		req, _ = http.NewRequest(http.MethodGet, "http://url.com/file/complex/path/file.txt", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		} else {
-			param := GetParam(req.Context(), "filename")
+			param := rctx.GetParam(req.Context(), "filename")
 			if param == "" {
 				t.Errorf("expected a filename param")
 			} else {
@@ -308,10 +314,11 @@ func TestPartialRouteDeclare(t *testing.T) {
 	t.Run("valid-filename", func(t *testing.T) {
 		rt := Declare(http.MethodGet, `/file/[filename]{\w+(?:\.\w+)?}+`)
 		req, _ := http.NewRequest(http.MethodGet, "http://url.com/file/README.md", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		} else {
-			param := GetParam(req.Context(), "filename")
+			param := rctx.GetParam(req.Context(), "filename")
 			if param == "" {
 				t.Errorf("expected a filename param")
 			} else {
@@ -321,10 +328,11 @@ func TestPartialRouteDeclare(t *testing.T) {
 			}
 		}
 		req, _ = http.NewRequest(http.MethodGet, "http://url.com/file/complex/path/file.txt", nil)
+		req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 		if req = rt.MatchAndUpdateContext(req); req == nil {
 			t.Errorf("expected route to match")
 		} else {
-			param := GetParam(req.Context(), "filename")
+			param := rctx.GetParam(req.Context(), "filename")
 			if param == "" {
 				t.Errorf("Expected a filename param")
 			} else {

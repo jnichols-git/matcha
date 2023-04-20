@@ -1,12 +1,14 @@
 package route
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
 	"regexp"
 
 	"github.com/cloudretic/router/pkg/path"
+	"github.com/cloudretic/router/pkg/rctx"
 )
 
 //=====PARTS=====
@@ -30,7 +32,7 @@ func build_stringPart(val string) (*stringPart, error) {
 }
 
 // stringParts match a literal token exactly.
-func (part *stringPart) Match(ctx *routeMatchContext, token string) bool {
+func (part *stringPart) Match(ctx context.Context, token string) bool {
 	if part.val == token {
 		return true
 	} else {
@@ -61,10 +63,11 @@ func build_wildcardPart(param string) (*wildcardPart, error) {
 }
 
 // wildcardParts match any value.
-func (part *wildcardPart) Match(ctx *routeMatchContext, token string) bool {
+func (part *wildcardPart) Match(ctx context.Context, token string) bool {
 	token = token[1:]
 	if ctx != nil && part.param != "" {
-		setParam(ctx, part.param, token)
+		rctx.SetParam(ctx, part.param, token)
+		// setParam(ctx, part.param, token)
 	}
 	return true
 }
@@ -101,7 +104,7 @@ func build_regexPart(param, expr string) (*regexPart, error) {
 }
 
 // regexParts match any token that matches the regex value.
-func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
+func (part *regexPart) Match(ctx context.Context, token string) bool {
 	token = token[1:]
 	// Match against regex
 	matched := part.expr.FindString(token)
@@ -111,7 +114,7 @@ func (part *regexPart) Match(ctx *routeMatchContext, token string) bool {
 	// If a parameter is set, act as a wildcard param.
 	if ctx != nil && part.param != "" {
 		// If a token matched, store the matched value as a route Param
-		setParam(ctx, part.param, token)
+		rctx.SetParam(ctx, part.param, token)
 	}
 	return true
 }
@@ -138,7 +141,6 @@ type defaultRoute struct {
 	origExpr string
 	method   string
 	parts    []Part
-	ctx      *routeMatchContext
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -149,7 +151,6 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 		origExpr: "",
 		method:   method,
 		parts:    make([]Part, 0),
-		ctx:      newRMC(),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -158,12 +159,6 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 		part, err := parse(token)
 		if err != nil {
 			return nil, err
-		}
-		if pp, ok := part.(paramPart); ok {
-			pn := pp.ParameterName()
-			if pn != "" {
-				route.ctx.Allocate(pn)
-			}
 		}
 		route.parts = append(route.parts, part)
 		if next == -1 {
@@ -214,15 +209,17 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	if req.Method != route.method {
 		return nil
 	}
-	route.ctx.ResetOnto(req.Context())
+	// route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path
+	rctx.ResetRequestContext(req)
+
 	var token string
 	var partIdx int
 	for next := 0; next < len(expr); {
 		part := route.parts[partIdx]
 		token, next = path.Next(expr, next)
-		if ok := part.Match(route.ctx, token); !ok {
+		if ok := part.Match(req.Context(), token); !ok {
 			return nil
 		}
 		partIdx++
@@ -230,5 +227,6 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			break
 		}
 	}
-	return req.WithContext(route.ctx)
+	//return req.WithContext(route.ctx)
+	return req
 }

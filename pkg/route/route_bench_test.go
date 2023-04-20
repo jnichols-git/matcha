@@ -3,6 +3,8 @@ package route
 import (
 	"net/http"
 	"testing"
+
+	"github.com/cloudretic/router/pkg/rctx"
 )
 
 func use(any) {}
@@ -16,6 +18,7 @@ func use(any) {}
 func BenchmarkStringRoute(b *testing.B) {
 	rt := Declare(http.MethodGet, "/a/b/c/d/e/f/g/h")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
 		out = rt.MatchAndUpdateContext(req)
@@ -29,6 +32,7 @@ func BenchmarkStringRoute(b *testing.B) {
 func BenchmarkWildcardRoute(b *testing.B) {
 	rt := Declare(http.MethodGet, "/[a]/[b]/[c]/[d]/[e]/[f]/[g]/[h]")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
 		out = rt.MatchAndUpdateContext(req)
@@ -42,6 +46,7 @@ func BenchmarkWildcardRoute(b *testing.B) {
 func BenchmarkRegexRoute(b *testing.B) {
 	rt := Declare(http.MethodGet, "/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}/{.+}")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
 		out = rt.MatchAndUpdateContext(req)
@@ -55,6 +60,7 @@ func BenchmarkRegexRoute(b *testing.B) {
 func BenchmarkPartialRoute(b *testing.B) {
 	rt := Declare(http.MethodGet, "/+")
 	req, _ := http.NewRequest(http.MethodGet, "http://url.com/a/b/c/d/e/f/g/h", nil)
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
 		out = rt.MatchAndUpdateContext(req)
