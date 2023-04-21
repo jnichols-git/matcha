@@ -52,9 +52,10 @@ func (rt *treeRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
-	reqWithCtx, r_id := rt.rtree.MatchAndUpdateContext(req)
-	if reqWithCtx != nil {
+	r_id := rt.rtree.Match(req)
+	if r_id != 0 {
 		r := rt.routes[r_id]
+		reqWithCtx := r.MatchAndUpdateContext(req)
 		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {
 			return

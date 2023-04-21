@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cloudretic/router/pkg/path"
-	"github.com/cloudretic/router/pkg/rctx"
 	"github.com/cloudretic/router/pkg/route"
 )
 
@@ -54,9 +53,9 @@ func (n *node) match(req *http.Request, expr string, last int) int {
 		return n.leaf_id
 	}
 	token, next := path.Next(expr, last)
-	ok := n.p.Match(req.Context(), token)
-	head, err := rctx.Head(req)
-	if !ok || err != nil {
+	ok := n.p.Match(nil, token)
+	// head, err := rctx.Head(req)
+	if !ok {
 		return 0
 	} else if n.leaf_id != 0 {
 		if route.IsPartialEndPart(n.p) {
@@ -69,11 +68,16 @@ func (n *node) match(req *http.Request, expr string, last int) int {
 	}
 	for _, child := range n.children {
 		match_leaf_id := child.match(req, expr, next)
-		if match_leaf_id == 0 {
-			rctx.ResetRequestContextHead(req, head)
-		} else {
+		if match_leaf_id != 0 {
 			return match_leaf_id
 		}
+		/*
+			if match_leaf_id == 0 {
+				rctx.ResetRequestContextHead(req, head)
+			} else {
+				return match_leaf_id
+			}
+		*/
 	}
 	return 0
 }
@@ -101,17 +105,17 @@ func (rtree *RouteTree) Add(r route.Route) int {
 	return rtree.nextId
 }
 
-func (rtree *RouteTree) MatchAndUpdateContext(req *http.Request) (*http.Request, int) {
+func (rtree *RouteTree) Match(req *http.Request) int {
 	root, ok := rtree.methodRoot[req.Method]
 	if !ok || root == nil {
-		return nil, 0
+		return 0
 	}
 	expr := req.URL.Path
 	for _, r := range root.children {
 		match_leaf_id := r.match(req, expr, 0)
 		if match_leaf_id != 0 {
-			return req, match_leaf_id
+			return match_leaf_id
 		}
 	}
-	return nil, 0
+	return 0
 }
