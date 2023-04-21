@@ -34,7 +34,7 @@ func declareReq(path string) *http.Request {
 // Basic router benchmark.
 // For more involved benchmarks, see /bench. This serves as a baseline value, not a robust example under load.
 func BenchmarkBasicRouter(b *testing.B) {
-	rt := Declare(Tree(),
+	rt := Declare(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
