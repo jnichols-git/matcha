@@ -198,6 +198,13 @@ func (route *defaultRoute) Length() int {
 	return len(route.parts)
 }
 
+// Get the parts of the route.
+//
+// See interface Route.
+func (route *defaultRoute) Parts() []Part {
+	return route.parts
+}
+
 // Return the route method.
 //
 // See interface Route.

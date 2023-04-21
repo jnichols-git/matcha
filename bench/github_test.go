@@ -325,7 +325,7 @@ var cloudReticRouterHandlerTest http.HandlerFunc = func(w http.ResponseWriter, r
 func loadCloudReticRouter(routes []route) http.Handler {
 	h := cloudReticRouterHandlerTest
 
-	rt, _ := router.New(router.Default())
+	rt, _ := router.New(router.Tree())
 	for _, rout := range routes {
 		r, _ := crroute.New(rout.Method, rout.Path)
 		rt.AddRoute(r, h)
@@ -333,7 +333,6 @@ func loadCloudReticRouter(routes []route) http.Handler {
 	return rt
 }
 
-// 296,177 ns/op, 58,635 B/op, 406 allocs/op
 func BenchmarkCloudReticRouter_GithubAll(b *testing.B) {
 	rt := loadCloudReticRouter(githubAPI)
 	benchRoutes(b, rt, githubAPI)

@@ -44,6 +44,11 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 	return result, nil
 }
 
+func IsPartialEndPart(p Part) bool {
+	_, ok := p.(*partialEndPart)
+	return ok
+}
+
 // partialEndPart assumes that it's starting at the first partial token.
 // For example, in route /file/[filename]{.+}, partialEndPart will start on any token after file
 func (part *partialEndPart) Match(ctx context.Context, token string) bool {
@@ -156,6 +161,13 @@ func (route *partialRoute) Hash() string {
 // See interface Route.
 func (route *partialRoute) Length() int {
 	return len(route.parts) - 1
+}
+
+// Get the parts of the route.
+//
+// See interface Route.
+func (route *partialRoute) Parts() []Part {
+	return route.parts
 }
 
 // Return the route method.

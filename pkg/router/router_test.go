@@ -158,12 +158,12 @@ func TestNewRouter(t *testing.T) {
 func TestBasicRoutes(t *testing.T) {
 	r, err := New(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
 		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
 		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 		WithMiddleware(testMiddleware),
-		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 	)
 	if err != nil {
 		t.Fatal(err)
