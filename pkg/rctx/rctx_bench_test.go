@@ -1,16 +1,25 @@
 package rctx
 
 import (
-	"context"
 	"net/http"
 	"testing"
 )
+
+func use(any) {}
+
+func BenchmarkNewParams(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		params := newParams(DefaultMaxParams)
+		use(params)
+	}
+}
 
 func BenchmarkPrepare(b *testing.B) {
 	req := &http.Request{}
 	for i := 0; i < b.N; i++ {
 		req = PrepareRequestContext(req, DefaultMaxParams)
-		req = req.WithContext(context.Background())
+		// req = req.WithContext(context.Background())
+		req = &http.Request{}
 	}
 }
 

@@ -12,7 +12,7 @@ type routeParam struct {
 }
 
 type routeParams struct {
-	rps  []*routeParam
+	rps  []routeParam
 	cap  int
 	head int
 }
@@ -21,12 +21,12 @@ type routeParams struct {
 
 func newParams(size int) *routeParams {
 	rps := &routeParams{
-		rps:  make([]*routeParam, size),
+		rps:  make([]routeParam, size),
 		cap:  size,
 		head: 0,
 	}
 	for i := 0; i < size; i++ {
-		rps.rps[i] = &routeParam{}
+		rps.rps[i] = routeParam{}
 	}
 	return rps
 }

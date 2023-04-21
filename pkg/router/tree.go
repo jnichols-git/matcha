@@ -11,7 +11,7 @@ import (
 
 type treeRouter struct {
 	mws      []middleware.Middleware
-	routes   map[int]route.Route
+	routes   map[string]map[int]route.Route
 	rtree    *tree.RouteTree
 	handlers map[string]http.Handler
 	notfound http.Handler
@@ -20,7 +20,7 @@ type treeRouter struct {
 func Tree() *treeRouter {
 	return &treeRouter{
 		mws:      make([]middleware.Middleware, 0),
-		routes:   make(map[int]route.Route),
+		routes:   make(map[string]map[int]route.Route),
 		rtree:    tree.New(),
 		handlers: make(map[string]http.Handler),
 		notfound: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
@@ -33,7 +33,10 @@ func (rt *treeRouter) Attach(mw middleware.Middleware) {
 
 func (rt *treeRouter) AddRoute(r route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
-	rt.routes[id] = r
+	if rt.routes[r.Method()] == nil {
+		rt.routes[r.Method()] = make(map[int]route.Route)
+	}
+	rt.routes[r.Method()][id] = r
 	rt.handlers[r.Hash()] = h
 }
 
@@ -54,7 +57,7 @@ func (rt *treeRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	r_id := rt.rtree.Match(req)
 	if r_id != 0 {
-		r := rt.routes[r_id]
+		r := rt.routes[req.Method][r_id]
 		reqWithCtx := r.MatchAndUpdateContext(req)
 		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {

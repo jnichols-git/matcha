@@ -33,10 +33,8 @@ func declareReq(path string) *http.Request {
 
 // Basic router benchmark.
 // For more involved benchmarks, see /bench. This serves as a baseline value, not a robust example under load.
-//
-// 1,275 ns/op, 1,387 B/op, 12 allocs/op
 func BenchmarkBasicRouter(b *testing.B) {
-	rt := Declare(Default(),
+	rt := Declare(Tree(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
@@ -55,5 +53,15 @@ func BenchmarkBasicRouter(b *testing.B) {
 		for _, r := range benchReqs {
 			rt.ServeHTTP(mockWriter, r)
 		}
+	}
+}
+
+// Granular benchmarks
+
+func BenchmarkThings(b *testing.B) {
+	r := route.Declare(http.MethodGet, "/some/route")
+	for i := 0; i < b.N; i++ {
+		bms := r.Middleware()
+		executeMiddleware(bms, nil, nil)
 	}
 }
