@@ -55,9 +55,9 @@ func (rt *treeRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
-	r_id := rt.rtree.Match(req)
-	if r_id != 0 {
-		r := rt.routes[req.Method][r_id]
+	leaf_id := rt.rtree.Match(req)
+	if leaf_id != tree.NO_LEAF_ID {
+		r := rt.routes[req.Method][leaf_id]
 		reqWithCtx := r.MatchAndUpdateContext(req)
 		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {

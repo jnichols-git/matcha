@@ -27,30 +27,6 @@ func PrepareRequestContext(req *http.Request, maxParams int) *http.Request {
 	return req.WithContext(rctx)
 }
 
-func Head(req *http.Request) (int, error) {
-	ctx := req.Context()
-	rctx, correctType := ctx.(*Context)
-	if !correctType {
-		return -1, errors.New("request must have *rctx.Context")
-	}
-	return rctx.params.head, nil
-}
-
-// ResetRequestContext resets the param head to the provided value.
-// This effectively deletes any params assigned after that head, allowing for partial resets.
-func ResetRequestContextHead(req *http.Request, to int) error {
-	ctx := req.Context()
-	rctx, correctType := ctx.(*Context)
-	if !correctType {
-		return errors.New("request must have *rctx.Context when resetting")
-	}
-	if rctx.params.head < to {
-		return errors.New("cannot move the context head forward")
-	}
-	rctx.params.head = to
-	return nil
-}
-
 // ResetRequestContext resets any values in the context that shouldn't be maintained between attempts to match routes.
 // This assumes that the request has a rctx.Context, and returns an error if it does not.
 func ResetRequestContext(req *http.Request) error {

@@ -7,19 +7,20 @@ import (
 	"github.com/cloudretic/router/pkg/route"
 )
 
+const NO_LEAF_ID = int(0)
+
 type node struct {
 	p        route.Part
 	children []*node
-	is_root  bool
 	leaf_id  int
 }
 
-func createRoot() *node {
-	return &node{
-		p:        nil,
-		children: make([]*node, 0),
-		is_root:  true,
-	}
+func (n *node) isRoot() bool {
+	return n.p == nil
+}
+
+func (n *node) isLeaf() bool {
+	return n.leaf_id != NO_LEAF_ID
 }
 
 func createNode(p route.Part) *node {
@@ -35,7 +36,7 @@ func (n *node) propogate(ps []route.Part, leaf_id int) {
 		return
 	}
 	next := ps[0]
-	if n.leaf_id == 0 {
+	if !n.isLeaf() {
 		for _, child := range n.children {
 			if child.p.Eq(next) {
 				child.propogate(ps[1:], leaf_id)
@@ -48,38 +49,43 @@ func (n *node) propogate(ps []route.Part, leaf_id int) {
 	n.children = append(n.children, child)
 }
 
-func (n *node) match(req *http.Request, expr string, last int) int {
+// match is a routine that traverses a tree of nodes to find the first matching route.
+func (n *node) match(expr string, last int) int {
+	// If we've reached the end of the expression, return the leaf_id of the current node.
+	// This encapsulates several edge cases where it's difficult to know if the routine should return early or not,
+	// like with partial leaves.
 	if last == -1 {
 		return n.leaf_id
 	}
+	// Get the next token from the path and match it against the route.Part of the current node.
 	token, next := path.Next(expr, last)
 	ok := n.p.Match(nil, token)
-	// head, err := rctx.Head(req)
 	if !ok {
-		return 0
-	} else if n.leaf_id != 0 {
+		// If the part doesn't match, return NO_LEAF_ID.
+		return NO_LEAF_ID
+	} else if n.isLeaf() {
+		// If the part matches...
 		if route.IsPartialEndPart(n.p) {
-			return n.match(req, expr, next)
+			// ...and the leaf is partial, return the result of recursively matching until termination.
+			return n.match(expr, next)
 		} else if next == -1 {
+			// ...and the route has been exhausted, return the id of the leaf as a successful match.
 			return n.leaf_id
 		} else {
-			return 0
+			// ...and the route has not been exhausted, return NO_LEAF_ID.
+			return NO_LEAF_ID
 		}
 	}
+	// Iterate through the children of this node.
 	for _, child := range n.children {
-		match_leaf_id := child.match(req, expr, next)
+		match_leaf_id := child.match(expr, next)
 		if match_leaf_id != 0 {
+			// If a child matches the entire remaining route, return its leaf_id.
 			return match_leaf_id
 		}
-		/*
-			if match_leaf_id == 0 {
-				rctx.ResetRequestContextHead(req, head)
-			} else {
-				return match_leaf_id
-			}
-		*/
 	}
-	return 0
+	// If we reach this point, the entire subtree from this node has been traversed with no match.
+	return NO_LEAF_ID
 }
 
 type RouteTree struct {
@@ -97,7 +103,7 @@ func New() *RouteTree {
 func (rtree *RouteTree) Add(r route.Route) int {
 	root, ok := rtree.methodRoot[r.Method()]
 	if !ok || root == nil {
-		root = createRoot()
+		root = createNode(nil)
 		rtree.methodRoot[r.Method()] = root
 	}
 	rtree.nextId++
@@ -112,7 +118,7 @@ func (rtree *RouteTree) Match(req *http.Request) int {
 	}
 	expr := req.URL.Path
 	for _, r := range root.children {
-		match_leaf_id := r.match(req, expr, 0)
+		match_leaf_id := r.match(expr, 0)
 		if match_leaf_id != 0 {
 			return match_leaf_id
 		}

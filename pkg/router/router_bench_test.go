@@ -55,13 +55,3 @@ func BenchmarkBasicRouter(b *testing.B) {
 		}
 	}
 }
-
-// Granular benchmarks
-
-func BenchmarkThings(b *testing.B) {
-	r := route.Declare(http.MethodGet, "/some/route")
-	for i := 0; i < b.N; i++ {
-		bms := r.Middleware()
-		executeMiddleware(bms, nil, nil)
-	}
-}
