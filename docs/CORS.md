@@ -1,6 +1,6 @@
 # Cross-Origin Resource Sharing (CORS)
 
-When requesting resources from a remote server, browsers typically require the server to describe the conditions under which a request may access those resources. This is called Cross-Origin Resource Sharing. `router` has some tools built in to help you handle CORS requests, if it's required for your application.
+When requesting resources from a remote server, browsers typically require the server to describe the conditions under which a request may access those resources. This is called Cross-Origin Resource Sharing. `matcha` has some tools built in to help you handle CORS requests, if it's required for your application.
 
 ## How CORS Works
 
@@ -18,7 +18,7 @@ If the request is simple, it's sent as normal. If it is not simple, the browser 
 - `Access-Control-Max-Age`: Indicates how long a resource may be cached in seconds.
 - `Access-Control-Allow-Credentials`: Indicates if a request may use credentials (cookies, authorization, or TLS).
 
-All of these can be empty, a list, or `*`, which indicates that any value is allowed/exposed. `router` represents these with the `*AccessControlOptions` struct, used to define how a Router should treat CORS requests.
+All of these can be empty, a list, or `*`, which indicates that any value is allowed/exposed. `matcha` represents these with the `*AccessControlOptions` struct, used to define how a Router should treat CORS requests.
 
 ## Setting Up CORS
 
@@ -26,7 +26,7 @@ There are three ways to set CORS headers on responses.
 
 - `Router` can set the default headers for all routes using the `DefaultCORSHeaders` configuration function.
 - `Route` can set the headers for itself only using the `CORSHeaders` configuration function.
-- `PreflightCORS` can be used to define an OPTIONS route that returns the given access control headers. *`router` does not currently automatically generate these routes.*
+- `PreflightCORS` can be used to define an OPTIONS route that returns the given access control headers. *`matcha` does not currently automatically generate these routes.*
 
 To manually manipulate CORS headers, `package cors` provides `SetCORSResponseHeaders` that will set the headers based on an `*AccessControlOptions` object. This can be used in the event that the above options don't fit your use case. We'd encourage you to submit an issue on GitHub if your use case isn't immediately supported.
 
