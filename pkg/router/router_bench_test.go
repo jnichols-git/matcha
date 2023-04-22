@@ -1,6 +1,7 @@
 package router
 
 import (
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -29,6 +30,30 @@ func declareReq(path string) *http.Request {
 	req.URL.Path = path
 	req.RequestURI = path
 	return req
+}
+
+// Benchmark single requests. Results should generally average out to the cost of a single handle after b.N runs.
+func BenchmarkSingleRequests(b *testing.B) {
+	rt := Declare(Default(),
+		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+	)
+	benchReqs := []*http.Request{
+		declareReq("/"),
+		declareReq("/wc"),
+		declareReq("/route/aWord"),
+		declareReq("/route/anID"),
+		declareReq("/static/file/some/file/path.md"),
+	}
+	mockWriter := &mockResponseWriter{}
+	for i := 0; i < b.N; i++ {
+		ri := rand.Int() % len(benchReqs)
+		r := benchReqs[ri]
+		rt.ServeHTTP(mockWriter, r)
+	}
 }
 
 // Basic router benchmark.

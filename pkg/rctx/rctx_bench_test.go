@@ -18,6 +18,7 @@ func BenchmarkPrepare(b *testing.B) {
 	req := &http.Request{}
 	for i := 0; i < b.N; i++ {
 		req = PrepareRequestContext(req, DefaultMaxParams)
+		//req = req.WithContext(context.Background())
 		// req = req.WithContext(context.Background())
 		req = &http.Request{}
 	}
