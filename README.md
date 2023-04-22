@@ -37,8 +37,9 @@ Router Name | Relative Speed | Memory Use
 
 Supported versions:
 
-- `main (v1.0)`
-- `v1.1`
+- `v1.0`
+- `main (v1.1)`
+- `v1.2`
 
 ## Basic Usage
 

@@ -1,6 +1,6 @@
 # Contributing to Router
 
-> ***The current development branch is `v1.1`.***
+> ***The current development branch is `v1.2`.***
 
 We welcome community contributions to `matcha`!
 
