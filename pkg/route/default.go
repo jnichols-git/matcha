@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strings"
 
 	"github.com/cloudretic/router/pkg/path"
 	"github.com/cloudretic/router/pkg/rctx"
@@ -149,13 +148,14 @@ type defaultRoute struct {
 // See interface Route.
 func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 	route := &defaultRoute{
-		origExpr: expr,
+		origExpr: "",
 		method:   method,
 		parts:    make([]Part, 0),
 	}
 	var token string
 	for next := 0; next < len(expr); {
 		token, next = path.Next(expr, next)
+		route.origExpr += token
 		part, err := parse(token)
 		if err != nil {
 			return nil, err
@@ -212,10 +212,6 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	// route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path
-	if strings.Count(expr, "/") != len(route.parts) {
-		return nil
-	}
-
 	rctx.ResetRequestContext(req)
 
 	var token string
@@ -227,7 +223,7 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			return nil
 		}
 		partIdx++
-		if next == -1 {
+		if next == -1 || partIdx >= route.Length() {
 			break
 		}
 	}

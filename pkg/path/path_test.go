@@ -23,4 +23,14 @@ func TestNext(t *testing.T) {
 		}
 		i++
 	}
+	path = "/consec///slash"
+	expected = []string{"/consec", "/slash"}
+	i = 0
+	for next = 0; next != -1; {
+		tk, next = Next(path, next)
+		if tk != expected[i] {
+			t.Errorf("Expected '%s' at %d, got '%s'", expected[i], i, tk)
+		}
+		i++
+	}
 }

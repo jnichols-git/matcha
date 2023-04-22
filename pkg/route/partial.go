@@ -99,7 +99,7 @@ type partialRoute struct {
 // See interface Route.
 func build_partialRoute(method, expr string) (*partialRoute, error) {
 	route := &partialRoute{
-		origExpr: expr,
+		origExpr: "",
 		method:   method,
 		parts:    make([]Part, 0),
 	}
@@ -109,6 +109,7 @@ func build_partialRoute(method, expr string) (*partialRoute, error) {
 	var partIdx int
 	for next := 0; next < len(expr); {
 		token, next = path.Next(expr, next)
+		route.origExpr += token
 		var part Part
 		var err error
 		if partIdx < tokenCt-1 {
