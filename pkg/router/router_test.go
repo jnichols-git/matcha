@@ -129,7 +129,7 @@ func TestNewRouter(t *testing.T) {
 }
 
 func TestBasicRoutes(t *testing.T) {
-	r, err := New(Default(),
+	r := Declare(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
@@ -138,9 +138,6 @@ func TestBasicRoutes(t *testing.T) {
 		WithMiddleware(testMiddleware),
 		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
@@ -172,6 +169,22 @@ func TestBasicRoutes(t *testing.T) {
 	runEvalRequest(t, s, "/middlewareTest", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
 		"body": "mwval",
+	})
+}
+
+func TestEdgeCaseRoutes(t *testing.T) {
+	r := Declare(
+		Default(),
+		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
+	)
+	s := httptest.NewServer(r)
+	runEvalRequest(t, s, "/odd/path", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "odd",
+	})
+	runEvalRequest(t, s, "/odd///path", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "odd",
 	})
 }
 
