@@ -12,10 +12,19 @@ func Next(path string, last int) (string, int) {
 	if last+1 > len(path) {
 		return "", -1
 	}
-	end := strings.Index(path[last+1:], "/")
-	if end == -1 {
-		return path[last:], -1
-	} else {
-		return path[last : last+end+1], last + end + 1
+	start := last
+	for {
+		idx := strings.Index(path[start+1:], "/")
+		if idx == -1 {
+			break
+		}
+		end := start + idx + 1
+		// Return if path token isn't 'empty' (/)
+		if end-start > 1 {
+			return path[start:end], end
+		}
+		// check
+		start = end
 	}
+	return path[start:], -1
 }

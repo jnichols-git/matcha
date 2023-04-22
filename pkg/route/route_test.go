@@ -356,6 +356,16 @@ func TestPartialRouteDeclare(t *testing.T) {
 	})
 }
 
+func TestRouteEdgeCases(t *testing.T) {
+	rt, err := New(http.MethodGet, "/consec///slash///route")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h := rt.Hash(); h != "GET /consec/slash/route" {
+		t.Errorf("expected hash 'GET /consec/slash/route', got %s", h)
+	}
+}
+
 func TestInvalidConfig(t *testing.T) {
 	rt, err := New(http.MethodGet, "/static/path", invalidConfigFunc)
 	if err == nil || rt != nil {
