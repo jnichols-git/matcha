@@ -14,6 +14,9 @@ func TestPartialPart(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	if !IsPartialEndPart(pp0) {
+		t.Error("pp0 should be a partial end part")
+	}
 	// Eq
 	pp1, _ := parse_partialEndPart(`/[part]{a-zA-Z+}+`)
 	if !pp0.Eq(pp1) {

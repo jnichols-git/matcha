@@ -19,6 +19,10 @@ type Route interface {
 	//
 	// Route implementations may determine how to represent their own length.
 	Length() int
+	// Get the parts of the route.
+	//
+	// Route implementations must return an exact slice of their parts.
+	Parts() []Part
 	// Get the method of the route.
 	//
 	// Route implementations must return a nonempty string containing exactly one method, compliant with http.MethodX

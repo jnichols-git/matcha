@@ -158,12 +158,12 @@ func TestNewRouter(t *testing.T) {
 func TestBasicRoutes(t *testing.T) {
 	r := Declare(Default(),
 		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
 		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
 		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
 		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 		WithMiddleware(testMiddleware),
-		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
 	)
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
@@ -203,6 +203,7 @@ func TestEdgeCaseRoutes(t *testing.T) {
 	r := Declare(
 		Default(),
 		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
+		WithRoute(route.Declare(http.MethodGet, "/reject", route.WithMiddleware(reject)), okHandler("never")),
 	)
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/odd/path", reqGen(http.MethodGet), map[string]any{
@@ -212,6 +213,9 @@ func TestEdgeCaseRoutes(t *testing.T) {
 	runEvalRequest(t, s, "/odd///path", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
 		"body": "odd",
+	})
+	runEvalRequest(t, s, "/reject", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusForbidden,
 	})
 }
 
@@ -314,4 +318,13 @@ func TestCORS(t *testing.T) {
 		"code":   http.StatusNoContent,
 		"header": http.Header{"Access-Control-Allow-Headers": {"X-Header-1"}},
 	})
+
+	// Test invalid route for preflight
+	r, err := New(
+		Default(),
+		PreflightCORS("/{(}", aco),
+	)
+	if err == nil {
+		t.Error("expected invalid route to fail with preflightcors")
+	}
 }
