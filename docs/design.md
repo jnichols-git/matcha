@@ -13,12 +13,4 @@ Generally, it is encouraged that you pick one and stick to it for both routes an
 
 ## Handlers
 
-Some routers use specialized handler functions or types in their APIs. While separating from Go's standard HTTP library can lead to performance improvements, it also leads to stronger coupling with the package being used. We've re-implemented some of the interface members of the HTTP library, allowing for high performance without the need for refactoring code to migrate to `router`. Any handler that works with Go's standard library works for `router` as well.
-
-## Middleware
-
-`router` has a different middleware definition than most open-source routers, opting for `func(http.ResponseWriter, *http.Request) *Request` as opposed to `http.Handler`. This is a deliberate style choice to permit middleware to explicitly reject requests and return control to the caller. Middleware chains are constructed by `Attach`ing each middleware in series.
-
-## Explicit Route Creation
-
-Where most routers add routes via a direct call to the constructed router, `router` requires the explicit construction of a route via `route.New` prior to being added. Creation of a route may fail, and the explicit creation is a necessity to communicate that behavior and; addition of a route may not
+Some routers use specialized handler functions or types in their APIs. While separating from Go's standard HTTP library can lead to performance improvements, it also leads to stronger coupling with the package being used. We've re-implemented some of the interface members of the HTTP library, allowing for high performance without the need for refactoring code to migrate to `matcha`. Any handler that works with Go's standard library works for `matcha` as well.

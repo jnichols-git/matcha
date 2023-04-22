@@ -1,6 +1,6 @@
 # Adapting Router
 
-`router` includes the `Adapter` interface to help define functionality that receives HTTP requests through methods other than direct HTTP/S, such as with serverless computing or through a message queue. External adapters aren't required to use this, but it may help.
+`matcha` includes the `Adapter` interface to help define functionality that receives HTTP requests through methods other than direct HTTP/S, such as with serverless computing or through a message queue. External adapters aren't required to use this, but it may help.
 
 ## Implementing the Adapter Interface
 
