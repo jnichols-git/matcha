@@ -51,9 +51,6 @@ func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 			cors.SetCORSResponseHeaders(w, r, aco)
 			w.WriteHeader(http.StatusNoContent)
 		}
-		if err != nil {
-			return err
-		}
 		rt.AddRoute(r, http.HandlerFunc(f))
 		return nil
 	}

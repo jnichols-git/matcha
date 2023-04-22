@@ -15,10 +15,6 @@ type node struct {
 	leaf_id  int
 }
 
-func (n *node) isRoot() bool {
-	return n.p == nil
-}
-
 func (n *node) isLeaf() bool {
 	return n.leaf_id != NO_LEAF_ID
 }
@@ -36,7 +32,7 @@ func (n *node) propogate(ps []route.Part, leaf_id int) {
 		return
 	}
 	next := ps[0]
-	if !n.isLeaf() {
+	if !n.isLeaf() && len(ps)-1 != 0 {
 		for _, child := range n.children {
 			if child.p.Eq(next) {
 				child.propogate(ps[1:], leaf_id)
@@ -119,7 +115,7 @@ func (rtree *RouteTree) Match(req *http.Request) int {
 	expr := req.URL.Path
 	for _, r := range root.children {
 		match_leaf_id := r.match(expr, 0)
-		if match_leaf_id != 0 {
+		if match_leaf_id != NO_LEAF_ID {
 			return match_leaf_id
 		}
 	}
