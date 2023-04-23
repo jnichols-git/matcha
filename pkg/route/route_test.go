@@ -374,6 +374,7 @@ func TestInvalidConfig(t *testing.T) {
 }
 
 func TestCORS(t *testing.T) {
+	// Basic
 	var aco = &cors.AccessControlOptions{
 		AllowOrigin:      []string{"*"},
 		AllowMethods:     []string{"*"},
@@ -394,11 +395,32 @@ func TestCORS(t *testing.T) {
 			"Origin": {"origin.com"},
 		},
 	}
-
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	req = rt.MatchAndUpdateContext(req)
 	headers := req.Header
 	if headers.Get("Origin") != "origin.com" {
 		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
+	}
+	// Partial/Non-builtin conf
+	rt, err = New(http.MethodGet, "/static/path/[add]+", WithMiddleware(cors.CORSMiddleware(aco)))
+	if err != nil || len(rt.Middleware()) != 1 {
+		t.Fatal(err)
+	}
+	u, _ = url.Parse("http://test.com/static/path/with/addition")
+	req = &http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Header: http.Header{
+			"Origin": {"origin.com"},
+		},
+	}
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	req = rt.MatchAndUpdateContext(req)
+	headers = req.Header
+	if headers.Get("Origin") != "origin.com" {
+		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
+	}
+	if rctx.GetParam(req.Context(), "add") != "/with/addition" {
+		t.Errorf("Expected param /with/addition, got %s", rctx.GetParam(req.Context(), "add"))
 	}
 }
