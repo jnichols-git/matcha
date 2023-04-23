@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudretic/router/pkg/route"
+	"github.com/cloudretic/matcha/pkg/route"
 )
 
 // mock response writer, taken from go-http-routing-benchmark

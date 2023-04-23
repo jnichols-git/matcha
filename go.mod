@@ -1,3 +1,3 @@
-module github.com/cloudretic/router
+module github.com/cloudretic/matcha
 
 go 1.20

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/cloudretic/router/pkg/regex"
+	"github.com/cloudretic/matcha/pkg/regex"
 )
 
 const (
