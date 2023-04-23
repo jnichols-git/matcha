@@ -222,7 +222,6 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	// route.ctx.ResetOnto(req.Context())
 	// Check for path length
 	expr := req.URL.Path
-
 	rctx.ResetRequestContext(req)
 
 	var token string
