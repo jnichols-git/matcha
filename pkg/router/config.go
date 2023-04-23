@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloudretic/router/pkg/cors"
-	"github.com/cloudretic/router/pkg/middleware"
-	"github.com/cloudretic/router/pkg/route"
+	"github.com/cloudretic/matcha/pkg/cors"
+	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/route"
 )
 
 // ConfigFuncs run on Routers, usually to add a route or attach middleware.

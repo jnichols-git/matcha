@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cloudretic/router/pkg/cors"
-	"github.com/cloudretic/router/pkg/rctx"
+	"github.com/cloudretic/matcha/pkg/cors"
+	"github.com/cloudretic/matcha/pkg/rctx"
 )
 
 func invalidConfigFunc(r Route) error {

@@ -3,7 +3,7 @@ package route
 import (
 	"net/http"
 
-	"github.com/cloudretic/router/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/middleware"
 )
 
 type Route interface {

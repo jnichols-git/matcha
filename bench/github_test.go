@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	crroute "github.com/cloudretic/router/pkg/route"
-	"github.com/cloudretic/router/pkg/router"
+	crroute "github.com/cloudretic/matcha/pkg/route"
+	"github.com/cloudretic/matcha/pkg/router"
 )
 
 // Benchmark against the GitHub API.
