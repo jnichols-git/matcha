@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 	"github.com/cloudretic/router/pkg/rctx"
 )
@@ -41,6 +42,11 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 	result.subPart = subPart
 
 	return result, nil
+}
+
+func IsPartialEndPart(p Part) bool {
+	_, ok := p.(*partialEndPart)
+	return ok
 }
 
 // partialEndPart assumes that it's starting at the first partial token.
@@ -89,9 +95,10 @@ func isPartialRouteExpr(s string) bool {
 // partialRoute is specialized to allow routes that may match on extensions, rather than on
 // an exact match
 type partialRoute struct {
-	origExpr string
-	method   string
-	parts    []Part
+	origExpr   string
+	method     string
+	parts      []Part
+	middleware []middleware.Middleware
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -157,6 +164,13 @@ func (route *partialRoute) Length() int {
 	return len(route.parts) - 1
 }
 
+// Get the parts of the route.
+//
+// See interface Route.
+func (route *partialRoute) Parts() []Part {
+	return route.parts
+}
+
 // Return the route method.
 //
 // See interface Route.
@@ -199,4 +213,12 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	}
 	// If there were no empty tokens to begin with, run the last rou
 	return req
+}
+
+func (route *partialRoute) Attach(m middleware.Middleware) {
+	route.middleware = append(route.middleware, m)
+}
+
+func (route *partialRoute) Middleware() []middleware.Middleware {
+	return route.middleware
 }

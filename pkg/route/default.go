@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"regexp"
 
+	"github.com/cloudretic/router/pkg/middleware"
 	"github.com/cloudretic/router/pkg/path"
 	"github.com/cloudretic/router/pkg/rctx"
 )
@@ -138,9 +139,10 @@ func (part *regexPart) SetParameterName(s string) {
 
 // defaultRoute is the default behavior for router, which is to match requests exactly.
 type defaultRoute struct {
-	origExpr string
-	method   string
-	parts    []Part
+	origExpr   string
+	method     string
+	parts      []Part
+	middleware []middleware.Middleware
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -148,9 +150,10 @@ type defaultRoute struct {
 // See interface Route.
 func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 	route := &defaultRoute{
-		origExpr: "",
-		method:   method,
-		parts:    make([]Part, 0),
+		origExpr:   "",
+		method:     method,
+		parts:      make([]Part, 0),
+		middleware: make([]middleware.Middleware, 0),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -195,6 +198,13 @@ func (route *defaultRoute) Length() int {
 	return len(route.parts)
 }
 
+// Get the parts of the route.
+//
+// See interface Route.
+func (route *defaultRoute) Parts() []Part {
+	return route.parts
+}
+
 // Return the route method.
 //
 // See interface Route.
@@ -229,4 +239,12 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	}
 	//return req.WithContext(route.ctx)
 	return req
+}
+
+func (route *defaultRoute) Attach(mw middleware.Middleware) {
+	route.middleware = append(route.middleware, mw)
+}
+
+func (route *defaultRoute) Middleware() []middleware.Middleware {
+	return route.middleware
 }

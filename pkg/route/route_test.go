@@ -3,9 +3,11 @@ package route
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 
+	"github.com/cloudretic/router/pkg/cors"
 	"github.com/cloudretic/router/pkg/rctx"
 )
 
@@ -24,7 +26,7 @@ func TestStringRouteNew(t *testing.T) {
 			t.Errorf("expected hash '/test', got %s", hash)
 		}
 		// length
-		if length := rt.Length(); length != 1 {
+		if length := rt.Length(); length != 1 || length != len(rt.Parts()) {
 			t.Errorf("expected length 1, got %d", length)
 		}
 		// prefix
@@ -82,7 +84,7 @@ func TestWildcardRouteNew(t *testing.T) {
 			t.Errorf("expected hash '/[param1]/[param2]/[param3]', got %s", hash)
 		}
 		// length
-		if length := rt.Length(); length != 3 {
+		if length := rt.Length(); length != 3 || length != len(rt.Parts()) {
 			t.Errorf("expected length 3, got %d", length)
 		}
 		// prefix
@@ -140,7 +142,7 @@ func TestRegexRouteNew(t *testing.T) {
 			t.Errorf("expected hash '/test', got %s", hash)
 		}
 		// length
-		if length := rt.Length(); length != 1 {
+		if length := rt.Length(); length != 1 || length != len(rt.Parts()) {
 			t.Errorf("expected length 1, got %d", length)
 		}
 		// prefix
@@ -205,7 +207,7 @@ func TestPartialRouteNew(t *testing.T) {
 			t.Errorf("expected hash '/partial/+', got %s", hash)
 		}
 		// length (partial routes do *not* include the extension in their length!)
-		if length := rt.Length(); length != 1 {
+		if length := rt.Length(); length != 1 || length != len(rt.Parts())-1 {
 			t.Errorf("expected length 1, got %d", length)
 		}
 		// prefix
@@ -368,5 +370,57 @@ func TestInvalidConfig(t *testing.T) {
 	rt, err := New(http.MethodGet, "/static/path", invalidConfigFunc)
 	if err == nil || rt != nil {
 		t.Errorf("expected New to fail if ConfigFunc returns error")
+	}
+}
+
+func TestCORS(t *testing.T) {
+	// Basic
+	var aco = &cors.AccessControlOptions{
+		AllowOrigin:      []string{"*"},
+		AllowMethods:     []string{"*"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		MaxAge:           1000,
+		AllowCredentials: false,
+	}
+	rt, err := New(http.MethodGet, "/static/path", CORSHeaders(aco))
+	if err != nil || len(rt.Middleware()) != 1 {
+		t.Fatal(err)
+	}
+	u, _ := url.Parse("http://test.com/static/path")
+	req := &http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Header: http.Header{
+			"Origin": {"origin.com"},
+		},
+	}
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	req = rt.MatchAndUpdateContext(req)
+	headers := req.Header
+	if headers.Get("Origin") != "origin.com" {
+		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
+	}
+	// Partial/Non-builtin conf
+	rt, err = New(http.MethodGet, "/static/path/[add]+", WithMiddleware(cors.CORSMiddleware(aco)))
+	if err != nil || len(rt.Middleware()) != 1 {
+		t.Fatal(err)
+	}
+	u, _ = url.Parse("http://test.com/static/path/with/addition")
+	req = &http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Header: http.Header{
+			"Origin": {"origin.com"},
+		},
+	}
+	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
+	req = rt.MatchAndUpdateContext(req)
+	headers = req.Header
+	if headers.Get("Origin") != "origin.com" {
+		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
+	}
+	if rctx.GetParam(req.Context(), "add") != "/with/addition" {
+		t.Errorf("Expected param /with/addition, got %s", rctx.GetParam(req.Context(), "add"))
 	}
 }
