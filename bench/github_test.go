@@ -1,6 +1,7 @@
 package bench
 
 import (
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -302,7 +303,6 @@ func benchRoutes(b *testing.B, router http.Handler, routes []route) {
 	w := new(mockResponseWriter)
 	r, _ := http.NewRequest("GET", "/", nil)
 	u := r.URL
-	rq := u.RawQuery
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -310,30 +310,44 @@ func benchRoutes(b *testing.B, router http.Handler, routes []route) {
 	for i := 0; i < b.N; i++ {
 		for _, route := range routes {
 			r.Method = route.Method
-			r.RequestURI = route.Path
 			u.Path = route.Path
-			u.RawQuery = rq
 			router.ServeHTTP(w, r)
 		}
 	}
 }
 
-var cloudReticRouterHandlerTest http.HandlerFunc = func(w http.ResponseWriter, req *http.Request) {
+var handler http.HandlerFunc = func(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(req.RequestURI))
 }
 
-func loadCloudReticRouter(routes []route) http.Handler {
-	h := cloudReticRouterHandlerTest
+func load(routes []route) http.Handler {
 
 	rt, _ := router.New(router.Default())
 	for _, rout := range routes {
 		r, _ := crroute.New(rout.Method, rout.Path)
-		rt.AddRoute(r, h)
+		rt.AddRoute(r, handler)
 	}
 	return rt
 }
 
-func BenchmarkCloudReticRouter_GithubAll(b *testing.B) {
-	rt := loadCloudReticRouter(githubAPI)
+// Benchmark *every route* per op.
+// Commonly used as a benchmark in the community, but not an accurate way to measure performance
+// by-request; see BenchmarkSingle.
+func BenchmarkFull(b *testing.B) {
+	rt := load(githubAPI)
 	benchRoutes(b, rt, githubAPI)
+}
+
+func BenchmarkSingle(b *testing.B) {
+	w := &mockResponseWriter{}
+	r, _ := http.NewRequest("GET", "/", nil)
+	u := r.URL
+	rt := load(githubAPI)
+	for i := 0; i < b.N; i++ {
+		route := githubAPI[rand.Int()%len(githubAPI)]
+		r.Method = route.Method
+		r.RequestURI = route.Path
+		u.Path = route.Path
+		rt.ServeHTTP(w, r)
+	}
 }
