@@ -26,6 +26,8 @@ func createNode(p route.Part) *node {
 	}
 }
 
+// Propogate a set of parts through the tree, with this node as the root.
+// If there are no parts left to propogate, the node will instead be set to leaf leaf_id.
 func (n *node) propogate(ps []route.Part, leaf_id int) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
@@ -45,7 +47,7 @@ func (n *node) propogate(ps []route.Part, leaf_id int) {
 	n.children = append(n.children, child)
 }
 
-// match is a routine that traverses a tree of nodes to find the first matching route.
+// match traverses a subtree of nodes to find the first matching route.
 func (n *node) match(expr string, last int) int {
 	// If we've reached the end of the expression, return the leaf_id of the current node.
 	// This encapsulates several edge cases where it's difficult to know if the routine should return early or not,
@@ -96,6 +98,8 @@ func New() *RouteTree {
 	}
 }
 
+// Add a route to the tree.
+// Returns the leaf ID of the added route.
 func (rtree *RouteTree) Add(r route.Route) int {
 	root, ok := rtree.methodRoot[r.Method()]
 	if !ok || root == nil {
@@ -107,6 +111,8 @@ func (rtree *RouteTree) Add(r route.Route) int {
 	return rtree.nextId
 }
 
+// Match a request to the tree.
+// Returns the leaf ID of the matched route, or NO_LEAF_ID if no match is found.
 func (rtree *RouteTree) Match(req *http.Request) int {
 	root, ok := rtree.methodRoot[req.Method]
 	if !ok || root == nil {

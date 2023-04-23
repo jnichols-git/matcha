@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 	"net/url"
+	"time"
 )
 
 // Middleware runs on any incoming request. Attachment behavior is defined by the structure it's attached to (route vs. router).
@@ -26,11 +26,12 @@ func ExpectQueryParam(name string) Middleware {
 }
 
 // The string used to indicate an absent origin in log entries.
-// 
+//
 // Origins take one of the following forms, so must not take any of these forms:
-//     "null"
-//     "<scheme>://<hostname>"
-//     "<scheme>://<hostname>:<port>"
+//
+//	"null"
+//	"<scheme>://<hostname>"
+//	"<scheme>://<hostname>:<port>"
 const OriginAbsent = "-"
 
 // Returns a middleware that logs the details of an incoming request.
@@ -62,7 +63,7 @@ func logRequest(w io.Writer, r *http.Request) {
 		origin = OriginAbsent
 	}
 	fmt.Fprintf(
-		w, 
+		w,
 		"%d %s %s %s\n",
 		time.Now().UnixNano(),
 		origin,
@@ -111,5 +112,5 @@ type LogEntry struct {
 	// Will be an empty string "" if no origin header was given on the request.
 	Origin string
 	Method string
-	URL *url.URL
+	URL    *url.URL
 }
