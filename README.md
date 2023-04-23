@@ -70,7 +70,7 @@ Router Name | Relative Speed | Memory Use
 [`gorilla/mux`](https://github.com/gorilla/mux) | .06x | 199,686 B/op
 `matcha` | 1.0x | 139,064 B/op
 [`chi`](https://github.com/go-chi/chi) | 1.52x | 61,713 B/op
-[`httprouter`](https://github.com/julienschmidt/httprouter) | 5.87x | 13,792
+[`httprouter`](https://github.com/julienschmidt/httprouter) | 5.87x | 13,792 B/op
 [`gin`](https://github.com/gin-gonic/gin) | 5.87x | 0 B/op
 
 ## Maintainers
