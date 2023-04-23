@@ -40,3 +40,7 @@ Currently, new submissions to `matcha` are subject to the following criteria:
 2. **Testing**: Test coverage should stay above 95%. New behavior is expected to have associated unit tests
 3. **Documentation**: CloudRETIC strongly encourages detailed documentation of code, and pull requests will be evaluated on quality of comments and external documentation in `/docs`.
 4. **Style**: While style is massively subjective, you should follow good Go code practices. We use [this list](https://github.com/golang/go/wiki/CodeReviewComments#gofmt) to evaluate style.
+
+## Divergent Branches
+
+`main` should not diverge from *future* versions, but may diverge from *past* versions.
