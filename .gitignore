@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+# Test output artifacts; should be local-only
+.cicd/*
+
 # Test binary, built with `go test -c`
 *.test
 
