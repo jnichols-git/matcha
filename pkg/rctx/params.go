@@ -32,8 +32,8 @@ func newParams(size int) *routeParams {
 }
 
 func (rps *routeParams) get(key paramKey) string {
-	for i := rps.head; i > 0; i-- {
-		kv := rps.rps[i-1]
+	for i := 0; i < rps.head; i++ {
+		kv := rps.rps[i]
 		if kv.key == key {
 			return kv.value
 		}
@@ -42,11 +42,22 @@ func (rps *routeParams) get(key paramKey) string {
 }
 
 func (rps *routeParams) set(key paramKey, value string) error {
-	if rps.head >= rps.cap {
-		return errors.New("placeholder error; over capacity")
+	idx := rps.head
+	inc := true
+	for i := 0; i < rps.head; i++ {
+		kv := rps.rps[i]
+		if kv.key == key {
+			idx = i
+			inc = false
+		}
 	}
-	rps.rps[rps.head].key = key
-	rps.rps[rps.head].value = value
-	rps.head++
+	if idx >= rps.cap {
+		return errors.New("over capacity")
+	}
+	if inc {
+		rps.head++
+	}
+	rps.rps[idx].key = key
+	rps.rps[idx].value = value
 	return nil
 }
