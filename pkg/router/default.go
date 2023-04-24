@@ -10,20 +10,22 @@ import (
 )
 
 type defaultRouter struct {
-	mws      []middleware.Middleware
-	routes   map[string]map[int]route.Route
-	rtree    *tree.RouteTree
-	handlers map[string]http.Handler
-	notfound http.Handler
+	mws       []middleware.Middleware
+	routes    map[string]map[int]route.Route
+	rtree     *tree.RouteTree
+	handlers  map[string]http.Handler
+	notfound  http.Handler
+	maxParams int
 }
 
 func Default() *defaultRouter {
 	return &defaultRouter{
-		mws:      make([]middleware.Middleware, 0),
-		routes:   make(map[string]map[int]route.Route),
-		rtree:    tree.New(),
-		handlers: make(map[string]http.Handler),
-		notfound: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
+		mws:       make([]middleware.Middleware, 0),
+		routes:    make(map[string]map[int]route.Route),
+		rtree:     tree.New(),
+		handlers:  make(map[string]http.Handler),
+		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
+		maxParams: rctx.DefaultMaxParams,
 	}
 }
 
@@ -54,10 +56,10 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req == nil {
 		return
 	}
-	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	leaf_id := rt.rtree.Match(req)
 	if leaf_id != tree.NO_LEAF_ID {
 		r := rt.routes[req.Method][leaf_id]
+		req = rctx.PrepareRequestContext(req, route.NumParams(r))
 		reqWithCtx := r.MatchAndUpdateContext(req)
 		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {

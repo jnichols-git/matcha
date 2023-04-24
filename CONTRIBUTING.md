@@ -1,8 +1,16 @@
 # Contributing to Router
 
-> ***The current development branch is `v1.2`.***
-
 We welcome community contributions to `matcha`!
+
+## Versioning
+
+Matcha's latest stable release is `v1.1.0` (major version 1, minor version 1, patch 0). This release, and all future releases, are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
+
+- Major: The change is non-essential and breaks the existing API. See our backwards compatiblility policy [here](docs/versioning.md). Major changes should relate to branch `v1.2.0`.
+- Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.2.0`.
+- Patch: The change is a bugfix, minor performance improvement, minor API change, or auxilary component (like middleware). Patches should relate to branch `main`.
+
+Release eligibility will be evaluated bimonthly, with the next evaluation being July 1, 2023.
 
 ## Getting Started
 
@@ -13,7 +21,7 @@ We welcome community contributions to `matcha`!
 
 ## Creating a Branch for Changes
 
-1. Identify the version number you would like to make a change to. *The current active development branch is noted at the top of this document.*
+1. Identify the version branch you would like to make a change to. *These branches are specified in Versioning*.
 2. Ensure that your local repository is up to date:
 
     ```bash
@@ -40,7 +48,3 @@ Currently, new submissions to `matcha` are subject to the following criteria:
 2. **Testing**: Test coverage should stay above 95%. New behavior is expected to have associated unit tests
 3. **Documentation**: CloudRETIC strongly encourages detailed documentation of code, and pull requests will be evaluated on quality of comments and external documentation in `/docs`.
 4. **Style**: While style is massively subjective, you should follow good Go code practices. We use [this list](https://github.com/golang/go/wiki/CodeReviewComments#gofmt) to evaluate style.
-
-## Divergent Branches
-
-`main` should not diverge from *future* versions, but may diverge from *past* versions.

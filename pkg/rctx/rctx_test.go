@@ -53,6 +53,10 @@ func TestNative(t *testing.T) {
 				t.Errorf("expected %s, got %s", v, got)
 			}
 		}
+		SetParam(ctx, "p0", "diffValue")
+		if v := GetParam(ctx, "p0"); v != "diffValue" {
+			t.Errorf("expected diffValue, got %s", v)
+		}
 		ResetRequestContext(req)
 		got := GetParam(ctx, "p0")
 		if got != "" {

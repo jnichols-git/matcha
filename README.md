@@ -18,11 +18,12 @@
 
 `go get github.com/cloudretic/matcha[@version]`
 
-Supported versions:
+Stable versions:
 
 - `v1.0`
-- `main (v1.1)`
-- `v1.2`
+- `v1.1.0 (stable release, recommended)`
+
+Omitting the version will fetch the main branch, which may contain unreleased but stable features.
 
 ## Basic Usage
 
@@ -68,7 +69,7 @@ Long answer: Go benchmarks provide a measurement of `ns/op` and `B/op`, represen
 Router Name | Relative Speed | Memory Use
 --- | --- | ---
 [`gorilla/mux`](https://github.com/gorilla/mux) | .06x | 199,686 B/op
-`matcha` | 1.0x | 139,064 B/op
+`matcha` | 1.0x | 67,928 B/op
 [`chi`](https://github.com/go-chi/chi) | 1.52x | 61,713 B/op
 [`httprouter`](https://github.com/julienschmidt/httprouter) | 5.87x | 13,792 B/op
 [`gin`](https://github.com/gin-gonic/gin) | 5.87x | 0 B/op
