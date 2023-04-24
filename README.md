@@ -18,10 +18,12 @@
 
 `go get github.com/cloudretic/matcha[@version]`
 
-Supported versions:
+Stable versions:
 
 - `v1.0`
 - `v1.1.0 (stable release, recommended)`
+
+Omitting the version will fetch the main branch, which may contain unreleased but stable features.
 
 ## Basic Usage
 
