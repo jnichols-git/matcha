@@ -13,7 +13,7 @@ type defaultRouter struct {
 	mws       []middleware.Middleware
 	routes    map[string]map[int]route.Route
 	rtree     *tree.RouteTree
-	handlers  map[string]http.Handler
+	handlers  map[string]map[int]http.Handler
 	notfound  http.Handler
 	maxParams int
 }
@@ -23,7 +23,7 @@ func Default() *defaultRouter {
 		mws:       make([]middleware.Middleware, 0),
 		routes:    make(map[string]map[int]route.Route),
 		rtree:     tree.New(),
-		handlers:  make(map[string]http.Handler),
+		handlers:  make(map[string]map[int]http.Handler),
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
@@ -39,7 +39,10 @@ func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 		rt.routes[r.Method()] = make(map[int]route.Route)
 	}
 	rt.routes[r.Method()][id] = r
-	rt.handlers[r.Hash()] = h
+	if rt.handlers[r.Method()] == nil {
+		rt.handlers[r.Method()] = make(map[int]http.Handler)
+	}
+	rt.handlers[r.Method()][id] = h
 }
 
 func (rt *defaultRouter) AddNotFound(h http.Handler) {
@@ -65,7 +68,7 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if reqWithCtx == nil {
 			return
 		}
-		rt.handlers[r.Hash()].ServeHTTP(w, reqWithCtx)
+		rt.handlers[req.Method][leaf_id].ServeHTTP(w, reqWithCtx)
 		return
 	}
 	rt.notfound.ServeHTTP(w, req)

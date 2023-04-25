@@ -12,7 +12,7 @@ r := router.Declare(
 r.AddRoute(route.Declare(http.MethodGet, "/someOtherEndpoint"), someOtherHandler)
 ```
 
-Routes will be handled in the order they are added.
+Routes will be handled in the order they are added. Re-adding a route with the same method and path does not change the handler or middleware for that route; only the first instance of a duplicate route will be matched against.
 
 You can also add a specific handler that's called in the event that no route matches using `WithNotFound` or `AddNotFound` in the same way (the router will return an empty 404 by default). Doing so will override any previously-set handler for this case.
 

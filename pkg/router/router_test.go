@@ -328,3 +328,23 @@ func TestCORS(t *testing.T) {
 		t.Error("expected invalid route to fail with preflightcors")
 	}
 }
+
+func TestDuplicate(t *testing.T) {
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusTeapot)
+	})
+	r := Declare(
+		Default(),
+		WithRoute(route.Declare(http.MethodGet, "/duplicate/route"), h1),
+		WithRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2),
+	)
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/duplicate/route", nil)
+	r.ServeHTTP(w, req)
+	if w.Result().StatusCode != http.StatusOK {
+		t.Errorf("re-declaration should be noop; expected %d, got %d", http.StatusOK, w.Result().StatusCode)
+	}
+}
