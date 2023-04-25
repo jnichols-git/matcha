@@ -69,6 +69,7 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		rt.handlers[req.Method][leaf_id].ServeHTTP(w, reqWithCtx)
+		rctx.ReturnRequestContext(req)
 		return
 	}
 	rt.notfound.ServeHTTP(w, req)

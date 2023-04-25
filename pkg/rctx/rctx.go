@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -17,13 +18,26 @@ type Context struct {
 	err    error
 }
 
+var rctxPool = &sync.Pool{
+	New: func() any {
+		return &Context{}
+	},
+}
+
+func new(parent context.Context, maxParams int) *Context {
+	rctx := rctxPool.Get().(*Context)
+	rctx.parent = parent
+	if rctx.params == nil || rctx.params.cap < maxParams {
+		rctx.params = newParams(maxParams)
+	} else {
+		rctx.params.head = 0
+	}
+	return rctx
+}
+
 // PrepareRequestContext prepares the context of a request for matching.
 func PrepareRequestContext(req *http.Request, maxParams int) *http.Request {
-	rctx := &Context{
-		parent: req.Context(),
-		params: newParams(maxParams),
-		err:    nil,
-	}
+	rctx := new(req.Context(), maxParams)
 	return req.WithContext(rctx)
 }
 
@@ -37,6 +51,12 @@ func ResetRequestContext(req *http.Request) error {
 	}
 	rctx.params.head = 0
 	return nil
+}
+
+func ReturnRequestContext(req *http.Request) {
+	if rctx, ok := req.Context().(*Context); ok {
+		rctxPool.Put(rctx)
+	}
 }
 
 // PARAMETER IMPLEMENTATION
