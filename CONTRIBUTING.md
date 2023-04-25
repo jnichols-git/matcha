@@ -10,7 +10,7 @@ Matcha's latest stable release is `v1.1.0` (major version 1, minor version 1, pa
 - Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.2.0`.
 - Patch: The change is a bugfix, minor performance improvement, minor API change, or auxilary component (like middleware). Patches should relate to branch `main`.
 
-Release eligibility will be evaluated bimonthly, with the next evaluation being July 1, 2023.
+Release eligibility will be evaluated monthly, with the next evaluation being on May 1, 2023.
 
 ## Getting Started
 

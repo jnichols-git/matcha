@@ -2,6 +2,7 @@ package tree
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/cloudretic/matcha/pkg/rctx"
@@ -43,5 +44,21 @@ func TestTree(t *testing.T) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	if leaf_id := rtree.Match(req); leaf_id != NO_LEAF_ID {
 		t.Error("route shouldn't exist")
+	}
+}
+
+func TestDuplicate(t *testing.T) {
+	rtree := New()
+	a := rtree.Add(route.Declare(http.MethodGet, "/duplicate/route"))
+	b := rtree.Add(route.Declare(http.MethodGet, "/duplicate/route"))
+	if a != 1 {
+		t.Errorf("expected leaf_id 1, got %d", a)
+	}
+	if b != 2 {
+		t.Errorf("expected leaf_id 2, got %d", b)
+	}
+	c := rtree.Match(httptest.NewRequest(http.MethodGet, "/duplicate/route", nil))
+	if c != 1 {
+		t.Errorf("expected leaf_id 1, got %d", c)
 	}
 }
