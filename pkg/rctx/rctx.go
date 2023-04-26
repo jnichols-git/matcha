@@ -55,6 +55,10 @@ func ResetRequestContext(req *http.Request) error {
 
 func ReturnRequestContext(req *http.Request) {
 	if rctx, ok := req.Context().(*Context); ok {
+		for i := range rctx.params.rps {
+			rctx.params.rps[i].key = ""
+			rctx.params.rps[i].value = ""
+		}
 		rctxPool.Put(rctx)
 	}
 }
