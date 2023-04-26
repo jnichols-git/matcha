@@ -30,6 +30,7 @@ func new(parent context.Context, maxParams int) *Context {
 	if rctx.params == nil || rctx.params.cap < maxParams {
 		rctx.params = newParams(maxParams)
 	} else {
+		rctx.params.cap = maxParams
 		rctx.params.head = 0
 	}
 	return rctx
@@ -55,6 +56,8 @@ func ResetRequestContext(req *http.Request) error {
 
 func ReturnRequestContext(req *http.Request) {
 	if rctx, ok := req.Context().(*Context); ok {
+		rctx.parent = nil
+		rctx.err = nil
 		for i := range rctx.params.rps {
 			rctx.params.rps[i].key = ""
 			rctx.params.rps[i].value = ""
