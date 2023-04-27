@@ -52,7 +52,7 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 // Tree Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
 // path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	req = executeMiddleware(rt.mws, w, req)
+	req = middleware.ExecuteMiddleware(rt.mws, w, req)
 	if req == nil {
 		return
 	}
@@ -61,7 +61,7 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		r := rt.routes[req.Method][leaf_id]
 		req = rctx.PrepareRequestContext(req, route.NumParams(r))
 		reqWithCtx := r.MatchAndUpdateContext(req)
-		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
+		reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {
 			return
 		}
@@ -70,13 +70,4 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	rt.notfound.ServeHTTP(w, req)
 	return
-}
-
-func executeMiddleware(mw []middleware.Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
-	for _, m := range mw {
-		if req = m(w, req); req == nil {
-			return nil
-		}
-	}
-	return req
 }
