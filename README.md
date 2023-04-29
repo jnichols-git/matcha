@@ -1,10 +1,9 @@
 # matcha
 
-[![Coverage Status](https://coveralls.io/repos/github/cloudretic/router/badge.svg)](https://coveralls.io/github/cloudretic/router)
+[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg)](https://coveralls.io/github/cloudretic/router)
+[![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
 `cloudretic/matcha` is an actively developed HTTP router for Go, primarily developed for CloudRETIC's API handlers but free to use by anyone under the Apache 2.0 license.
-
-> **In version 1.1, `cloudretic/router` will be renamed to `cloudretic/matcha`.** The former name is too generic to support long-term. We apologize for any inconvenience caused by this change.
 
 ## Features
 

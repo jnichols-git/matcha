@@ -4,13 +4,13 @@ We welcome community contributions to `matcha`!
 
 ## Versioning
 
-Matcha's latest stable release is `v1.1.0` (major version 1, minor version 1, patch 0). This release, and all future releases, are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
+Matcha's latest stable release is `v1.1.0` (major version 1, minor version 1, patch 0). Releases are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
 
-- Major: The change is non-essential and breaks the existing API. See our backwards compatiblility policy [here](docs/versioning.md). Major changes should relate to branch `v1.2.0`.
+- Major: The change is non-essential and breaks the existing API. See our backwards compatiblility policy [here](docs/versioning.md). Major changes are not currently being accepted.
 - Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.2.0`.
 - Patch: The change is a bugfix, minor performance improvement, minor API change, or auxilary component (like middleware). Patches should relate to branch `main`.
 
-Release eligibility will be evaluated monthly, with the next evaluation being on May 1, 2023.
+Release eligibility will be evaluated biweekly, with the next evaluation being on May 15, 2023.
 
 ## Getting Started
 
