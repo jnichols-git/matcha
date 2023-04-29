@@ -1,3 +1,6 @@
+// Package router defines the API for creating and interacting with a router, and its internal behavior.
+//
+// See [https://github.com/cloudretic/matcha/blob/main/docs/routers.md].
 package router
 
 import (

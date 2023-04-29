@@ -8,7 +8,7 @@ Routes are defined using *expressions* and made up of *parts*. When creating a r
 
 ## Route Parts
 
- `matcha` has support for special syntax to customize the behavior of "parts". Currently, it supports:
+ Matcha has support for special syntax to customize the behavior of "parts". Currently, it supports:
 
 - Static strings
 - Wildcard parameters

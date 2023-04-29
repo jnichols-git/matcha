@@ -1,5 +1,4 @@
-// package path manages the tokenization of http paths
-// TODO: this should belong to the data repo
+// Package path manages the tokenization of http paths.
 package path
 
 import (
@@ -7,7 +6,7 @@ import (
 )
 
 // Return the next token from a path, starting at position last, and the position to use with the next call.
-// Returns "" if no token could be found
+// Next considers multiple consecutive slashes to act as a single slash.
 func Next(path string, last int) (string, int) {
 	if last+1 > len(path) {
 		return "", -1
