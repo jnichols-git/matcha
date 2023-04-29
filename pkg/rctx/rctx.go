@@ -1,3 +1,6 @@
+// Package rctx defines the context structure for Matcha.
+//
+// See [https://github.com/cloudretic/matcha/blob/main/docs/context.md].
 package rctx
 
 import (

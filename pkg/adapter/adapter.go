@@ -1,3 +1,7 @@
+// Package adapter implements an optional interface for use with non-standard requests.
+//
+// Use of this package is optional when writing adapters for other services, but serves as
+// a good representation of what may be needed.
 package adapter
 
 import "net/http"

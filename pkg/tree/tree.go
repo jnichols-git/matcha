@@ -1,3 +1,6 @@
+// Package tree defines a method of recursively matching route paths by part.
+//
+// See [https://github.com/cloudretic/matcha/blob/main/docs/routers.md#matching].
 package tree
 
 import (

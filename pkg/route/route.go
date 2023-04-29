@@ -1,3 +1,6 @@
+// Package route defines the API for creating and interacting with a route, and its internal behavior.
+//
+// See [https://github.com/cloudretic/matcha/blob/main/docs/routes.md].
 package route
 
 import (
