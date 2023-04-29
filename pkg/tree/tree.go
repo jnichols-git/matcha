@@ -94,6 +94,7 @@ type RouteTree struct {
 	nextId     int
 }
 
+// Create a new RouteTree.
 func New() *RouteTree {
 	return &RouteTree{
 		methodRoot: make(map[string]*node),

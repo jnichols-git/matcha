@@ -52,8 +52,11 @@ type AccessControlOptions struct {
 }
 
 // Create a deep copy of aco that reflects the headers in crh.
+// Reflection means that for each option in aco, the resulting aco will contain any values in crh that match it;
+// as a result, the output has the minimum number of permissions needed to fulfill the provided headers. This should
+// not be used as a security feature.
 // If there is no option in aco that can reflect crh, the output will have an empty field; this is intended behavior
-// and indicates to the HTTP client that resource sharing should not be allowed for this request
+// and indicates to the HTTP client that resource sharing should not be allowed for this request.
 func ReflectCORSRequestHeaders(aco *AccessControlOptions, crh *CORSRequestHeaders) *AccessControlOptions {
 	out := &AccessControlOptions{
 		AllowOrigin:      make([]string, 1),
@@ -108,6 +111,8 @@ func ReflectCORSRequestHeaders(aco *AccessControlOptions, crh *CORSRequestHeader
 	return out
 }
 
+// Updates the response headers from http.ResponseWriter to mirror a set of access control options.
+// Mirroring provides the minimum amount of permissions needed for the inbound request via ReflectCorsRequestHeaders.
 func SetCORSResponseHeaders(w http.ResponseWriter, req *http.Request, aco *AccessControlOptions) {
 	crh := GetCORSRequestHeaders(req)
 	res := ReflectCORSRequestHeaders(aco, crh)

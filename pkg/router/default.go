@@ -29,10 +29,16 @@ func Default() *defaultRouter {
 	}
 }
 
+// Attach middleware to the router.
+//
+// See interface Router.
 func (rt *defaultRouter) Attach(mw middleware.Middleware) {
 	rt.mws = append(rt.mws, mw)
 }
 
+// Add a route to the router.
+//
+// See interface Router.
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	if rt.routes[r.Method()] == nil {
@@ -45,6 +51,9 @@ func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 	rt.handlers[r.Method()][id] = h
 }
 
+// Set the handler for instances where no route is found.
+//
+// See interface Router.
 func (rt *defaultRouter) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
