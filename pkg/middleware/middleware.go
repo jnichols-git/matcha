@@ -114,3 +114,15 @@ type LogEntry struct {
 	Method string
 	URL    *url.URL
 }
+
+// ExecuteMiddleware executes the given middleware functions on the given request.
+// It returns the modified request or nil if any middleware function returns nil.
+func ExecuteMiddleware(mw []Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
+	for _, m := range mw {
+		req = m(w, req)
+		if req == nil {
+			break
+		}
+	}
+	return req
+}
