@@ -13,4 +13,4 @@ Generally, it is encouraged that you pick one and stick to it for both routes an
 
 ## Handlers
 
-Some routers use specialized handler functions or types in their APIs. While separating from Go's standard HTTP library can lead to performance improvements, it also leads to stronger coupling with the package being used. We've re-implemented some of the interface members of the HTTP library, allowing for high performance without the need for refactoring code to migrate to `matcha`. Any handler that works with Go's standard library works for `matcha` as well.
+Some routers use specialized handler functions or types in their APIs. While separating from Go's standard HTTP library can lead to performance improvements, it also leads to stronger coupling with the package being used. We've re-implemented some of the interface members of the HTTP library, allowing for high performance without the need for refactoring code to migrate to Matcha. Any handler that works with Go's standard library works for Matcha as well.
