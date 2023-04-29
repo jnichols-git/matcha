@@ -66,9 +66,11 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		reqWithCtx := r.MatchAndUpdateContext(req)
 		reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {
+			rctx.ReturnRequestContext(req)
 			return
 		}
 		rt.handlers[req.Method][leaf_id].ServeHTTP(w, reqWithCtx)
+		rctx.ReturnRequestContext(req)
 		return
 	}
 	rt.notfound.ServeHTTP(w, req)

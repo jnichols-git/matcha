@@ -31,9 +31,9 @@ func TestNative(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		req = PrepareRequestContext(req, DefaultMaxParams)
+		req = PrepareRequestContext(req, 4)
 		ctx := req.Context()
-		for i := 0; i < DefaultMaxParams; i++ {
+		for i := 0; i < 4; i++ {
 			p := fmt.Sprintf("p%d", i)
 			v := fmt.Sprintf("v%d", i)
 			err := SetParam(ctx, p, v)
@@ -43,9 +43,9 @@ func TestNative(t *testing.T) {
 		}
 		err = SetParam(ctx, "errp", "errv")
 		if err == nil {
-			t.Error("should fail to set more than DefaultMaxParams")
+			t.Error("should fail to set more than 4 params")
 		}
-		for i := 0; i < DefaultMaxParams; i++ {
+		for i := 0; i < 4; i++ {
 			p := fmt.Sprintf("p%d", i)
 			v := fmt.Sprintf("v%d", i)
 			got := GetParam(ctx, p)
@@ -67,6 +67,21 @@ func TestNative(t *testing.T) {
 			t.Error(err)
 		} else if val := GetParam(ctx, "new-param"); val != "new-value" {
 			t.Errorf("expected new-value, got %s", val)
+		}
+		ReturnRequestContext(req)
+		req, err = http.NewRequest(http.MethodPost, "http://test.com", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req = PrepareRequestContext(req, 3)
+		ctx = req.Context()
+		if l := ctx.(*Context).params.cap; l != 3 {
+			t.Errorf("should have space for 3 params exactly")
+		}
+		for _, kv := range ctx.(*Context).params.rps {
+			if kv.key != "" || kv.value != "" {
+				t.Errorf("values should be cleared from pool contexts")
+			}
 		}
 	})
 	t.Run("with ctx", func(t *testing.T) {})
