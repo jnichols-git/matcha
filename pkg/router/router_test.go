@@ -320,11 +320,7 @@ func TestCORS(t *testing.T) {
 	})
 
 	// Test invalid route for preflight
-	r, err := New(
-		Default(),
-		PreflightCORS("/{(}", aco),
-	)
-	if err == nil {
+	if _, err := New(Default(), PreflightCORS("/{(}", aco)); err == nil {
 		t.Error("expected invalid route to fail with preflightcors")
 	}
 }
