@@ -114,3 +114,10 @@ type LogEntry struct {
 	Method string
 	URL    *url.URL
 }
+
+func Handler(h http.Handler) Middleware {
+	return func(w http.ResponseWriter, r *http.Request) *http.Request {
+		h.ServeHTTP(w, r)
+		return r
+	}
+}
