@@ -118,6 +118,19 @@ type LogEntry struct {
 	URL    *url.URL
 }
 
+// Executes the given middleware functions on the given request.
+// It returns the modified request or nil if any middleware function returns nil.
+func ExecuteMiddleware(mw []Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
+	for _, m := range mw {
+		req = m(w, req)
+		if req == nil {
+			break
+		}
+	}
+	return req
+}
+
+// Use an http.Handler as Middleware.
 func Handler(h http.Handler) Middleware {
 	return func(w http.ResponseWriter, r *http.Request) *http.Request {
 		h.ServeHTTP(w, r)
