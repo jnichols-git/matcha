@@ -74,10 +74,11 @@ func matchf(tk string) (pmf, bool, error) {
 		}, false, nil
 	} else {
 		return func(s string, i int) int {
-			if tk != s[i:i+len(tk)] {
+			if end := i + len(tk); len(s) < end || tk != s[i:end] {
 				return -1
+			} else {
+				return end
 			}
-			return i + len(tk)
 		}, true, nil
 	}
 }
@@ -109,11 +110,8 @@ func CompilePattern(expr string) (*Pattern, bool, error) {
 		statics: make([]string, 0),
 	}
 	regexIndices, err := findAllRegexGroups(expr)
-	if err != nil {
+	if err != nil || len(regexIndices) == 0 {
 		return nil, false, err
-	}
-	if len(regexIndices) == 0 {
-		return nil, false, nil
 	}
 	var set, next []int
 	// Start with the first set
