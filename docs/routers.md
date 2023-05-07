@@ -12,7 +12,7 @@ r := router.Declare(
 r.AddRoute(route.Declare(http.MethodGet, "/someOtherEndpoint"), someOtherHandler)
 ```
 
-Routes will be handled in the order they are added.
+Routes will be handled in the order they are added. Re-adding a route with the same method and path does not change the handler or middleware for that route; only the first instance of a duplicate route will be matched against.
 
 You can also add a specific handler that's called in the event that no route matches using `WithNotFound` or `AddNotFound` in the same way (the router will return an empty 404 by default). Doing so will override any previously-set handler for this case.
 
@@ -45,7 +45,7 @@ router.Attach(someOtherMiddleware)
 
 ## Matching
 
-As of version 1.1, `matcha` uses a tree-based system to match requests. When adding routes, the `Part`s of the route are added to a tree, where equivalent `Part`s are combined into the same node. Requested routes are compared to this tree using a depth-first traversal, in the same order that the routes were added. For example, take this tree for the following set of routes. Note that leaf nodes are not overwritten by routes that extend beyond them.
+As of version 1.1, Matcha uses a tree-based system to match requests. When adding routes, the `Part`s of the route are added to a tree, where equivalent `Part`s are combined into the same node. Requested routes are compared to this tree using a depth-first traversal, in the same order that the routes were added. For example, take this tree for the following set of routes. Note that leaf nodes are not overwritten by routes that extend beyond them.
 
 ```txt
 1: /static
@@ -59,4 +59,4 @@ root -- static
                 \ other -- route
 ```
 
-Some routers support exact routes only, as defining behavior for conflicting routes can be expensive. `matcha` supports wildcards, regex validation, and partial routes, all of which can lead to conflicts. To avoid incurring performance costs, `matcha` currently supports only *first match*, which means that the first "correct" route, in order of their registration, will be matched, regardless of if there is another conflicting one registered after.
+Some routers support exact routes only, as defining behavior for conflicting routes can be expensive. Matcha supports wildcards, regex validation, and partial routes, all of which can lead to conflicts. To avoid incurring performance costs, Matcha currently supports only *first match*, which means that the first "correct" route, in order of their registration, will be matched, regardless of if there is another conflicting one registered after.

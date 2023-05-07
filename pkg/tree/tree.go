@@ -1,3 +1,6 @@
+// Package tree defines a method of recursively matching route paths by part.
+//
+// See [https://github.com/cloudretic/matcha/blob/main/docs/routers.md#matching].
 package tree
 
 import (
@@ -91,6 +94,7 @@ type RouteTree struct {
 	nextId     int
 }
 
+// Create a new RouteTree.
 func New() *RouteTree {
 	return &RouteTree{
 		methodRoot: make(map[string]*node),

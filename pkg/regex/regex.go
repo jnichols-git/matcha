@@ -1,4 +1,4 @@
-// package regex wraps the Golang regexp package
+// Package regex wraps the Golang regexp package to provide more convenient access to some features.
 package regex
 
 import (

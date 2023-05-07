@@ -13,7 +13,7 @@ type defaultRouter struct {
 	mws       []middleware.Middleware
 	routes    map[string]map[int]route.Route
 	rtree     *tree.RouteTree
-	handlers  map[string]http.Handler
+	handlers  map[string]map[int]http.Handler
 	notfound  http.Handler
 	maxParams int
 }
@@ -23,25 +23,37 @@ func Default() *defaultRouter {
 		mws:       make([]middleware.Middleware, 0),
 		routes:    make(map[string]map[int]route.Route),
 		rtree:     tree.New(),
-		handlers:  make(map[string]http.Handler),
+		handlers:  make(map[string]map[int]http.Handler),
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
 }
 
+// Attach middleware to the router.
+//
+// See interface Router.
 func (rt *defaultRouter) Attach(mw middleware.Middleware) {
 	rt.mws = append(rt.mws, mw)
 }
 
+// Add a route to the router.
+//
+// See interface Router.
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	if rt.routes[r.Method()] == nil {
 		rt.routes[r.Method()] = make(map[int]route.Route)
 	}
 	rt.routes[r.Method()][id] = r
-	rt.handlers[r.Hash()] = h
+	if rt.handlers[r.Method()] == nil {
+		rt.handlers[r.Method()] = make(map[int]http.Handler)
+	}
+	rt.handlers[r.Method()][id] = h
 }
 
+// Set the handler for instances where no route is found.
+//
+// See interface Router.
 func (rt *defaultRouter) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
@@ -52,7 +64,7 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 // Tree Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
 // path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
 func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	req = executeMiddleware(rt.mws, w, req)
+	req = middleware.ExecuteMiddleware(rt.mws, w, req)
 	if req == nil {
 		return
 	}
@@ -61,22 +73,15 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		r := rt.routes[req.Method][leaf_id]
 		req = rctx.PrepareRequestContext(req, route.NumParams(r))
 		reqWithCtx := r.MatchAndUpdateContext(req)
-		reqWithCtx = executeMiddleware(r.Middleware(), w, reqWithCtx)
+		reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {
+			rctx.ReturnRequestContext(req)
 			return
 		}
-		rt.handlers[r.Hash()].ServeHTTP(w, reqWithCtx)
+		rt.handlers[req.Method][leaf_id].ServeHTTP(w, reqWithCtx)
+		rctx.ReturnRequestContext(req)
 		return
 	}
 	rt.notfound.ServeHTTP(w, req)
 	return
-}
-
-func executeMiddleware(mw []middleware.Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
-	for _, m := range mw {
-		if req = m(w, req); req == nil {
-			return nil
-		}
-	}
-	return req
 }
