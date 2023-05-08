@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -195,5 +196,26 @@ func TestFailure(t *testing.T) {
 	l, err = ParseLog(badlog)
 	if l != nil || err == nil {
 		t.Errorf("bad log should return nil, err, got %v, %s", l, err)
+	}
+}
+
+func TestHandlerAsMiddleware(t *testing.T) {
+	expectedResponse := "Hello, world!"
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, expectedResponse)
+	}
+	mw := Handler(http.HandlerFunc(handler))
+	req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+	rec := httptest.NewRecorder()
+	req = mw(rec, req)
+	if req == nil {
+		t.Errorf("request should be unchanged.")
+	}
+	if res := rec.Body.String(); res != "Hello, world!" {
+		t.Errorf(
+			"response should be \"%s\", got \"%s\"",
+			expectedResponse,
+			res,
+		)
 	}
 }
