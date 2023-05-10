@@ -11,6 +11,8 @@
     - [Partial/Prefix Routes](#partialprefix-routes)
     - [Full Example](#full-example)
     - [Note: Registration Order](#note-registration-order)
+  - [Additional Tools](#additional-tools)
+    - [Middleware](#middleware)
 
 Hello! This is a step-by-step guide to using Matcha for HTTP handling in Go.
 
@@ -158,3 +160,29 @@ Implicitly deprioritizing some routes to skew towards exact matches causes two p
 - Performance will be hit as in order to know if the most exact match has been reached, the entire tree must be traversed
 
 We're working on ways to make routing more intuitive while avoiding these problems. In the meantime, we believe that strict registration order is the best way to go, so that you can always predict what Matcha will do with the instructions you give it.
+
+## Additional Tools
+
+### Middleware
+
+Matcha uses `func(w http.ResponseWriter, req *http.Request) *http.Request` for middleware. You can attach them to a router or route using `Attach`, or the ConfigFunc `WithMiddleware`. This example logs all incoming requests, and rejects requests to the second route that don't have a query parameter `user` by returning `400 Bad Request`:
+
+```go
+import (
+    "github.com/cloudretic/matcha/pkg/router"
+    "github.com/cloudretic/matcha/pkg/route"
+    "github.com/cloudretic/matcha/pkg/middleware"
+)
+
+server := router.Declare(
+    router.Default(),
+    router.WithRoute(route.Declare(http.MethodGet, "/"), h1),
+    router.WithRoute(route.Declare(
+        http.MethodGet, "/users",
+        WithMiddleware(middleware.ExpectQueryParam("user"))
+    ), h2)
+)
+server.Attach(middleware.LogRequests())
+```
+
+Check `package middleware` for information on what we natively support. Additionally, in version 1.2.0, we are extending support to `http.Handler` middleware to more easily integrate with exterior tools.
