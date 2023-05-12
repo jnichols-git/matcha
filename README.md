@@ -64,11 +64,10 @@ Long answer: Go benchmarks provide a measurement of `ns/op` and `B/op`, represen
 
 Router Name | Relative Speed | Memory Use
 --- | --- | ---
-[`gorilla/mux`](https://github.com/gorilla/mux) | .06x | 199,686 B/op
-`cloudretic/matcha` | 1.0x | 67,928 B/op
-[`go-chi/chi`](https://github.com/go-chi/chi) | 1.52x | 61,713 B/op
-[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 5.87x | 13,792 B/op
-[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 5.87x | 0 B/op
+`cloudretic/matcha` | 1.0x | 44,785 B/op
+[`go-chi/chi`](https://github.com/go-chi/chi) | 1.26x | 61,713 B/op
+[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 4.96x | 13,792 B/op
+[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 4.96x | 0 B/op
 
 ## Maintainers
 
