@@ -62,19 +62,23 @@ rt1.AddRoute(r1, h1)
 rt1.AddRoute(r2, h2)
 ```
 
-You may have noticed that this is a lot of error checking that you don't want to be doing. That is fair! This error behavior is meant to help you deal with complex workloads, like loading a configuration file with lots of paths to register, where errors may occur and be recoverable. Let's look at a different way to do this.
+You may have noticed that this is a lot of error checking that you don't want to be doing. That is fair! This error behavior is the default because explicit error handling is the default in Go, but for simple router workloads, it can be a pain. Let's look at a different way to do this.
 
 ### ConfigFuncs and Declare
 
-You may be wondering what the deal is with `router.New`. In this example, it serves only to pass through `router.Default()` and make your code longer--why go through the trouble? You certainly don't have to, but in addition to their regular arguments, both `route.New` and `router.New` take a variadic slice of functions that run on their respective structures. These are used to further customize behavior and enable a *declarative* routing style, which is what `Declare` is for. Here's the above example, but done in this style:
+In this example, `router.New` serves only to pass through `router.Default()` and make your code longer--why go through the trouble? You certainly don't have to, but in addition to their regular arguments, both `New` and `Declare` take a variadic slice of functions that run on their respective structures. These are used to further customize behavior and enable a *declarative* routing style, which is what `Declare` is for. In this style, you set the definition for a router that *must compile* for the program to continue. Here's the above example, but done in this style:
 
 ```go
+r1 := route.Declare(http.MethodGet, "/")
+r2 := route.Declare(http.MethodGet, "/some/route")
 rt1 := router.Declare(
     router.Default(),
-    router.WithRoute(r.Declare(http.MethodGet,"/"), h1),
-    router.WithRoute(r.Declare(http.MethodGet,"/some/route"), h2),
+    router.WithRoute(r1, h1),
+    router.WithRoute(r2, h2),
 )
 ```
+
+If you're working on an application which may modify or reload the router based on a new definition, it's suggested you use `New` so you can catch and handle errors that occur during router or route creation.
 
 ## Route Syntax
 
@@ -97,6 +101,8 @@ func h1(w http.RequestWriter, req *http.Request) {
 }
 ```
 
+Wildcard parts that contain non-matching brackets or non-regex text outside of the brackets will fail to compile.
+
 Since **routes are matched in the order they are registered**, wildcards will override any same-length path you register to a router afterwards.
 
 ### Regex Validation
@@ -108,6 +114,8 @@ r1 := r.Declare(http.MethodGet, `/{hello|goodbye}`)
 r2 := r.Declare(http.MethodGet, `/files/[filename]{.*\.(md|go)}`)
 ```
 
+Regex parts that have non-matching brackets or invalid regex will fail to compile.
+
 Since **routes are matched in the order they are registered**, permissive regex will override any same-length path you register to a router afterwards.
 
 ### Partial/Prefix Routes
@@ -118,6 +126,8 @@ Routes can be configured to match their root and longer request paths by using a
 r1 := r.Declare(http.MethodGet, `/files/[filename]+`)
 r2 := r.Declare(http.MethodGet, `/+`)
 ```
+
+Partial end parts whose sub-part (whatever isn't the plus) fails to compile will also fail to compile.
 
 Since--and I promise this is the last time we'll say this--***routes are matched in the order they are registered***, partial routes will override any longer path you register to a router afterwards. This is particularly important for partial routes. You should register these last, and if you have multiple, in order from longest to shortest.
 
@@ -168,21 +178,27 @@ We're working on ways to make routing more intuitive while avoiding these proble
 Matcha uses `func(w http.ResponseWriter, req *http.Request) *http.Request` for middleware. You can attach them to a router or route using `Attach`, or the ConfigFunc `WithMiddleware`. This example logs all incoming requests, and rejects requests to the second route that don't have a query parameter `user` by returning `400 Bad Request`:
 
 ```go
+package main
+
 import (
     "github.com/cloudretic/matcha/pkg/router"
     "github.com/cloudretic/matcha/pkg/route"
     "github.com/cloudretic/matcha/pkg/middleware"
 )
 
-server := router.Declare(
-    router.Default(),
-    router.WithRoute(route.Declare(http.MethodGet, "/"), h1),
-    router.WithRoute(route.Declare(
+func main() {
+    rootRoute := route.Declare(http.MethodGet, "/")
+    userRoute := route.Declare(
         http.MethodGet, "/users",
-        WithMiddleware(middleware.ExpectQueryParam("user"))
-    ), h2)
-)
-server.Attach(middleware.LogRequests())
+        route.WithMiddleware(middleware.ExpectQueryParam("user"))
+    )
+    server := router.Declare(
+        router.Default(),
+        router.WithRoute(rootRoute, h1),
+        router.WithRoute(userRoute, h2)
+    )
+    server.Attach(middleware.LogRequests())
+}
 ```
 
 Check `package middleware` for information on what we natively support. Additionally, in version 1.2.0, we are extending support to `http.Handler` middleware to more easily integrate with exterior tools.

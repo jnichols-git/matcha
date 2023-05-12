@@ -28,36 +28,31 @@ Omitting the version will fetch the main branch, which may contain unreleased bu
 
 ## Basic Usage
 
-Create routes using `route.New` or `route.Declare` and a route expression:
+Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`
 
 ```go
-rt, err := route.New(http.MethodGet, "/static")
-if err != nil { ... }
-```
+package main
 
-Create a router using `router.New` or `router.Declare` with a router type and configuration functions:
-
-```go
-// Traditional router construction; create router and add properties
-r := router.Default()
-rt, err := route.New(http.MethodGet, "/static")
-if err != nil { ... }
-r.AddRoute(rt, routeHandler)
-r.AddNotFound(notFoundHandler)
-r.Attach(someMiddleware)
-```
-
-```go
-// Declarative router construction; create router by definition and panic on failure
-r := router.Declare(
-    router.Default(),
-    router.WithRoute(route.Declare(http.MethodGet, "/static"), routeHandler),
-    router.WithNotFound(notFoundHandler),
-    router.WithMiddleware(someMiddleware)
+import (
+    "github.com/cloudretic/matcha/pkg/route"
+    "github.com/cloudretic/matcha/pkg/router"
 )
+
+func handleHello(w http.ResponseWriter, req *http.Request) {
+    w.Write([]byte("Hello, World"))
+}
+
+func main() {
+    helloRoute := route.Declare(http.MethodGet, "/hello")
+    s := router.Declare(
+        router.Default(),
+        router.WithRoute(helloRoute, http.HandleFunc(handleHello)),
+    )
+    http.ListenAndServer(":8080", s)
+}
 ```
 
-See `docs/` for information on implementing more advanced features.
+For a step-by-step guide through Matcha's features, see our [User Guide](docs/user-guide.md).
 
 ## Benchmarks
 
@@ -79,4 +74,4 @@ Router Name | Relative Speed | Memory Use
 
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
-Jake Nichols | Creator | they/them | jakenichols2719 | jnichols@cloudretic.com
+Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@cloudretic.com>

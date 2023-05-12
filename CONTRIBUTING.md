@@ -61,7 +61,7 @@ Currently, new submissions to Matcha are subject to the following criteria:
 4. **Style**: Follow good Go code practices. We use [this list](https://github.com/golang/go/wiki/CodeReviewComments#gofmt) to evaluate style.
 5. **Zero-Dependency**: Matcha does not use any external libraries. Changes with dependencies will be rejected.
 
-We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub Copilot in your contributions to Matcha.
+We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub Copilot in your contributions to Matcha. CloudRETIC has concerns regarding the ethics and copyright implications of scraping open-source code for training data, and would prefer that any work submitted be attributable to the users that directly contribute to it.
 
 ## Versioning Policy
 
