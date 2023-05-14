@@ -3,12 +3,12 @@
 [![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg)](https://coveralls.io/github/cloudretic/router)
 [![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
-`cloudretic/matcha` is an actively developed HTTP router for Go, primarily developed for CloudRETIC's API handlers but free to use by anyone under the Apache 2.0 license.
+`cloudretic/matcha` is an actively developed HTTP router for Go with a focus on providing a flexible and performant route API.
 
 ## Features
 
 - Static string routes, wildcard parameters, regex validation, and prefix routes
-- Highly customizable route/router construction; use the syntax that feels best to you
+- Highly customizable route/router construction; get the results you want with the syntax that feels best to you
 - Comprehensive and passing test coverage, and extensive benchmarks to track performance
 - Native middleware to help you add common functionality, extensible when native support doesn't fit your use case
 - No dependencies, what you see is what you get
