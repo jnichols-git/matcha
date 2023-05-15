@@ -29,9 +29,9 @@ func createNode(p route.Part) *node {
 	}
 }
 
-// Propogate a set of parts through the tree, with this node as the root.
-// If there are no parts left to propogate, the node will instead be set to leaf leaf_id.
-func (n *node) propogate(ps []route.Part, leaf_id int) {
+// Propagate a set of parts through the tree, with this node as the root.
+// If there are no parts left to propagate, the node will instead be set to leaf leaf_id.
+func (n *node) propagate(ps []route.Part, leaf_id int) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
 		return
@@ -40,13 +40,13 @@ func (n *node) propogate(ps []route.Part, leaf_id int) {
 	if !n.isLeaf() && len(ps)-1 != 0 {
 		for _, child := range n.children {
 			if child.p.Eq(next) {
-				child.propogate(ps[1:], leaf_id)
+				child.propagate(ps[1:], leaf_id)
 				return
 			}
 		}
 	}
 	child := createNode(next)
-	child.propogate(ps[1:], leaf_id)
+	child.propagate(ps[1:], leaf_id)
 	n.children = append(n.children, child)
 }
 
@@ -111,7 +111,7 @@ func (rtree *RouteTree) Add(r route.Route) int {
 		rtree.methodRoot[r.Method()] = root
 	}
 	rtree.nextId++
-	root.propogate(r.Parts(), rtree.nextId)
+	root.propagate(r.Parts(), rtree.nextId)
 	return rtree.nextId
 }
 
