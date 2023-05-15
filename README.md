@@ -1,8 +1,8 @@
 # matcha
 
-[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg)](https://coveralls.io/github/cloudretic/router)
-[![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
+[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg?branch=main)](https://coveralls.io/github/cloudretic/matcha?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cloudretic/matcha)](https://goreportcard.com/report/github.com/cloudretic/matcha)
+[![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
 `cloudretic/matcha` is an actively developed HTTP router for Go with a focus on providing a flexible and performant route API.
 
@@ -18,14 +18,7 @@ For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 
 ## Installation
 
-`go get github.com/cloudretic/matcha[@version]`
-
-Stable versions:
-
-- `v1.0`
-- `v1.1.0 (stable release, recommended)`
-
-Omitting the version will fetch the main branch, which may contain unreleased but stable features.
+`go get github.com/cloudretic/matcha@v1.1.1`
 
 ## Basic Usage
 
