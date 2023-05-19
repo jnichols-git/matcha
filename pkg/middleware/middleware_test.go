@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,7 +14,7 @@ func TestExpectQueryParam(t *testing.T) {
 		m := ExpectQueryParam("foo")
 		r := httptest.NewRequest("GET", "http://example.com?foo=bar", nil)
 		w := httptest.NewRecorder()
-		if m(w, r) != r {
+		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
 			t.Error("ExpectQueryParam did not recognize foo was provided")
 		}
 	})
@@ -22,7 +23,7 @@ func TestExpectQueryParam(t *testing.T) {
 		m := ExpectQueryParam("foo")
 		r := httptest.NewRequest("GET", "http://example.com?foo=", nil)
 		w := httptest.NewRecorder()
-		if m(w, r) != r {
+		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
 			t.Error("ExpectQueryParam did not recognize foo was provided")
 		}
 	})
@@ -31,7 +32,7 @@ func TestExpectQueryParam(t *testing.T) {
 		m := ExpectQueryParam("foo")
 		r := httptest.NewRequest("GET", "http://example.com?foo", nil)
 		w := httptest.NewRecorder()
-		if m(w, r) != r {
+		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
 			t.Error("ExpectQueryParam should not have recognized foo was provided")
 		}
 	})
@@ -40,7 +41,7 @@ func TestExpectQueryParam(t *testing.T) {
 		m := ExpectQueryParam("foo")
 		r := httptest.NewRequest("GET", "http://example.com?bar=foo", nil)
 		w := httptest.NewRecorder()
-		if m(w, r) != nil {
+		if ExecuteMiddleware([]Middleware{m}, w, r) != nil {
 			t.Error("ExpectQueryParam should not have recognized foo was provided")
 		}
 	})
@@ -50,8 +51,9 @@ func TestLogRequests(t *testing.T) {
 	t.Run("log request with no origin", func(t *testing.T) {
 		var builder strings.Builder
 		mw := LogRequests(&builder)
+		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
-		req = mw(nil, req)
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
 		}
@@ -86,9 +88,10 @@ func TestLogRequests(t *testing.T) {
 	t.Run("log request with an origin", func(t *testing.T) {
 		var builder strings.Builder
 		mw := LogRequests(&builder)
+		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
 		req.Header.Set("Origin", "origin.com")
-		req = mw(nil, req)
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
 		}
@@ -127,9 +130,10 @@ func TestLogRequestsIf(t *testing.T) {
 		mw := LogRequestsIf(func(r *http.Request) bool {
 			return r.Header.Get("Origin") == "cloudretic.com"
 		}, &builder)
+		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
 		req.Header.Set("Origin", "cloudretic.com")
-		req = mw(nil, req)
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
 		}
@@ -160,9 +164,10 @@ func TestLogRequestsIf(t *testing.T) {
 		}
 
 		builder.Reset()
+		w = httptest.NewRecorder()
 		req = httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
 		req.Header.Set("Origin", "other.com")
-		req = mw(nil, req)
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
 		}
@@ -195,5 +200,26 @@ func TestFailure(t *testing.T) {
 	l, err = ParseLog(badlog)
 	if l != nil || err == nil {
 		t.Errorf("bad log should return nil, err, got %v, %s", l, err)
+	}
+}
+
+func TestHandlerAsMiddleware(t *testing.T) {
+	expectedResponse := "Hello, world!"
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, expectedResponse)
+	}
+	mw := Handler(http.HandlerFunc(handler))
+	req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+	rec := httptest.NewRecorder()
+	req = mw(rec, req)
+	if req == nil {
+		t.Errorf("request should be unchanged.")
+	}
+	if res := rec.Body.String(); res != "Hello, world!" {
+		t.Errorf(
+			"response should be \"%s\", got \"%s\"",
+			expectedResponse,
+			res,
+		)
 	}
 }

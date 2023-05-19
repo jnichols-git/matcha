@@ -6,7 +6,6 @@ Matcha is actively maintained, and we're always looking for feature requests, bu
 
 Planned for release by May 15, 2023
 
-- Adapter for middleware of the form `http.Handler`
 - Specified behavior for duplicate routes in preparation for 1.2.0 route validation
 - Performance improvements
 
@@ -14,5 +13,7 @@ Planned for release by May 15, 2023
 
 Planned for release by July 1, 2023
 
+- New format for regex; use as part or whole token for improved performance with known formats
 - Additional route validation: match against host, origin, etc.
 - Error handling: shorthand access to a generic error response and the [RFC 7801](https://datatracker.ietf.org/doc/draft-ietf-httpapi-rfc7807bis/) problem+json proposal
+- Integrate with common `http.Handler` chain middleware pattern

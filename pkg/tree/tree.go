@@ -41,25 +41,26 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 	return n.leaf_id
 }
 
-// Propogate a set of parts through the tree, with this node as the root.
-// If there are no parts left to propogate, the node will instead be set to leaf leaf_id.
-func (n *node) propogate(rt route.Route, ps []route.Part, leaf_id int) {
+// Propagate a set of parts through the tree, with this node as the root.
+// If there are no parts left to propagate, the node will instead be set to leaf leaf_id.
+func (n *node) propagate(r route.Route, ps []route.Part, leaf_id int) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
-		n.leaf_validators = rt.Validators()
+		n.leaf_validators = r.Validators()
 		return
 	}
 	next := ps[0]
 	if !n.isLeaf() && len(ps)-1 != 0 {
 		for _, child := range n.children {
 			if child.p.Eq(next) {
-				child.propogate(rt, ps[1:], leaf_id)
+				child.propagate(r, ps[1:], leaf_id)
 				return
 			}
 		}
 	}
 	child := createNode(next)
-	child.propogate(rt, ps[1:], leaf_id)
+	child.propagate(r, ps[1:], leaf_id)
+	child.propagate(r, ps[1:], leaf_id)
 	n.children = append(n.children, child)
 }
 
@@ -124,7 +125,7 @@ func (rtree *RouteTree) Add(r route.Route) int {
 		rtree.methodRoot[r.Method()] = root
 	}
 	rtree.nextId++
-	root.propogate(r, r.Parts(), rtree.nextId)
+	root.propagate(r, r.Parts(), rtree.nextId)
 	return rtree.nextId
 }
 

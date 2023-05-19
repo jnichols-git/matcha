@@ -1,14 +1,15 @@
 # matcha
 
-[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg)](https://coveralls.io/github/cloudretic/router)
+[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg?branch=main)](https://coveralls.io/github/cloudretic/matcha?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cloudretic/matcha)](https://goreportcard.com/report/github.com/cloudretic/matcha)
 [![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
-`cloudretic/matcha` is an actively developed HTTP router for Go, primarily developed for CloudRETIC's API handlers but free to use by anyone under the Apache 2.0 license.
+`cloudretic/matcha` is an actively developed HTTP router for Go with a focus on providing a flexible and performant route API.
 
 ## Features
 
 - Static string routes, wildcard parameters, regex validation, and prefix routes
-- Highly customizable route/router construction; use the syntax that feels best to you
+- Highly customizable route/router construction; get the results you want with the syntax that feels best to you
 - Comprehensive and passing test coverage, and extensive benchmarks to track performance
 - Native middleware to help you add common functionality, extensible when native support doesn't fit your use case
 - No dependencies, what you see is what you get
@@ -17,47 +18,35 @@ For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 
 ## Installation
 
-`go get github.com/cloudretic/matcha[@version]`
-
-Stable versions:
-
-- `v1.0`
-- `v1.1.0 (stable release, recommended)`
-
-Omitting the version will fetch the main branch, which may contain unreleased but stable features.
+`go get github.com/cloudretic/matcha@v1.1.1`
 
 ## Basic Usage
 
-Create routes using `route.New` or `route.Declare` and a route expression:
+Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`
 
 ```go
-rt, err := route.New(http.MethodGet, "/static")
-if err != nil { ... }
-```
+package main
 
-Create a router using `router.New` or `router.Declare` with a router type and configuration functions:
-
-```go
-// Traditional router construction; create router and add properties
-r := router.Default()
-rt, err := route.New(http.MethodGet, "/static")
-if err != nil { ... }
-r.AddRoute(rt, routeHandler)
-r.AddNotFound(notFoundHandler)
-r.Attach(someMiddleware)
-```
-
-```go
-// Declarative router construction; create router by definition and panic on failure
-r := router.Declare(
-    router.Default(),
-    router.WithRoute(route.Declare(http.MethodGet, "/static"), routeHandler),
-    router.WithNotFound(notFoundHandler),
-    router.WithMiddleware(someMiddleware)
+import (
+    "github.com/cloudretic/matcha/pkg/route"
+    "github.com/cloudretic/matcha/pkg/router"
 )
+
+func handleHello(w http.ResponseWriter, req *http.Request) {
+    w.Write([]byte("Hello, World"))
+}
+
+func main() {
+    helloRoute := route.Declare(http.MethodGet, "/hello")
+    s := router.Declare(
+        router.Default(),
+        router.WithRoute(helloRoute, http.HandleFunc(handleHello)),
+    )
+    http.ListenAndServer(":8080", s)
+}
 ```
 
-See `docs/` for information on implementing more advanced features.
+For a step-by-step guide through Matcha's features, see our [User Guide](docs/user-guide.md).
 
 ## Benchmarks
 
@@ -69,14 +58,13 @@ Long answer: Go benchmarks provide a measurement of `ns/op` and `B/op`, represen
 
 Router Name | Relative Speed | Memory Use
 --- | --- | ---
-[`gorilla/mux`](https://github.com/gorilla/mux) | .06x | 199,686 B/op
-`cloudretic/matcha` | 1.0x | 67,928 B/op
-[`go-chi/chi`](https://github.com/go-chi/chi) | 1.52x | 61,713 B/op
-[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 5.87x | 13,792 B/op
-[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 5.87x | 0 B/op
+`cloudretic/matcha` | 1.0x | 44,785 B/op
+[`go-chi/chi`](https://github.com/go-chi/chi) | 1.26x | 61,713 B/op
+[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 4.96x | 13,792 B/op
+[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 4.96x | 0 B/op
 
 ## Maintainers
 
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
-Jake Nichols | Creator | they/them | jakenichols2719 | jnichols@cloudretic.com
+Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@cloudretic.com>
