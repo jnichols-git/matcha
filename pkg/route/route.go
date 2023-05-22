@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 type Route interface {
@@ -41,11 +42,11 @@ type Route interface {
 	// Attach a validator to the route.
 	//
 	// Validators cannot be removed from a router once they are added.
-	Validate(v Validator)
+	Validate(v require.Required)
 	// Get the middleware attached to the route.
 	Middleware() []middleware.Middleware
 	// Get the validators attached to the route.
-	Validators() []Validator
+	Validators() []require.Required
 }
 
 // Create a new Route based on a string expression.

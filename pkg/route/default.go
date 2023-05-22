@@ -10,6 +10,7 @@ import (
 	"github.com/cloudretic/matcha/pkg/middleware"
 	"github.com/cloudretic/matcha/pkg/path"
 	"github.com/cloudretic/matcha/pkg/rctx"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 //=====PARTS=====
@@ -143,7 +144,7 @@ type defaultRoute struct {
 	method     string
 	parts      []Part
 	middleware []middleware.Middleware
-	validators []Validator
+	validators []require.Required
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -155,7 +156,7 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 		method:     method,
 		parts:      make([]Part, 0),
 		middleware: make([]middleware.Middleware, 0),
-		validators: make([]Validator, 0),
+		validators: make([]require.Required, 0),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -247,7 +248,7 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 	route.middleware = append(route.middleware, mw)
 }
 
-func (route *defaultRoute) Validate(v Validator) {
+func (route *defaultRoute) Validate(v require.Required) {
 	route.validators = append(route.validators, v)
 }
 
@@ -255,6 +256,6 @@ func (route *defaultRoute) Middleware() []middleware.Middleware {
 	return route.middleware
 }
 
-func (route *defaultRoute) Validators() []Validator {
+func (route *defaultRoute) Validators() []require.Required {
 	return route.validators
 }

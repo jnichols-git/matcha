@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudretic/matcha/pkg/path"
 	"github.com/cloudretic/matcha/pkg/route"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 const NO_LEAF_ID = int(0)
@@ -16,7 +17,7 @@ type node struct {
 	p               route.Part
 	children        []*node
 	leaf_id         int
-	leaf_validators []route.Validator
+	leaf_validators []require.Required
 }
 
 func (n *node) isLeaf() bool {
@@ -34,7 +35,7 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 	if n.leaf_id == NO_LEAF_ID {
 		return NO_LEAF_ID
 	}
-	if !route.ExecuteValidators(req, n.leaf_validators) {
+	if !require.Execute(req, n.leaf_validators) {
 		return NO_LEAF_ID
 	}
 	return n.leaf_id

@@ -1,4 +1,4 @@
-package route
+package require
 
 import (
 	"net/http"
@@ -8,11 +8,11 @@ import (
 	"github.com/cloudretic/matcha/pkg/regex"
 )
 
-type Validator func(req *http.Request) bool
+type Required func(req *http.Request) bool
 
-// ExecuteValidators executes a list of route validators on a request.
+// ExecuteRequireds executes a list of route validators on a request.
 // It only returns true if every validator provided returns true.
-func ExecuteValidators(req *http.Request, vs []Validator) bool {
+func Execute(req *http.Request, vs []Required) bool {
 	for _, v := range vs {
 		if !v(req) {
 			return false
@@ -44,8 +44,8 @@ func getReqHost(req *http.Request) (string, string) {
 }
 
 // Hosts checks a request against a list of host patterns.
-func Hosts(hns ...string) Validator {
-	hmfs := make([]Validator, 0, len(hns))
+func Hosts(hns ...string) Required {
+	hmfs := make([]Required, 0, len(hns))
 	for _, hn := range hns {
 		toks := strings.Split(hn, ":")
 		var hf, pf func(str string) bool

@@ -3,6 +3,7 @@ package route
 import (
 	"github.com/cloudretic/matcha/pkg/cors"
 	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 // RouteConfigFuncs can be applied to a Route at creation.
@@ -24,7 +25,7 @@ func WithMiddleware(mw middleware.Middleware) ConfigFunc {
 	}
 }
 
-func Validators(vs ...Validator) ConfigFunc {
+func Validators(vs ...require.Required) ConfigFunc {
 	return func(r Route) error {
 		for _, v := range vs {
 			r.Validate(v)

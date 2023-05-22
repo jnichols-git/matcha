@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/cloudretic/matcha/pkg/cors"
+	"github.com/cloudretic/matcha/pkg/route/require"
 
 	"github.com/cloudretic/matcha/pkg/rctx"
 	"github.com/cloudretic/matcha/pkg/route"
@@ -356,7 +357,7 @@ func TestValidatedDuplicate(t *testing.T) {
 		Default(),
 		WithRoute(route.Declare(
 			http.MethodGet, "/",
-			route.Validators(route.Hosts("origin.com")),
+			route.Validators(require.Hosts("origin.com")),
 		), h1),
 		WithRoute(route.Declare(http.MethodGet, "/"), h2),
 	)
