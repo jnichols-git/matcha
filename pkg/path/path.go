@@ -8,7 +8,7 @@ import (
 // Return the next token from a path, starting at position last, and the position to use with the next call.
 // Next considers multiple consecutive slashes to act as a single slash.
 func Next(path string, last int) (string, int) {
-	if path == "" {
+	if path == "" && last == 0 {
 		path = "/"
 	}
 	if last+1 > len(path) {
