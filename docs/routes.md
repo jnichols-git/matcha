@@ -46,3 +46,23 @@ r, err := route.New(http.MethodGet, "/files/[filename]+")
 ```
 
 Partials will match against their root with no additional tokens, and if they do, they will not set their parameter.
+
+## Requiring Non-Path Parameters
+
+Matcha provides an interface for matching things that are not paths in package `route/require` as the type `require.Required`. You can define your own with the function definition `func(req *http.Request) bool` and register them onto routes by using the config function or route function `route.Require`.
+
+```go
+webRoute, err := route.New(
+    http.MethodGet, "/",
+    route.Require(require.HostPorts("https://(www.|)cloudretic.com"))
+)
+apiRoute, err := route.New(
+    http.MethodGet(require.HostPorts("https://api.cloudretic.com"))
+)
+```
+
+We provide some commonly used requirements, such as HostPorts above.
+
+### Hosts
+
+You can use `require.Hosts` or `require.HostPorts` to match hosts using Patterns (regex enclosed in braces). Hosts matches the hostname, while HostPorts matches the scheme, host, and port of the request.

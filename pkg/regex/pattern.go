@@ -70,7 +70,7 @@ func matchf(tk string) (pmf, bool, error) {
 			if match == "" {
 				return -1
 			}
-			return i + strings.Index(s, match) + len(match)
+			return i + strings.Index(s[i:], match) + len(match)
 		}, false, nil
 	} else {
 		return func(s string, i int) int {
@@ -115,19 +115,30 @@ func CompilePattern(expr string) (*Pattern, bool, error) {
 	}
 	var set, next []int
 	// Start with the first set
-	set = regexIndices[0]
-	for setidx := 0; setidx < len(regexIndices)-1; {
+	setidx := 0
+	set = regexIndices[setidx]
+	if len(regexIndices) > 1 {
+		next = regexIndices[1]
+	} else {
+		next = []int{set[1], len(expr)}
+	}
+	for set[1] < len(expr) {
 		// For each set, resolve the token in the set
 		err = resolve(patt, expr, set)
 		if err != nil {
 			return nil, false, err
 		}
 		// Move to the next set OR whatever's in between this set and the next.
-		next = regexIndices[setidx+1]
-		if set[1] == next[0] {
+		if set[1] == next[0] && setidx+1 < len(regexIndices) {
+			// Sets line up and the next set exists; go to next
 			setidx++
-		} else {
+			next = regexIndices[setidx]
+		} else if next[0] > set[1] {
+			// Space in between sets; go to whatever's in between
 			next = []int{set[1], next[0]}
+		} else {
+			// Sets line up, but there's no next set; go to the last available substring
+			next = []int{set[1], len(expr)}
 		}
 		set = next
 	}
@@ -162,6 +173,9 @@ func (patt *Pattern) Match(str string) bool {
 		if i == -1 {
 			return false
 		}
+	}
+	if i != len(str) {
+		return false
 	}
 	return true
 }
