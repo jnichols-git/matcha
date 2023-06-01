@@ -93,7 +93,12 @@ func reqGenHeaders(method string, headers http.Header) func(url, path string) *h
 
 func runEvalRequest(t *testing.T,
 	s *httptest.Server, path string, genReqTo func(string, string) *http.Request, expect map[string]any) {
-	name := strings.ReplaceAll(path, "/", "-")[1:]
+	var name string
+	if len(path) > 0 {
+		name = strings.ReplaceAll(path, "/", "-")[1:]
+	} else {
+		name = "empty"
+	}
 	t.Run(name, func(t *testing.T) {
 		req := genReqTo(s.URL, path)
 		res, err := http.DefaultClient.Do(req)
@@ -166,6 +171,10 @@ func TestBasicRoutes(t *testing.T) {
 		WithMiddleware(testMiddleware),
 	)
 	s := httptest.NewServer(r)
+	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "root",
+	})
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
 		"body": "root",
