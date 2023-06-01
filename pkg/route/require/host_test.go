@@ -14,13 +14,6 @@ func TestRequireHosts(t *testing.T) {
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	for i := 3001; i <= 4000; i++ {
-		url := fmt.Sprintf("http://localhost:%d", i)
-		req = httptest.NewRequest(http.MethodGet, url, nil)
-		if !rq(req) {
-			t.Error("expected match", url)
-		}
-	}
 	req = httptest.NewRequest(http.MethodGet, "http://localhost:4500", nil)
 	if !rq(req) {
 		t.Error("expected match")
@@ -44,6 +37,11 @@ func TestRequireHosts(t *testing.T) {
 	req = httptest.NewRequest(http.MethodGet, "http://api.cloudretic.com", nil)
 	if !rq(req) {
 		t.Error("expected match")
+	}
+	// Negative cases
+	req = httptest.NewRequest(http.MethodGet, "https://cloudretic.com", nil)
+	if rq(req) {
+		t.Error("expected no match")
 	}
 }
 

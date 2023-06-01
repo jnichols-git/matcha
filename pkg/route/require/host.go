@@ -58,10 +58,11 @@ func Hosts(hns ...string) Required {
 		_, host, _ := splitHostPort(hn)
 		hpatt, isPatt, err := regex.CompilePattern(host)
 		hf = func(inHost string) bool {
+			_, inHost, _ = splitHostPort(inHost)
 			if !isPatt || err != nil {
 				return inHost == host
 			} else {
-				return hpatt.Match(host)
+				return hpatt.Match(inHost)
 			}
 		}
 		hmfs = append(hmfs, func(req *http.Request) bool {

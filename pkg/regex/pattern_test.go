@@ -18,6 +18,17 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("api.google.com"); ok {
 		t.Error("expected no match")
 	}
+	if ok := rs.Match("cloudretic.com"); ok {
+		t.Error("expected no match")
+	}
+	rs, _, _ = CompilePattern("{.+}.cloudretic.com")
+	if ok := rs.Match("cloudretic.com"); ok {
+		t.Error("expected no match")
+	}
+	if ok := rs.Match("www.cloudretic.com:80"); ok {
+		t.Error("expected no match")
+	}
+
 	rs, isrs, err = CompilePattern("api.cloudretic.com")
 	if err != nil {
 		t.Errorf("expected no error")
