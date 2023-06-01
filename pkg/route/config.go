@@ -25,10 +25,10 @@ func WithMiddleware(mw middleware.Middleware) ConfigFunc {
 	}
 }
 
-func Validators(vs ...require.Required) ConfigFunc {
+func Require(vs ...require.Required) ConfigFunc {
 	return func(r Route) error {
 		for _, v := range vs {
-			r.Validate(v)
+			r.Require(v)
 		}
 		return nil
 	}

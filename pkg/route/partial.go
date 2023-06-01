@@ -100,7 +100,7 @@ type partialRoute struct {
 	method     string
 	parts      []Part
 	middleware []middleware.Middleware
-	validators []require.Required
+	required   []require.Required
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -221,14 +221,14 @@ func (route *partialRoute) Attach(m middleware.Middleware) {
 	route.middleware = append(route.middleware, m)
 }
 
-func (route *partialRoute) Validate(v require.Required) {
-	route.validators = append(route.validators, v)
+func (route *partialRoute) Require(v require.Required) {
+	route.required = append(route.required, v)
 }
 
 func (route *partialRoute) Middleware() []middleware.Middleware {
 	return route.middleware
 }
 
-func (route *partialRoute) Validators() []require.Required {
-	return route.validators
+func (route *partialRoute) Required() []require.Required {
+	return route.required
 }

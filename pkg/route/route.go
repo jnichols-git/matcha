@@ -42,11 +42,11 @@ type Route interface {
 	// Attach a validator to the route.
 	//
 	// Validators cannot be removed from a router once they are added.
-	Validate(v require.Required)
+	Require(v require.Required)
 	// Get the middleware attached to the route.
 	Middleware() []middleware.Middleware
 	// Get the validators attached to the route.
-	Validators() []require.Required
+	Required() []require.Required
 }
 
 // Create a new Route based on a string expression.

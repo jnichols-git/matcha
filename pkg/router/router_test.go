@@ -357,7 +357,7 @@ func TestValidatedDuplicate(t *testing.T) {
 		Default(),
 		WithRoute(route.Declare(
 			http.MethodGet, "/",
-			route.Validators(require.Hosts("origin.com")),
+			route.Require(require.Hosts("origin.com")),
 		), h1),
 		WithRoute(route.Declare(http.MethodGet, "/"), h2),
 	)

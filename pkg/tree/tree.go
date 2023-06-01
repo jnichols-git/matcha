@@ -14,10 +14,10 @@ import (
 const NO_LEAF_ID = int(0)
 
 type node struct {
-	p               route.Part
-	children        []*node
-	leaf_id         int
-	leaf_validators []require.Required
+	p             route.Part
+	children      []*node
+	leaf_id       int
+	leaf_required []require.Required
 }
 
 func (n *node) isLeaf() bool {
@@ -35,7 +35,7 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 	if n.leaf_id == NO_LEAF_ID {
 		return NO_LEAF_ID
 	}
-	if !require.Execute(req, n.leaf_validators) {
+	if !require.Execute(req, n.leaf_required) {
 		return NO_LEAF_ID
 	}
 	return n.leaf_id
@@ -46,7 +46,7 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 func (n *node) propagate(r route.Route, ps []route.Part, leaf_id int) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
-		n.leaf_validators = r.Validators()
+		n.leaf_required = r.Required()
 		return
 	}
 	next := ps[0]

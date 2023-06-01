@@ -144,7 +144,7 @@ type defaultRoute struct {
 	method     string
 	parts      []Part
 	middleware []middleware.Middleware
-	validators []require.Required
+	required   []require.Required
 }
 
 // Tokenize and parse a route expression into a defaultRoute.
@@ -156,7 +156,7 @@ func build_defaultRoute(method, expr string) (*defaultRoute, error) {
 		method:     method,
 		parts:      make([]Part, 0),
 		middleware: make([]middleware.Middleware, 0),
-		validators: make([]require.Required, 0),
+		required:   make([]require.Required, 0),
 	}
 	var token string
 	for next := 0; next < len(expr); {
@@ -248,14 +248,14 @@ func (route *defaultRoute) Attach(mw middleware.Middleware) {
 	route.middleware = append(route.middleware, mw)
 }
 
-func (route *defaultRoute) Validate(v require.Required) {
-	route.validators = append(route.validators, v)
+func (route *defaultRoute) Require(v require.Required) {
+	route.required = append(route.required, v)
 }
 
 func (route *defaultRoute) Middleware() []middleware.Middleware {
 	return route.middleware
 }
 
-func (route *defaultRoute) Validators() []require.Required {
-	return route.validators
+func (route *defaultRoute) Required() []require.Required {
+	return route.required
 }
