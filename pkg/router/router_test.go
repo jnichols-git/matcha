@@ -166,6 +166,10 @@ func TestBasicRoutes(t *testing.T) {
 		WithMiddleware(testMiddleware),
 	)
 	s := httptest.NewServer(r)
+	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusOK,
+		"body": "root",
+	})
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
 		"body": "root",
