@@ -18,7 +18,7 @@ For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 
 ## Installation
 
-`go get github.com/cloudretic/matcha@v1.1.1`
+`go get github.com/cloudretic/matcha@v1.1.2`
 
 ## Basic Usage
 
