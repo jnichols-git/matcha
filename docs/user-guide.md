@@ -73,8 +73,8 @@ r1 := route.Declare(http.MethodGet, "/")
 r2 := route.Declare(http.MethodGet, "/some/route")
 rt1 := router.Declare(
     router.Default(),
-    router.WithRoute(r1, h1),
-    router.WithRoute(r2, h2),
+    router.HandleRoute(r1, h1),
+    router.HandleRoute(r2, h2),
 )
 ```
 
@@ -151,10 +151,10 @@ import (
 func main() {
     server := rt.Declare(
         rt.Default(),
-        rt.WithRoute(r.Declare(http.MethodGet, "/"), indexHandler),
-        rt.WithRoute(r.Declare(http.MethodPost, "/reviews/[name]"), reviewCreate),
-        rt.WithRoute(r.Declare(http.MethodGet, "/reviews/[name]"), reviewGet),
-        rt.WithRoute(r.Declare(http.MethodGet, `/static/[filename]{\w+.(.*)?}+`), staticHandler),
+        rt.HandleRoute(r.Declare(http.MethodGet, "/"), indexHandler),
+        rt.HandleRoute(r.Declare(http.MethodPost, "/reviews/[name]"), reviewCreate),
+        rt.HandleRoute(r.Declare(http.MethodGet, "/reviews/[name]"), reviewGet),
+        rt.HandleRoute(r.Declare(http.MethodGet, `/static/[filename]{\w+.(.*)?}+`), staticHandler),
     )
     http.ListenAndServe(":3000", server)
 }
@@ -194,8 +194,8 @@ func main() {
     )
     server := router.Declare(
         router.Default(),
-        router.WithRoute(rootRoute, h1),
-        router.WithRoute(userRoute, h2)
+        router.HandleRoute(rootRoute, h1),
+        router.HandleRoute(userRoute, h2)
     )
     server.Attach(middleware.LogRequests())
 }

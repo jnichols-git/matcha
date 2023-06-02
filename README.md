@@ -40,7 +40,7 @@ func main() {
     helloRoute := route.Declare(http.MethodGet, "/hello")
     s := router.Declare(
         router.Default(),
-        router.WithRoute(helloRoute, http.HandleFunc(handleHello)),
+        router.HandleRoute(helloRoute, http.HandleFunc(handleHello)),
     )
     http.ListenAndServer(":8080", s)
 }
