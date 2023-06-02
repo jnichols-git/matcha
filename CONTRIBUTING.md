@@ -8,6 +8,7 @@
     - [Submitting Changes](#submitting-changes)
   - [Submission Standards](#submission-standards)
   - [Versioning Policy](#versioning-policy)
+    - [Deprecated Features](#deprecated-features)
 
 We welcome community contributions to Matcha!
 
@@ -67,8 +68,10 @@ We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub C
 
 Matcha's latest stable release is `v1.1.1` (major version 1, minor version 1, patch 0). Releases are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
 
-- Major: The change is non-essential and breaks the existing API. See our backwards compatiblility policy [here](docs/versioning.md). Major changes are not currently being accepted.
+- Major: The change is non-essential and breaks the existing API. Major changes are not currently being accepted.
 - Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.2.0`.
 - Patch: The change is a bugfix, minor performance improvement, minor API change, or auxilary component (like middleware). Patches should relate to branch `main`.
 
-Release eligibility will be evaluated biweekly, with the next evaluation being on June 1, 2023.
+### Deprecated Features
+
+To maintain the long-term health of the project, you/we may elect to *deprecate* features, meaning that we won't support them going forward. If you have a change that overrides old functionality, it's preferred that you mark the old as deprecated and implement alongside it, rather than delete it from the project entirely; we generally prefer to keep behavior the same between versions when it's not a bug problem.
