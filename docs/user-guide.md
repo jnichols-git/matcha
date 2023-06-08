@@ -166,14 +166,15 @@ func main() {
 
 ### Requirements
 
-Matcha provides an interface for matching things that are not paths in package `route/require` as the type `require.Required`. You can define your own with the function definition `func(req *http.Request) bool` and register them onto routes by using the config function or route function `route.Require`. If a requirement returns `false`, the router will continue to match against the remaining routes.
+Matcha provides an interface for matching things that are not paths in package `route/require`. You can define your own with the function definition `func(req *http.Request) bool` and register them onto routes by using the config function or route function `route.Require`. If a requirement returns `false`, the router will continue to match against the remaining routes.
 
 ```go
 webRoute, err := route.New(
     http.MethodGet, "/",
-    route.Require(require.HostPorts("https://{www.|}cloudretic.com"))
+    route.Require(require.HostPorts("https://{www.|}cloudretic.com")),
 )
 apiRoute, err := route.New(
-    http.MethodGet(require.HostPorts("https://api.cloudretic.com"))
+    http.MethodGet, "/",
+    require.HostPorts("https://api.cloudretic.com"),
 )
 ```
