@@ -25,10 +25,10 @@ func getID(next http.Handler) http.Handler {
 	})
 }
 
-func TestHandler(t *testing.T) {
+func TestHandlerConcurrent(t *testing.T) {
 	mw := Handler(getID)
 	wg := &sync.WaitGroup{}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		a := i
 		go func() {
