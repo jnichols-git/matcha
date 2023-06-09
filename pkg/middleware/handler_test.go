@@ -26,7 +26,8 @@ func getID(next http.Handler) http.Handler {
 }
 
 func TestHandlerConcurrent(t *testing.T) {
-	mw := Handler(getID)
+	mw1 := Handler(noop)
+	mw2 := Handler(getID)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
@@ -34,7 +35,8 @@ func TestHandlerConcurrent(t *testing.T) {
 		go func() {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req.Header.Set("X-Request-ID", strconv.FormatInt(int64(a), 10))
-			req = mw(nil, req)
+			req = mw1(nil, req)
+			req = mw2(nil, req)
 			if req == nil {
 				t.Errorf("nil request")
 			} else if id := req.Context().Value("Request-ID"); id != a {
