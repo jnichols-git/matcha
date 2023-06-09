@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/cloudretic/matcha/pkg/cors"
@@ -47,7 +46,6 @@ func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 			return err
 		}
 		f := func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("hello")
 			cors.SetCORSResponseHeaders(w, r, aco)
 			w.WriteHeader(http.StatusNoContent)
 		}

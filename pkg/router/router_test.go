@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/cloudretic/matcha/pkg/cors"
+	"github.com/cloudretic/matcha/pkg/route/require"
 
 	"github.com/cloudretic/matcha/pkg/rctx"
 	"github.com/cloudretic/matcha/pkg/route"
@@ -342,5 +343,34 @@ func TestDuplicate(t *testing.T) {
 	r.ServeHTTP(w, req)
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("re-declaration should be noop; expected %d, got %d", http.StatusOK, w.Result().StatusCode)
+	}
+}
+
+func TestValidatedDuplicate(t *testing.T) {
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	})
+	rt := Declare(
+		Default(),
+		WithRoute(route.Declare(
+			http.MethodGet, "/",
+			route.Require(require.Hosts("origin.com")),
+		), h1),
+		WithRoute(route.Declare(http.MethodGet, "/"), h2),
+	)
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "http://origin.com/", nil)
+	rt.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("origin.com request should be OK; got %d", w.Code)
+	}
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	rt.ServeHTTP(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("example.com request should fall through to BadRequest; got %d", w.Code)
 	}
 }
