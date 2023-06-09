@@ -87,7 +87,7 @@ func testHandler(ctx context.Context, in *testAdaptable) (*testAdapted, error) {
 	adapter := &testAdapter{}
 	rt := router.Declare(
 		router.Default(),
-		router.WithRoute(route.Declare(http.MethodGet, "/"), http.HandlerFunc(handleTest)),
+		router.HandleRoute(route.Declare(http.MethodGet, "/"), http.HandlerFunc(handleTest)),
 	)
 	w, req, out, err := adapter.Adapt(in)
 	if err != nil {

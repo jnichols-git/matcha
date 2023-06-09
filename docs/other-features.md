@@ -58,8 +58,8 @@ r := Declare(
     Default(),
     DefaultCORS(aco),
     PreflightCORS("/", aco),
-    WithRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
-    WithRoute(route.Declare(http.MethodPost, "/"), okHandler("ok")),
+    HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
+    HandleRoute(route.Declare(http.MethodPost, "/"), okHandler("ok")),
     WithNotFound(nfHandler()),
 )
 ```
