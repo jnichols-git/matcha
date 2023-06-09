@@ -129,11 +129,3 @@ func ExecuteMiddleware(mw []Middleware, w http.ResponseWriter, req *http.Request
 	}
 	return req
 }
-
-// Use an http.Handler as Middleware.
-func Handler(h http.Handler) Middleware {
-	return func(w http.ResponseWriter, r *http.Request) *http.Request {
-		h.ServeHTTP(w, r)
-		return r
-	}
-}
