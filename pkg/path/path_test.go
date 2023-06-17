@@ -38,3 +38,14 @@ func TestNext(t *testing.T) {
 		i++
 	}
 }
+
+func BenchmarkNext(b *testing.B) {
+	path := "/path/to/file.txt"
+	next := 0
+	for i := 0; i < b.N; i++ {
+		_, next = Next(path, next)
+		if next == -1 {
+			next = 0
+		}
+	}
+}

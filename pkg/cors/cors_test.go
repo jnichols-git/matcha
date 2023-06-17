@@ -55,6 +55,12 @@ func TestGetCORSRequestHeaders(t *testing.T) {
 	}
 }
 
+func BenchmarkGetCORSRequestHeaders(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = GetCORSRequestHeaders(preflight_request)
+	}
+}
+
 func TestReflectCORSRequestHeaders(t *testing.T) {
 	crh := GetCORSRequestHeaders(simple_request)
 	resp_headers := ReflectCORSRequestHeaders(aco1, crh)
@@ -87,5 +93,12 @@ func TestReflectCORSRequestHeaders(t *testing.T) {
 	}
 	if resp_headers.AllowCredentials {
 		t.Errorf("expected no allowed credentials")
+	}
+}
+
+func BenchmarkReflectCORSRequestHeaders(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		crh := GetCORSRequestHeaders(simple_request)
+		_ = ReflectCORSRequestHeaders(aco1, crh)
 	}
 }

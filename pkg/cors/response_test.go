@@ -130,3 +130,11 @@ func TestSetCORSResponseHeaders(t *testing.T) {
 		}
 	})
 }
+
+func BenchmarkSetCORSResponseHeaders(b *testing.B) {
+	adp := &testAdapter{}
+	w, req, _, _ := adp.Adapt(simple_request)
+	for i := 0; i < b.N; i++ {
+		SetCORSResponseHeaders(w, req, aco2)
+	}
+}

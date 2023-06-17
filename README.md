@@ -56,7 +56,7 @@ Matcha has an extensive benchmark suite to help identify, document, and improve 
   - 4 endpoints requiring authorization using a "client_id" header
   - 4 endpoints with an enumeration URI parameter (new/top posts, etc)
 - 2 middleware components assigning a request ID and CORS headers
-- 1 requirement for target host
+- 1 requirement for target host on all endpoints
 
 Our benchmark constructs and then runs single requests against the MockBoards API specification, first in sequence and then in parallel. The below is the results on an M2 MacBook Pro, provided for convenience; we encourage you to test relevant benchmarks on your own hardware if you're comparing to other solutions. *Please note that 1 op is 10 requests for the concurrent benchmark.*
 
