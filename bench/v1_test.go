@@ -4,55 +4,32 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"sync"
 	"testing"
 
-	"github.com/cloudretic/matcha/pkg/cors"
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/rctx"
 	"github.com/cloudretic/matcha/pkg/route"
-	"github.com/cloudretic/matcha/pkg/route/require"
 	"github.com/cloudretic/matcha/pkg/router"
 )
 
-type benchRoute struct {
-	method   string
-	path     string
-	testPath string
-	mws      []middleware.Middleware
-	rqs      []require.Required
-}
-
-func mwCORS() middleware.Middleware {
-	return cors.CORSMiddleware(&cors.AccessControlOptions{
-		AllowOrigin:  []string{"cloudretic.com"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete},
-		AllowHeaders: []string{"client_id"},
-	})
-}
-
-func mwID(w http.ResponseWriter, req *http.Request) *http.Request {
-	req.Header.Add("X-Matcha-Request-ID", strconv.FormatInt(rand.Int63(), 10))
-	return req
-}
-
-func mwIsUserParam(userParam string) middleware.Middleware {
-	return func(w http.ResponseWriter, r *http.Request) *http.Request {
-		user := rctx.GetParam(r.Context(), userParam)
-		is := r.Header.Get("X-Platform-User-ID")
-		if is != user {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("user " + is + " unauthorized"))
-			return nil
-		}
-		return r
-	}
-}
-
-var api_mws = []middleware.Middleware{mwCORS(), mwID}
-var api_mws_auth = []middleware.Middleware{mwIsUserParam("user"), mwCORS(), mwID}
-var api_rqs = []require.Required{require.Hosts("{.*}")}
+/*
+ * ===== MockBoards V1 API =====
+ *
+ * Use Case: MockBoards is a (fake) forum website setting up their API using Matcha. The V1 API has:
+ *
+ * - 18 endpoints
+ * - 4 endpoints requiring client_id header authorization
+ * - 4 endpoints ending in an API parameter with an enumeration (new/top)
+ * - Middleware assigning request IDs and CORS headers
+ * - Requirements for host matching on all routes
+ *
+ * This benchmark approximates the performance of Matcha while routing their API.
+ *
+ * ===== Using This Benchmark =====
+ *
+ * Run all 3 included benchmarks (API, stripped, offset)
+ * For sequential results, subtract the offset from the X/op values.
+ * For concurrent results, divide the X/op values by 10, then subtract the offset.
+ */
 
 // MockBoards API
 var apiRoutes = []benchRoute{
@@ -95,7 +72,7 @@ func handleOK(w http.ResponseWriter, req *http.Request) {
 }
 
 // Just to check!
-func TestAPI(t *testing.T) {
+func TestAPIv1(t *testing.T) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
 		r := route.Declare(tr.method, tr.path)
@@ -121,7 +98,7 @@ func TestAPI(t *testing.T) {
 
 // BENCHMARKS: MockBoards API
 
-func BenchmarkAPI(b *testing.B) {
+func BenchmarkAPIv1(b *testing.B) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
 		r, err := route.New(tr.method, tr.path)
@@ -206,7 +183,7 @@ func BenchmarkStrippedAPI(b *testing.B) {
 
 // BenchmarkOffset is used to calculate the performance offset of generating test values
 // for benchmarks.
-// This is important; creating new requests
+// This is important; creating new requests is expensive
 func BenchmarkOffset(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = httptest.NewRecorder()
