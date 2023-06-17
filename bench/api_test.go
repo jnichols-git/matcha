@@ -136,43 +136,82 @@ func BenchmarkAPI(b *testing.B) {
 		}
 		rt.HandleRouteFunc(r, handleOK)
 	}
-	w := httptest.NewRecorder()
-	for i := 0; i < b.N; i++ {
-		br := choose()
-		req := httptest.NewRequest(br.method, br.testPath, nil)
-		req.Header.Set("X-Platform-User-ID", "jnichols")
-		rt.ServeHTTP(w, req)
-	}
+	b.Run(b.Name()+"-sequential", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			w := httptest.NewRecorder()
+			br := choose()
+			req := httptest.NewRequest(br.method, br.testPath, nil)
+			req.Header.Set("X-Platform-User-ID", "jnichols")
+			rt.ServeHTTP(w, req)
+		}
+	})
+	b.Run(b.Name()+"-concurrent-10", func(b *testing.B) {
+		wg := &sync.WaitGroup{}
+		for i := 0; i < b.N; i++ {
+			for i := 0; i < 10; i++ {
+				wg.Add(1)
+				go func() {
+					w := httptest.NewRecorder()
+					br := choose()
+					req := httptest.NewRequest(br.method, br.testPath, nil)
+					req.Header.Set("X-Platform-User-ID", "jnichols")
+					rt.ServeHTTP(w, req)
+					wg.Done()
+				}()
+			}
+			wg.Wait()
+		}
+	})
 }
 
-func BenchmarkAPIConcurrent(b *testing.B) {
+func BenchmarkStrippedAPI(b *testing.B) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
 		r, err := route.New(tr.method, tr.path)
 		if err != nil {
 			b.Fatal(err)
 		}
-		for _, mw := range tr.mws {
-			r.Attach(mw)
-		}
-		for _, rq := range tr.rqs {
-			r.Require(rq)
-		}
 		rt.HandleRouteFunc(r, handleOK)
 	}
-	wg := &sync.WaitGroup{}
-	for i := 0; i < b.N; i++ {
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
-			go func() {
-				w := httptest.NewRecorder()
-				br := choose()
-				req := httptest.NewRequest(br.method, br.testPath, nil)
-				req.Header.Set("X-Platform-User-ID", "jnichols")
-				rt.ServeHTTP(w, req)
-				wg.Done()
-			}()
+	b.Run(b.Name()+"-sequential", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			w := httptest.NewRecorder()
+			br := choose()
+			req := httptest.NewRequest(br.method, br.testPath, nil)
+			req.Header.Set("X-Platform-User-ID", "jnichols")
+			rt.ServeHTTP(w, req)
+			if w.Code != 200 {
+				b.Fatal(w.Code)
+			}
 		}
-		wg.Wait()
+	})
+	b.Run(b.Name()+"-concurrent-10", func(b *testing.B) {
+		wg := &sync.WaitGroup{}
+		for i := 0; i < b.N; i++ {
+			for i := 0; i < 10; i++ {
+				wg.Add(1)
+				go func() {
+					w := httptest.NewRecorder()
+					br := choose()
+					req := httptest.NewRequest(br.method, br.testPath, nil)
+					req.Header.Set("X-Platform-User-ID", "jnichols")
+					rt.ServeHTTP(w, req)
+					wg.Done()
+				}()
+			}
+			wg.Wait()
+		}
+	})
+}
+
+// BenchmarkOffset is used to calculate the performance offset of generating test values
+// for benchmarks.
+// This is important; creating new requests
+func BenchmarkOffset(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = httptest.NewRecorder()
+		br := choose()
+		req := httptest.NewRequest(br.method, br.testPath, nil)
+		req.Header.Set("X-Platform-User-ID", "jnichols")
 	}
 }
