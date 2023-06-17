@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/cloudretic/matcha/pkg/cors"
@@ -12,10 +11,38 @@ import (
 // ConfigFuncs run on Routers, usually to add a route or attach middleware.
 type ConfigFunc func(rt Router) error
 
-// Add a Route for the Router to handle
+// Add a Route for the Router to handle.
+//
+// HandleRoute was deprecated in v1.2.0. Use HandleRoute instread.
 func WithRoute(r route.Route, h http.Handler) ConfigFunc {
 	return func(rt Router) error {
 		rt.AddRoute(r, h)
+		return nil
+	}
+}
+
+func Handle(method, path string, h http.Handler) ConfigFunc {
+	return func(rt Router) error {
+		return rt.Handle(method, path, h)
+	}
+}
+
+func HandleFunc(method, path string, h http.HandlerFunc) ConfigFunc {
+	return func(rt Router) error {
+		return rt.HandleFunc(method, path, h)
+	}
+}
+
+func HandleRoute(r route.Route, h http.Handler) ConfigFunc {
+	return func(rt Router) error {
+		rt.HandleRoute(r, h)
+		return nil
+	}
+}
+
+func HandleRouteFunc(r route.Route, h http.HandlerFunc) ConfigFunc {
+	return func(rt Router) error {
+		rt.HandleRouteFunc(r, h)
 		return nil
 	}
 }
@@ -47,7 +74,6 @@ func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 			return err
 		}
 		f := func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("hello")
 			cors.SetCORSResponseHeaders(w, r, aco)
 			w.WriteHeader(http.StatusNoContent)
 		}
