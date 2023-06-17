@@ -7,6 +7,7 @@
     - [File Server with Partial Routes](#file-server-with-partial-routes)
     - [Note: Registration Order](#note-registration-order)
   - [Advanced Usage](#advanced-usage)
+    - [Mounting Subrouters](#mounting-subrouters)
     - [Customizing Routes with ConfigFuncs](#customizing-routes-with-configfuncs)
     - [Middleware](#middleware)
     - [Requirements](#requirements)
@@ -132,6 +133,26 @@ Implicitly deprioritizing some routes to skew towards exact matches causes two p
 We're working on ways to make routing more intuitive while avoiding these problems. In the meantime, we believe that strict registration order is the best way to go, so that you can always predict what Matcha will do with the instructions you give it.
 
 ## Advanced Usage
+
+### Mounting Subrouters
+
+In addition to `router.Handle` and similar functions, there is also `router.Mount`, which passes all requests to a path prefix through to the given handler. In this example, any request made to `localhost:3000/api` will go directly to the `api2` router.
+
+```go
+func main() {
+    api1 := router.Default()
+    api2 := router.Default()
+    // Register some handlers here.
+    api1.Mount("/v2", api2)
+    http.ListenAndServe(":3000", api1)
+}
+```
+
+Usage notes:
+
+- This automatically trims the given prefix, so routes in `api2` do *not* need to include `/v2` in their paths.
+- Mounting currently only supports static string paths.
+- The underlying path used for mounting is a partial path, and comes with all of the same caveats.
 
 ### Customizing Routes with ConfigFuncs
 

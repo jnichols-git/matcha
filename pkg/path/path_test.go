@@ -51,13 +51,16 @@ func BenchmarkNext(b *testing.B) {
 }
 
 func TestMakePartial(t *testing.T) {
-	if px := MakePartial("/hello"); px != "/hello/+" {
+	if px := MakePartial("/hello", ""); px != "/hello/+" {
 		t.Error("/hello/+", px)
 	}
-	if px := MakePartial("/hello/"); px != "/hello/+" {
+	if px := MakePartial("/hello/", ""); px != "/hello/+" {
 		t.Error("/hello/+", px)
 	}
-	if px := MakePartial("/hello/+"); px != "/hello/+" {
+	if px := MakePartial("/hello/+", ""); px != "/hello/+" {
 		t.Error("/hello/+", px)
+	}
+	if px := MakePartial("/hello", "next"); px != "/hello/[next]+" {
+		t.Error("/hello/[next]+", px)
 	}
 }

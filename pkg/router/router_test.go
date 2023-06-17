@@ -458,4 +458,9 @@ func TestComposition(t *testing.T) {
 	if err == nil {
 		t.Error("expected failure due to route formatting")
 	}
+
+	err = api2.Mount("/api/[version]", api1)
+	if err == nil {
+		t.Error("expected error due to route formatting")
+	}
 }

@@ -240,7 +240,6 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 			break
 		}
 	}
-	//return req.WithContext(route.ctx)
 	return req
 }
 

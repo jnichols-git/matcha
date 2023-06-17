@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/cloudretic/matcha/pkg/middleware"
@@ -113,9 +114,15 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 		}
 	}
 	trim := middleware.TrimPrefix(rpath)
-	rpath = path.MakePartial(rpath)
+	rpath = path.MakePartial(rpath, "")
+	validate := route.ConfigFunc(func(r route.Route) error {
+		if route.NumParams(r) > 0 {
+			return errors.New("invalid mount path; must be static strings only")
+		}
+		return nil
+	})
 	for _, method := range methods {
-		r, err := route.New(method, rpath)
+		r, err := route.New(method, rpath, validate)
 		if err != nil {
 			return err
 		}
