@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/cloudretic/matcha/pkg/cors"
@@ -53,6 +54,7 @@ var api_mws = []middleware.Middleware{mwCORS(), mwID}
 var api_mws_auth = []middleware.Middleware{mwIsUserParam("user"), mwCORS(), mwID}
 var api_rqs = []require.Required{require.Hosts("{.*}")}
 
+// MockBoards API
 var apiRoutes = []benchRoute{
 	// Get/create posts
 	{method: http.MethodGet, path: "/[board]/posts", testPath: "/cloudretic/posts", mws: api_mws, rqs: api_rqs},
@@ -92,6 +94,7 @@ func handleOK(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(id + " OK"))
 }
 
+// Just to check!
 func TestAPI(t *testing.T) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
@@ -116,6 +119,8 @@ func TestAPI(t *testing.T) {
 	}
 }
 
+// BENCHMARKS: MockBoards API
+
 func BenchmarkAPI(b *testing.B) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
@@ -137,5 +142,37 @@ func BenchmarkAPI(b *testing.B) {
 		req := httptest.NewRequest(br.method, br.testPath, nil)
 		req.Header.Set("X-Platform-User-ID", "jnichols")
 		rt.ServeHTTP(w, req)
+	}
+}
+
+func BenchmarkAPIConcurrent(b *testing.B) {
+	rt := router.Default()
+	for _, tr := range apiRoutes {
+		r, err := route.New(tr.method, tr.path)
+		if err != nil {
+			b.Fatal(err)
+		}
+		for _, mw := range tr.mws {
+			r.Attach(mw)
+		}
+		for _, rq := range tr.rqs {
+			r.Require(rq)
+		}
+		rt.HandleRouteFunc(r, handleOK)
+	}
+	wg := &sync.WaitGroup{}
+	for i := 0; i < b.N; i++ {
+		for i := 0; i < 10; i++ {
+			wg.Add(1)
+			go func() {
+				w := httptest.NewRecorder()
+				br := choose()
+				req := httptest.NewRequest(br.method, br.testPath, nil)
+				req.Header.Set("X-Platform-User-ID", "jnichols")
+				rt.ServeHTTP(w, req)
+				wg.Done()
+			}()
+		}
+		wg.Wait()
 	}
 }

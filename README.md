@@ -48,20 +48,22 @@ func HelloExample() {
 
 For a step-by-step guide through Matcha's features, see our [User Guide](docs/user-guide.md).
 
-## Benchmarks
+## Performance
 
-> These benchmarks are run on the GitHub API provided by [julienschmidt](https://github.com/julienschmidt/go-http-routing-benchmark), updated to match the current Go version.
+Matcha has an extensive benchmark suite to help identify, document, and improve performance over time. Additionally, `/bench` contains a comprehensive benchmark API for "MockBoards", a fake website that just so happens to use all of the features of Matcha. The MockBoards API has the following:
 
-Short answer: in tests with handling of *single requests* to a large API (~200 routes), Matcha can handle requests end-to-end in about 470 nanoseconds, using about 720 bytes of memory, when running on an M2 MacBook Pro.
+- 18 distinct endpoints, including
+  - 4 endpoints requiring authorization using a "client_id" header
+  - 4 endpoints with an enumeration URI parameter (new/top posts, etc)
+- 2 middleware components assigning a request ID and CORS headers
+- 1 requirement for target host
 
-Long answer: Go benchmarks provide a measurement of `ns/op` and `B/op`, representing how much time and memory was used for one "operation", which in this case is one full loop of handling *every route* in the API, a common metric used to compare http routers in Go. Since speed in nanoseconds can be machine-dependent, we have provided a relative value instead for this comparison, where the value is (Matcha result)/(`other` result). Higher is better/faster.
+Our benchmark constructs and then runs single requests against the MockBoards API specification, first in sequence and then in parallel. The below is the results on an M2 MacBook Pro, provided for convenience; we encourage you to test relevant benchmarks on your own hardware if you're comparing to other solutions. *Please note that 1 op is 10 requests for the concurrent benchmark.*
 
-Router Name | Relative Speed | Memory Use
---- | --- | ---
-`cloudretic/matcha` | 1.0x | 44,785 B/op
-[`go-chi/chi`](https://github.com/go-chi/chi) | 1.26x | 61,713 B/op
-[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 4.96x | 13,792 B/op
-[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 4.96x | 0 B/op
+Benchmark | ns/op | B/op | allocs/op
+--- | --- | --- | ---
+Sequential | 2461 ns/request | 6032 bytes/request | 29 allocs/request
+Concurrent | 2854 ns/request | 7107 bytes/request | 40 allocs/request
 
 ## Maintainers
 
