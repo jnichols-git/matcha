@@ -33,6 +33,11 @@ type Router interface {
 	// Handle a more complex path.
 	// If you're only using method+path, use Handle instead.
 	HandleRouteFunc(r route.Route, h http.HandlerFunc)
+	// Mount a handler at a path.
+	// Forwards all requests at path to the provided handler, optionally limited to a set
+	// of methods passed in the variadic methods parameter. Use this if you want to
+	// use your existing handler at a specific URI.
+	Mount(path string, h http.Handler, methods ...string) error
 	// Add a handler for any request that is not matched.
 	//
 	// Router implementations should define default behavior, and must allow user assignment of behavior.

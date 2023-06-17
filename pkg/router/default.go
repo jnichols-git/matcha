@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/path"
 	"github.com/cloudretic/matcha/pkg/rctx"
 	"github.com/cloudretic/matcha/pkg/route"
 	"github.com/cloudretic/matcha/pkg/tree"
@@ -99,6 +100,29 @@ func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
 // See interface Router.
 func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
 	register(rt, r, h)
+}
+
+// Mount mounts a handler at path.
+//
+// See interface Router.
+func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) error {
+	if len(methods) == 0 {
+		methods = []string{
+			http.MethodPut, http.MethodGet, http.MethodPatch, http.MethodDelete, http.MethodPost,
+			http.MethodOptions, http.MethodHead, http.MethodTrace, http.MethodConnect,
+		}
+	}
+	trim := middleware.TrimPrefix(rpath)
+	rpath = path.MakePartial(rpath)
+	for _, method := range methods {
+		r, err := route.New(method, rpath)
+		if err != nil {
+			return err
+		}
+		r.Attach(trim)
+		rt.HandleRoute(r, h)
+	}
+	return nil
 }
 
 // Set the handler for instances where no route is found.

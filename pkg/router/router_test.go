@@ -392,3 +392,70 @@ func TestValidatedDuplicate(t *testing.T) {
 		t.Errorf("example.com request should fall through to BadRequest; got %d", w.Code)
 	}
 }
+
+func TestComposition(t *testing.T) {
+	// Set up a an API for composition
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	api1 := Default()
+	api1.HandleFunc(http.MethodGet, "/hello", h1)
+	api1.HandleFunc(http.MethodPost, "/hello", h1)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/hello", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	// Pass through ONLY get
+	api2 := Default()
+	api2.Mount("/api", api1, http.MethodGet)
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 404 {
+		t.Error(404, w.Code)
+	}
+
+	// Pass through all methods
+	api2 = Default()
+	api2.Mount("/api", api1)
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	// Invalid path test
+	api2 = Default()
+	err := api2.Mount("/{", api1)
+	if err == nil {
+		t.Error("expected failure due to route formatting")
+	}
+}
