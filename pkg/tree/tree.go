@@ -39,7 +39,7 @@ func (n *node) propagate(ps []route.Part, leaf_id int) {
 	next := ps[0]
 	if !n.isLeaf() && len(ps)-1 != 0 {
 		for _, child := range n.children {
-			if child.p.Eq(next) {
+			if child.p.Eq(next) && !child.isLeaf() {
 				child.propagate(ps[1:], leaf_id)
 				return
 			}
