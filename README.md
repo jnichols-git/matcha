@@ -25,24 +25,24 @@ For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`
 
 ```go
-package main
+package examples
 
 import (
-    "github.com/cloudretic/matcha/pkg/route"
+    "net/http"
+
     "github.com/cloudretic/matcha/pkg/router"
 )
 
-func handleHello(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("Hello, World"))
+func sayHello(w http.ResponseWriter, req *http.Request) {
+    w.Write([]byte("Hello, World!"))
 }
 
-func main() {
-    helloRoute := route.Declare(http.MethodGet, "/hello")
-    s := router.Declare(
-        router.Default(),
-        router.WithRoute(helloRoute, http.HandleFunc(handleHello)),
-    )
-    http.ListenAndServer(":8080", s)
+func HelloExample() {
+    rt := router.Default()
+    rt.HandleFunc(http.MethodGet, "/hello", sayHello)
+    // or:
+    // rt.Handle(http.MethodGet, "/hello", http.HandlerFunc(sayHello))
+    http.ListenAndServe(":3000", rt)
 }
 ```
 

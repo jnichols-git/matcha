@@ -2,12 +2,12 @@
 
 ## Creating Routers
 
-You can create a Router with a series of Routes, add Routes after creation, or both, using `WithRoute` and `AddRoute`.
+You can create a Router with a series of Routes, add Routes after creation, or both, using `HandleRoute` and `AddRoute`.
 
 ```go
 r := router.Declare(
     router.Default(),
-    router.WithRoute(route.Declare(http.MethodGet, "/someEndpoint"), someHandler)
+    router.HandleRoute(route.Declare(http.MethodGet, "/someEndpoint"), someHandler)
 )
 r.AddRoute(route.Declare(http.MethodGet, "/someOtherEndpoint"), someOtherHandler)
 ```
@@ -19,7 +19,7 @@ You can also add a specific handler that's called in the event that no route mat
 ```go
 r := router.Declare(
     router.Default(),
-    router.WithRoute(...),
+    router.HandleRoute(...),
     router.WithNotFound(notFoundHandler)
 )
 r.AddNotFound(otherNotFoundHandler)
@@ -27,7 +27,7 @@ r.AddNotFound(otherNotFoundHandler)
 
 ## Configuration
 
-`ConfigFunc`s are the generalization of router customization--both `WithRoute` and `WithNotFound` are `ConfigFuncs`, and router creation functions can accept any number of them. These will be run *in order*.
+`ConfigFunc`s are the generalization of router customization--both `HandleRoute` and `WithNotFound` are `ConfigFuncs`, and router creation functions can accept any number of them. These will be run *in order*.
 
 ## Middleware
 
@@ -36,7 +36,7 @@ Middleware is defined as a `func(http.ResponseWriter, *http.Request) *http.Reque
 ```go
 router, err := router.New(
     router.Default(),
-    router.WithRoute(...),
+    router.HandleRoute(...),
     router.WithMiddleware(someMiddleware),
 )
 if err != nil { ... }

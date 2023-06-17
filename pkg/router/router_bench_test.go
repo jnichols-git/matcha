@@ -35,11 +35,11 @@ func declareReq(path string) *http.Request {
 // Benchmark single requests. Results should generally average out to the cost of a single handle after b.N runs.
 func BenchmarkSingleRequests(b *testing.B) {
 	rt := Declare(Default(),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	benchReqs := []*http.Request{
 		declareReq("/"),
@@ -60,11 +60,11 @@ func BenchmarkSingleRequests(b *testing.B) {
 // For more involved benchmarks, see /bench. This serves as a baseline value, not a robust example under load.
 func BenchmarkBasicRouter(b *testing.B) {
 	rt := Declare(Default(),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	benchReqs := []*http.Request{
 		declareReq("/"),

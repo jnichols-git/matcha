@@ -51,6 +51,56 @@ func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 	rt.handlers[r.Method()][id] = h
 }
 
+func register(rt *defaultRouter, r route.Route, h http.Handler) {
+	id := rt.rtree.Add(r)
+	if rt.routes[r.Method()] == nil {
+		rt.routes[r.Method()] = make(map[int]route.Route)
+	}
+	rt.routes[r.Method()][id] = r
+	if rt.handlers[r.Method()] == nil {
+		rt.handlers[r.Method()] = make(map[int]http.Handler)
+	}
+	rt.handlers[r.Method()][id] = h
+}
+
+// Add a route to the router.
+//
+// See interface Router.
+func (rt *defaultRouter) Handle(method, path string, h http.Handler) error {
+	r, err := route.New(method, path)
+	if err != nil {
+		return err
+	}
+	register(rt, r, h)
+	return nil
+}
+
+// Add a route to the router.
+//
+// See interface Router.
+func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) error {
+	r, err := route.New(method, path)
+	if err != nil {
+		return err
+	}
+	register(rt, r, h)
+	return nil
+}
+
+// Add a route to the router.
+//
+// See interface Router.
+func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
+	register(rt, r, h)
+}
+
+// Add a route to the router.
+//
+// See interface Router.
+func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
+	register(rt, r, h)
+}
+
 // Set the handler for instances where no route is found.
 //
 // See interface Router.

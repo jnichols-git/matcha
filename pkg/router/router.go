@@ -17,8 +17,22 @@ type Router interface {
 	Attach(mw middleware.Middleware)
 	// Add a route to the router.
 	//
-	// Router implementations must use h for any request that matches r, in order of addition to the router.
+	// AddRoute was deprecated in v1.2.0. Use HandleRoute instead.
 	AddRoute(r route.Route, h http.Handler)
+	// Handle a method and path.
+	// This constructs a basic Route internally. Returns an error if routing path rules are
+	// violated; see routes.md.
+	Handle(method, path string, h http.Handler) error
+	// Handle a method and path.
+	// This constructs a basic Route internally. Returns an error if routing path rules are
+	// violated; see routes.md.
+	HandleFunc(method, path string, h http.HandlerFunc) error
+	// Handle a more complex path.
+	// If you're only using method+path, use Handle instead.
+	HandleRoute(r route.Route, h http.Handler)
+	// Handle a more complex path.
+	// If you're only using method+path, use Handle instead.
+	HandleRouteFunc(r route.Route, h http.HandlerFunc)
 	// Add a handler for any request that is not matched.
 	//
 	// Router implementations should define default behavior, and must allow user assignment of behavior.
