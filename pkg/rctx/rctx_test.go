@@ -124,7 +124,7 @@ func TestImplementContext(t *testing.T) {
 	}
 	dl := time.Now().Add(time.Second * 1)
 	ctx := req.Context()
-	ctx, _ = context.WithDeadline(ctx, dl)
+	ctx, cancel := context.WithDeadline(ctx, dl)
 	ctx = context.WithValue(ctx, "testKey", "testValue")
 	req = req.WithContext(ctx)
 	req = PrepareRequestContext(req, DefaultMaxParams)
@@ -164,6 +164,7 @@ func TestImplementContext(t *testing.T) {
 		mtx.Lock()
 		mtx.Unlock()
 	}
+	cancel()
 	// Test nil parent
 	req = &http.Request{}
 	req = PrepareRequestContext(req, DefaultMaxParams)
