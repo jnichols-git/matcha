@@ -30,3 +30,18 @@ func Next(path string, last int) (string, int) {
 	}
 	return path[start:], -1
 }
+
+// MakePartial gives the partial equivalent of a route.
+// This effectively appends /+ to the path.
+func MakePartial(path string, param string) string {
+	if param != "" {
+		param = "[" + param + "]"
+	}
+	i := len(path) - 1
+	if path[i-1:] == "/+" {
+		path = path[:i-1]
+	} else if path[i] == '/' {
+		path = path[:i]
+	}
+	return path + "/" + param + "+"
+}
