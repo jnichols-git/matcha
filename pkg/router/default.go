@@ -34,8 +34,8 @@ func Default() *defaultRouter {
 // Attach middleware to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) Attach(mw middleware.Middleware) {
-	rt.mws = append(rt.mws, mw)
+func (rt *defaultRouter) Attach(mws ...middleware.Middleware) {
+	rt.mws = append(rt.mws, mws...)
 }
 
 // Add a route to the router.
