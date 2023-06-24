@@ -1,16 +1,15 @@
 # Matcha User Guide
 
-- [Matcha User Guide](#matcha-user-guide)
-  - [Basics](#basics)
-    - [Hello World](#hello-world)
-    - [Echo Server with Route Parameters](#echo-server-with-route-parameters)
-    - [File Server with Partial Routes](#file-server-with-partial-routes)
-    - [Note: Registration Order](#note-registration-order)
-  - [Advanced Usage](#advanced-usage)
-    - [Mounting Subrouters](#mounting-subrouters)
-    - [Customizing Routes with ConfigFuncs](#customizing-routes-with-configfuncs)
-    - [Middleware](#middleware)
-    - [Requirements](#requirements)
+- [Basics](#basics)
+  - [Hello World](#hello-world)
+  - [Echo Server with Route Parameters](#echo-server-with-route-parameters)
+  - [File Server with Partial Routes](#file-server-with-partial-routes)
+  - [Note: Registration Order](#note-registration-order)
+- [Advanced Usage](#advanced-usage)
+  - [Mounting Subrouters](#mounting-subrouters)
+  - [Complex Routes](#complex-routes)
+  - [Middleware](#middleware)
+  - [Requirements](#requirements)
 
 Hello! This is a step-by-step guide to using Matcha for HTTP handling in Go.
 
@@ -154,7 +153,7 @@ Usage notes:
 - Mounting currently only supports static string paths.
 - The underlying path used for mounting is a partial path, and comes with all of the same caveats.
 
-### Customizing Routes with ConfigFuncs
+### Complex Routes
 
 So, what if you need more out of your routes?
 

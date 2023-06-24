@@ -40,12 +40,8 @@ func TestAPIv2(t *testing.T) {
 	v2 := router.Default()
 	for _, tr := range apiRoutes {
 		r := route.Declare(tr.method, tr.path)
-		for _, mw := range tr.mws {
-			r.Attach(mw)
-		}
-		for _, rq := range tr.rqs {
-			r.Require(rq)
-		}
+		r.Attach(tr.mws...)
+		r.Require(tr.rqs...)
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}
@@ -76,12 +72,8 @@ func BenchmarkAPIv2(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		for _, mw := range tr.mws {
-			r.Attach(mw)
-		}
-		for _, rq := range tr.rqs {
-			r.Require(rq)
-		}
+		r.Attach(tr.mws...)
+		r.Require(tr.rqs...)
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}

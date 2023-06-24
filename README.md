@@ -15,8 +15,6 @@
 - Easy conversion from standard library; uses stdlib handler signatures
 - Zero dependencies, zero dependency management
 
-For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
-
 ## Installation
 
 `go get github.com/cloudretic/matcha@v1.2.0`
