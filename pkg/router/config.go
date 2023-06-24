@@ -83,9 +83,9 @@ func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 }
 
 // Attach generic middleware to the Router
-func WithMiddleware(mw middleware.Middleware) ConfigFunc {
+func WithMiddleware(mws ...middleware.Middleware) ConfigFunc {
 	return func(rt Router) error {
-		rt.Attach(mw)
+		rt.Attach(mws...)
 		return nil
 	}
 }

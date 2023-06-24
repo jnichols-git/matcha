@@ -217,12 +217,12 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	return req
 }
 
-func (route *partialRoute) Attach(m middleware.Middleware) {
-	route.middleware = append(route.middleware, m)
+func (route *partialRoute) Attach(mws ...middleware.Middleware) {
+	route.middleware = append(route.middleware, mws...)
 }
 
-func (route *partialRoute) Require(v require.Required) {
-	route.required = append(route.required, v)
+func (route *partialRoute) Require(rs ...require.Required) {
+	route.required = append(route.required, rs...)
 }
 
 func (route *partialRoute) Middleware() []middleware.Middleware {

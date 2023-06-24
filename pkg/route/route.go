@@ -38,11 +38,11 @@ type Route interface {
 	// Attach middleware to the route.
 	//
 	// Middleware cannot be removed from a router once it is added.
-	Attach(mw middleware.Middleware)
+	Attach(mws ...middleware.Middleware)
 	// Attach a validator to the route.
 	//
 	// Validators cannot be removed from a router once they are added.
-	Require(v require.Required)
+	Require(rs ...require.Required)
 	// Get the middleware attached to the route.
 	Middleware() []middleware.Middleware
 	// Get the validators attached to the route.

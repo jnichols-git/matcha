@@ -243,12 +243,12 @@ func (route *defaultRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	return req
 }
 
-func (route *defaultRoute) Attach(mw middleware.Middleware) {
-	route.middleware = append(route.middleware, mw)
+func (route *defaultRoute) Attach(mws ...middleware.Middleware) {
+	route.middleware = append(route.middleware, mws...)
 }
 
-func (route *defaultRoute) Require(v require.Required) {
-	route.required = append(route.required, v)
+func (route *defaultRoute) Require(rs ...require.Required) {
+	route.required = append(route.required, rs...)
 }
 
 func (route *defaultRoute) Middleware() []middleware.Middleware {
