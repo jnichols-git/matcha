@@ -47,3 +47,12 @@ func TestCORSMiddleware(t *testing.T) {
 		t.Errorf("expected exposed header X-Header-Out, got %v", eh)
 	}
 }
+
+func BenchmarkCORSMiddleware(b *testing.B) {
+	adp := &testAdapter{}
+	w, req, _, _ := adp.Adapt(preflight_request)
+	mid := CORSMiddleware(aco2)
+	for i := 0; i < b.N; i++ {
+		_ = mid(w, req)
+	}
+}

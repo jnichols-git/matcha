@@ -4,67 +4,107 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/cloudretic/matcha)](https://goreportcard.com/report/github.com/cloudretic/matcha)
 [![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
-`cloudretic/matcha` is an actively developed HTTP router for Go with a focus on providing a flexible and performant route API.
+`cloudretic/matcha` is an HTTP router designed for ease of use, power, and extensibility.
 
 ## Features
 
-- Static string routes, wildcard parameters, regex validation, and prefix routes
-- Highly customizable route/router construction; get the results you want with the syntax that feels best to you
-- Comprehensive and passing test coverage, and extensive benchmarks to track performance
-- Native middleware to help you add common functionality, extensible when native support doesn't fit your use case
-- No dependencies, what you see is what you get
-
-For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
+- Flexible routing--handle your API specifications with ease
+- Extensible components for edge cases and integration with 3rd-party tools
+- High performance that scales to larger APIs
+- Comprehensive and passing test coverage, and extensive benchmarks to track performance on key features
+- Easy conversion from standard library; uses stdlib handler signatures and types
+- Zero dependencies, zero dependency management
 
 ## Installation
 
-`go get github.com/cloudretic/matcha@v1.1.2`
+`go get github.com/cloudretic/matcha@v1.2.0`
 
 ## Basic Usage
 
-Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`
+Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`.
 
 ```go
-package main
+package examples
 
 import (
-    "github.com/cloudretic/matcha/pkg/route"
+    "net/http"
+
     "github.com/cloudretic/matcha/pkg/router"
 )
 
-func handleHello(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("Hello, World"))
+func sayHello(w http.ResponseWriter, req *http.Request) {
+    w.Write([]byte("Hello, World!"))
 }
 
-func main() {
-    helloRoute := route.Declare(http.MethodGet, "/hello")
-    s := router.Declare(
-        router.Default(),
-        router.WithRoute(helloRoute, http.HandleFunc(handleHello)),
-    )
-    http.ListenAndServer(":8080", s)
+func HelloExample() {
+    rt := router.Default()
+    rt.HandleFunc(http.MethodGet, "/hello", sayHello)
+    // or:
+    // rt.Handle(http.MethodGet, "/hello", http.HandlerFunc(sayHello))
+    http.ListenAndServe(":3000", rt)
 }
 ```
 
 For a step-by-step guide through Matcha's features, see our [User Guide](docs/user-guide.md).
 
-## Benchmarks
+## Performance
 
-> These benchmarks are run on the GitHub API provided by [julienschmidt](https://github.com/julienschmidt/go-http-routing-benchmark), updated to match the current Go version.
+Matcha has an extensive benchmark suite to help identify, document, and improve performance over time. Additionally, `/bench` contains a comprehensive benchmark API for "MockBoards", a fake website that just so happens to use all of the features of Matcha. The MockBoards API has the following:
 
-Short answer: in tests with handling of *single requests* to a large API (~200 routes), Matcha can handle requests end-to-end in about 470 nanoseconds, using about 720 bytes of memory, when running on an M2 MacBook Pro.
+- 18 distinct endpoints, including
+  - 4 endpoints requiring authorization using a "client_id" header
+  - 4 endpoints with an enumeration URI parameter (new/top posts, etc)
+- 2 middleware components assigning a request ID and CORS headers
+- 1 requirement for target host on all endpoints
 
-Long answer: Go benchmarks provide a measurement of `ns/op` and `B/op`, representing how much time and memory was used for one "operation", which in this case is one full loop of handling *every route* in the API, a common metric used to compare http routers in Go. Since speed in nanoseconds can be machine-dependent, we have provided a relative value instead for this comparison, where the value is (Matcha result)/(`other` result). Higher is better/faster.
+The MockBoards benchmarks are run alongside an *offset benchmark* that measures the performance cost of setting up scaffolding
+for each request sent to calculate their final score. The values below represent performance numbers that you might expect
+to see in practice. Please keep in mind that performance varies by machine--you should run benchmarks on your own
+hardware to get a proper idea of how well Matcha's performance suits your needs.
 
-Router Name | Relative Speed | Memory Use
---- | --- | ---
-`cloudretic/matcha` | 1.0x | 44,785 B/op
-[`go-chi/chi`](https://github.com/go-chi/chi) | 1.26x | 61,713 B/op
-[`julienschmidt/httprouter`](https://github.com/julienschmidt/httprouter) | 4.96x | 13,792 B/op
-[`gin-gonic/gin`](https://github.com/gin-gonic/gin) | 4.96x | 0 B/op
+### MockBoards API Spec Benchmark
+
+Benchmark | ns/request | B/request | allocs/request
+--- | --- | --- | ---
+Sequential | 2226 ns/request | 1909 bytes/request | 27 allocs/request
+Concurrent | 1953 ns/request | 1943 bytes/request | 29 allocs/request
+
+### MockBoards Mounted API (v2) Benchmark
+
+This mounts a copy of the API at `/v2` and runs requests against both the v1 and v2 APIs.
+
+Benchmark | ns/request | B/request | allocs/request
+--- | --- | --- | ---
+Sequential | 2797 ns/request | 2046 bytes/request | 29 allocs/request
+Concurrent | 2097 ns/request | 2139 bytes/request | 30 allocs/request
+
+### MockBoards API Routing-Only Benchmark
+
+This is the v1 spec, but with the non-path features stripped out to give a better idea of pure routing costs.
+
+Benchmark | ns/request | B/request | allocs/request
+--- | --- | --- | ---
+Sequential | 1054 ns/request | 1417 bytes/request | 12 allocs/request
+Concurrent | 1353 ns/request | 1453 bytes/request | 14 allocs/request
 
 ## Maintainers
 
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
 Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@cloudretic.com>
+
+## License
+
+Copyright 2023 CloudRETIC LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

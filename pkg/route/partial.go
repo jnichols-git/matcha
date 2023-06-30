@@ -8,6 +8,7 @@ import (
 	"github.com/cloudretic/matcha/pkg/middleware"
 	"github.com/cloudretic/matcha/pkg/path"
 	"github.com/cloudretic/matcha/pkg/rctx"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 // =====PARTS=====
@@ -99,6 +100,7 @@ type partialRoute struct {
 	method     string
 	parts      []Part
 	middleware []middleware.Middleware
+	required   []require.Required
 }
 
 // Tokenize and parse a route expression into a partialRoute.
@@ -215,10 +217,18 @@ func (route *partialRoute) MatchAndUpdateContext(req *http.Request) *http.Reques
 	return req
 }
 
-func (route *partialRoute) Attach(m middleware.Middleware) {
-	route.middleware = append(route.middleware, m)
+func (route *partialRoute) Attach(mws ...middleware.Middleware) {
+	route.middleware = append(route.middleware, mws...)
+}
+
+func (route *partialRoute) Require(rs ...require.Required) {
+	route.required = append(route.required, rs...)
 }
 
 func (route *partialRoute) Middleware() []middleware.Middleware {
 	return route.middleware
+}
+
+func (route *partialRoute) Required() []require.Required {
+	return route.required
 }

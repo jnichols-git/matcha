@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/cloudretic/matcha/pkg/cors"
+	"github.com/cloudretic/matcha/pkg/route/require"
 
 	"github.com/cloudretic/matcha/pkg/rctx"
 	"github.com/cloudretic/matcha/pkg/route"
@@ -147,7 +148,7 @@ func runEvalRequest(t *testing.T,
 // Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
 func TestNewRouter(t *testing.T) {
 	_, err := New(Default(),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		HandleFunc(http.MethodGet, "/", okHandler("root")),
 		WithNotFound(nfHandler()),
 		WithMiddleware(testMiddleware),
 	)
@@ -162,14 +163,14 @@ func TestNewRouter(t *testing.T) {
 
 func TestBasicRoutes(t *testing.T) {
 	r := Declare(Default(),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		WithRoute(route.Declare(http.MethodGet, "/middlewareTest"), genericValueHandler("mwkey")),
-		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
-		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		Handle(http.MethodGet, "/", okHandler("root")),
+		HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey")),
+		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRouteFunc(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
 		WithMiddleware(testMiddleware),
 	)
+	r.Handle(http.MethodGet, `/route/[id]{[\w]{4}}`, rpHandler("id"))
+	r.HandleFunc(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`, rpHandler("filename"))
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
@@ -206,13 +207,22 @@ func TestBasicRoutes(t *testing.T) {
 		"code": http.StatusOK,
 		"body": "mwval",
 	})
+	// Invalid routes
+	r, err := New(Default(), Handle(http.MethodGet, "/{", nil))
+	if err == nil {
+		t.Error()
+	}
+	r, err = New(Default(), HandleFunc(http.MethodGet, "/{", nil))
+	if err == nil {
+		t.Error()
+	}
 }
 
 func TestEdgeCaseRoutes(t *testing.T) {
 	r := Declare(
 		Default(),
 		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
-		WithRoute(route.Declare(http.MethodGet, "/reject", route.WithMiddleware(reject)), okHandler("never")),
+		HandleRoute(route.Declare(http.MethodGet, "/reject", route.WithMiddleware(reject)), okHandler("never")),
 	)
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/odd/path", reqGen(http.MethodGet), map[string]any{
@@ -230,11 +240,11 @@ func TestEdgeCaseRoutes(t *testing.T) {
 
 func TestConcurrent(t *testing.T) {
 	r := Declare(Default(),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		WithRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[a-zA-Z]+}`), rpHandler("id")),
-		WithRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		WithRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
+		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[a-zA-Z]+}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	s := httptest.NewServer(r)
 	wg := sync.WaitGroup{}
@@ -311,7 +321,7 @@ func TestCORS(t *testing.T) {
 		Default(),
 		DefaultCORSHeaders(aco),
 		PreflightCORS("/", aco),
-		WithRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
+		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
 		WithNotFound(nfHandler()),
 	)
 	s := httptest.NewServer(r)
@@ -343,13 +353,114 @@ func TestDuplicate(t *testing.T) {
 	})
 	r := Declare(
 		Default(),
-		WithRoute(route.Declare(http.MethodGet, "/duplicate/route"), h1),
-		WithRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2),
+		HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h1),
+		HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2),
 	)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/duplicate/route", nil)
 	r.ServeHTTP(w, req)
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("re-declaration should be noop; expected %d, got %d", http.StatusOK, w.Result().StatusCode)
+	}
+}
+
+func TestValidatedDuplicate(t *testing.T) {
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	})
+	rt := Declare(
+		Default(),
+		HandleRoute(route.Declare(
+			http.MethodGet, "/",
+			route.Require(require.Hosts("origin.com")),
+		), h1),
+		HandleRoute(route.Declare(http.MethodGet, "/"), h2),
+	)
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "http://origin.com/", nil)
+	rt.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("origin.com request should be OK; got %d", w.Code)
+	}
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	rt.ServeHTTP(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("example.com request should fall through to BadRequest; got %d", w.Code)
+	}
+}
+
+func TestComposition(t *testing.T) {
+	// Set up a an API for composition
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	api1 := Default()
+	api1.HandleFunc(http.MethodGet, "/hello", h1)
+	api1.HandleFunc(http.MethodPost, "/hello", h1)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/hello", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	// Pass through ONLY get
+	api2 := Default()
+	api2.Mount("/api", api1, http.MethodGet)
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 404 {
+		t.Error(404, w.Code)
+	}
+
+	// Pass through all methods
+	api2 = Default()
+	api2.Mount("/api", api1)
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	// Invalid path test
+	api2 = Default()
+	err := api2.Mount("/{", api1)
+	if err == nil {
+		t.Error("expected failure due to route formatting")
+	}
+
+	err = api2.Mount("/api/[version]", api1)
+	if err == nil {
+		t.Error("expected error due to route formatting")
 	}
 }

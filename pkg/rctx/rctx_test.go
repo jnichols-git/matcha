@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
@@ -124,7 +125,7 @@ func TestImplementContext(t *testing.T) {
 	}
 	dl := time.Now().Add(time.Second * 1)
 	ctx := req.Context()
-	ctx, _ = context.WithDeadline(ctx, dl)
+	ctx, cancel := context.WithDeadline(ctx, dl)
 	ctx = context.WithValue(ctx, "testKey", "testValue")
 	req = req.WithContext(ctx)
 	req = PrepareRequestContext(req, DefaultMaxParams)
@@ -164,6 +165,7 @@ func TestImplementContext(t *testing.T) {
 		mtx.Lock()
 		mtx.Unlock()
 	}
+	cancel()
 	// Test nil parent
 	req = &http.Request{}
 	req = PrepareRequestContext(req, DefaultMaxParams)
@@ -206,5 +208,47 @@ func TestOverrideContext(t *testing.T) {
 	}
 	if v := ctx.Value(paramKey("testParam")); v != "testCorrectValue" {
 		t.Errorf("got %s", v)
+	}
+}
+
+func TestNested(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/path", nil)
+	ctx := context.WithValue(req.Context(), paramKey("p3"), "v3")
+	req = req.WithContext(ctx)
+
+	req = PrepareRequestContext(req, 1)
+	err := SetParam(req.Context(), "p1", "v1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	req = PrepareRequestContext(req, 1)
+	err = SetParam(req.Context(), "p2", "v2")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p1 := GetParam(req.Context(), "p1"); p1 != "v1" {
+		t.Error("v1", p1)
+	}
+	if p2 := GetParam(req.Context(), "p2"); p2 != "v2" {
+		t.Error("v2", p2)
+	}
+	if p3 := GetParam(req.Context(), "p3"); p3 != "v3" {
+		t.Error("v3", p3)
+	}
+	if p4 := GetParam(req.Context(), "p4"); p4 != "" {
+		t.Error("", p4)
+	}
+
+	// Test nil parents
+	rctx := req.Context().(*Context)
+	rctx.parent.(*Context).parent = nil
+	if p3 := GetParam(req.Context(), "p3"); p3 != "" {
+		t.Error("", p3)
+	}
+
+	rctx.parent = nil
+	if p1 := GetParam(req.Context(), "p1"); p1 != "" {
+		t.Error("", p1)
 	}
 }

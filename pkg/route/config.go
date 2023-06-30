@@ -3,6 +3,7 @@ package route
 import (
 	"github.com/cloudretic/matcha/pkg/cors"
 	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 // RouteConfigFuncs can be applied to a Route at creation.
@@ -17,9 +18,16 @@ func CORSHeaders(aco *cors.AccessControlOptions) ConfigFunc {
 }
 
 // Attaches middleware to the route.
-func WithMiddleware(mw middleware.Middleware) ConfigFunc {
+func WithMiddleware(mws ...middleware.Middleware) ConfigFunc {
 	return func(r Route) error {
-		r.Attach(mw)
+		r.Attach(mws...)
+		return nil
+	}
+}
+
+func Require(rs ...require.Required) ConfigFunc {
+	return func(r Route) error {
+		r.Require(rs...)
 		return nil
 	}
 }

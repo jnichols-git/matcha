@@ -38,3 +38,29 @@ func TestNext(t *testing.T) {
 		i++
 	}
 }
+
+func BenchmarkNext(b *testing.B) {
+	path := "/path/to/file.txt"
+	next := 0
+	for i := 0; i < b.N; i++ {
+		_, next = Next(path, next)
+		if next == -1 {
+			next = 0
+		}
+	}
+}
+
+func TestMakePartial(t *testing.T) {
+	if px := MakePartial("/hello", ""); px != "/hello/+" {
+		t.Error("/hello/+", px)
+	}
+	if px := MakePartial("/hello/", ""); px != "/hello/+" {
+		t.Error("/hello/+", px)
+	}
+	if px := MakePartial("/hello/+", ""); px != "/hello/+" {
+		t.Error("/hello/+", px)
+	}
+	if px := MakePartial("/hello", "next"); px != "/hello/[next]+" {
+		t.Error("/hello/[next]+", px)
+	}
+}

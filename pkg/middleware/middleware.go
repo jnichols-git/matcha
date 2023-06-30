@@ -16,18 +16,6 @@ import (
 // Returns an *http.Request; the middleware can set router params or reject a request by returning nil.
 type Middleware func(http.ResponseWriter, *http.Request) *http.Request
 
-// Returns a middleware that checks for the presence of a query parameter.
-func ExpectQueryParam(name string) Middleware {
-	return func(w http.ResponseWriter, r *http.Request) *http.Request {
-		if r.URL.Query().Has(name) {
-			return r
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Missing query param: %s", name)
-		return nil
-	}
-}
-
 // The string used to indicate an absent origin in log entries.
 //
 // Origins take one of the following forms, so must not take any of these forms:
@@ -118,7 +106,7 @@ type LogEntry struct {
 	URL    *url.URL
 }
 
-// ExecuteMiddleware executes the given middleware functions on the given request.
+// Executes the given middleware functions on the given request.
 // It returns the modified request or nil if any middleware function returns nil.
 func ExecuteMiddleware(mw []Middleware, w http.ResponseWriter, req *http.Request) *http.Request {
 	for _, m := range mw {

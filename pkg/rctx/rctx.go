@@ -78,7 +78,14 @@ func ReturnRequestContext(req *http.Request) {
 // the key is passed to ctx.Value(paramKey(key)).
 func GetParam(ctx context.Context, key string) string {
 	if rctx, ok := ctx.(*Context); ok {
-		return rctx.params.get(paramKey(key))
+		v := rctx.params.get(paramKey(key))
+		if v != "" {
+			return v
+		} else if rctx.parent != nil {
+			ctx = rctx.parent
+		} else {
+			return ""
+		}
 	}
 	if val, ok := ctx.Value(paramKey(key)).(string); ok {
 		return val
@@ -138,7 +145,14 @@ func (ctx *Context) Err() error {
 // See interface context.Context.
 func (ctx *Context) Value(key any) any {
 	if pkey, ok := key.(paramKey); ok {
-		return ctx.params.get(pkey)
+		v := ctx.params.get(pkey)
+		if v != "" {
+			return v
+		} else if ctx.parent != nil {
+			return ctx.parent.Value(key)
+		} else {
+			return ""
+		}
 	} else if ctx.parent != nil {
 		return ctx.parent.Value(key)
 	} else {

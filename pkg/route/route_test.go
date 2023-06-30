@@ -3,12 +3,14 @@ package route
 import (
 	"errors"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"testing"
 
 	"github.com/cloudretic/matcha/pkg/cors"
 	"github.com/cloudretic/matcha/pkg/rctx"
+	"github.com/cloudretic/matcha/pkg/route/require"
 )
 
 func invalidConfigFunc(r Route) error {
@@ -422,5 +424,50 @@ func TestCORS(t *testing.T) {
 	}
 	if rctx.GetParam(req.Context(), "add") != "/with/addition" {
 		t.Errorf("Expected param /with/addition, got %s", rctx.GetParam(req.Context(), "add"))
+	}
+}
+
+func TestRequire(t *testing.T) {
+	webhost := require.Hosts("cloudretic.com", "www.cloudretic.com")
+	apihost := require.Hosts("api.cloudretic.com")
+	webr := Declare(http.MethodGet, "/", Require(webhost))
+	apir := Declare(http.MethodGet, "/")
+	apir.Require(apihost)
+
+	req := httptest.NewRequest(http.MethodGet, "https://www.cloudretic.com", nil)
+	if !require.Execute(req, webr.Required()) {
+		t.Error("expected match")
+	}
+	if require.Execute(req, apir.Required()) {
+		t.Error("expected no match")
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "https://api.cloudretic.com", nil)
+	if !require.Execute(req, apir.Required()) {
+		t.Error("expected match")
+	}
+	if require.Execute(req, webr.Required()) {
+		t.Error("expected no match")
+	}
+
+	// Repeat for partial routes
+	webr = Declare(http.MethodGet, "/+", Require(webhost))
+	apir = Declare(http.MethodGet, "/+")
+	apir.Require(apihost)
+
+	req = httptest.NewRequest(http.MethodGet, "https://www.cloudretic.com", nil)
+	if !require.Execute(req, webr.Required()) {
+		t.Error("expected match")
+	}
+	if require.Execute(req, apir.Required()) {
+		t.Error("expected no match")
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "https://api.cloudretic.com", nil)
+	if !require.Execute(req, apir.Required()) {
+		t.Error("expected match")
+	}
+	if require.Execute(req, webr.Required()) {
+		t.Error("expected no match")
 	}
 }
