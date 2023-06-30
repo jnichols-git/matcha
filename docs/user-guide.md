@@ -127,7 +127,7 @@ Given the emphasis put onto registration order here, I think it's important to n
 Implicitly deprioritizing some routes to skew towards exact matches causes two problems with this structure:
 
 - The ordering of routes is no longer guaranteed; Matcha shouldn't be doing anything you don't explicitly tell it to do
-- Performance will be hit as in order to know if the most exact match has been reached, the entire tree must be traversed
+- Performance will be decreased as in order to know if the most exact match has been reached, the entire tree must be traversed
 
 We're working on ways to make routing more intuitive while avoiding these problems. In the meantime, we believe that strict registration order is the best way to go, so that you can always predict what Matcha will do with the instructions you give it.
 
@@ -158,6 +158,8 @@ Usage notes:
 So, what if you need more out of your routes?
 
 Behind the scenes, `Handle` and `HandleFunc` use the method and path you provide do construct a route and register the handler to it. This covers a lot of use cases, but some applications need more control over the behavior of a route. For this, we provide `route.New` and `route.Declare`, which both accept a variadic list of arguments modifying the route. These are called `ConfigFunc`s, and they give access to things like middleware or "requirements", which match against non-path properties of a request. `HandleRoute` and `HandleRouteFunc` are used to register these routes directly.
+
+Our [routes documentation](routes.md) has the most up-to-date information on advanced usage, but here are some commonly-used examples.
 
 ### Middleware
 
