@@ -1,14 +1,13 @@
 # Contributing to Matcha
 
-- [Contributing to Matcha](#contributing-to-matcha)
-  - [Getting Started](#getting-started)
-  - [Making Changes](#making-changes)
-    - [Picking an Issue](#picking-an-issue)
-    - [Creating a Branch for Changes](#creating-a-branch-for-changes)
-    - [Submitting Changes](#submitting-changes)
-  - [Submission Standards](#submission-standards)
-  - [Versioning Policy](#versioning-policy)
-    - [Deprecated Features](#deprecated-features)
+- [Getting Started](#getting-started)
+- [Making Changes](#making-changes)
+  - [Picking an Issue](#picking-an-issue)
+  - [Creating a Branch for Changes](#creating-a-branch-for-changes)
+  - [Submitting Changes](#submitting-changes)
+- [Submission Standards](#submission-standards)
+- [Versioning Policy](#versioning-policy)
+  - [Deprecated Features](#deprecated-features)
 
 We welcome community contributions to Matcha!
 
@@ -56,9 +55,9 @@ Once your changes are approved, they'll be squash-and-merged into the feature br
 
 Currently, new submissions to Matcha are subject to the following criteria:
 
-1. **Performance**: Changes must not significantly decrease performance unless they are urgent bugfixes. Benchmarks for routers and routes, as well as a more comprehensive benchmark on the GitHub API (courtesy of [julienschmidt](https://github.com/julienschmidt/go-http-routing-benchmark)) are provided to help evaluate this as you work. Run benchmarks before and after making changes to most accurately assess impact.
+1. **Performance**: Changes must not significantly decrease performance unless they are urgent bugfixes. End-to-end benchmarks are provided in the docs folder; additionally, if your feature or change is to a system that is integrated heavily, we suggest you add and check benchmarks for it.
 2. **Testing**: Test coverage should stay above 95%. New behavior is expected to have associated unit tests, and PRs that drop coverage by more than 2%, or below 90%, will be automatically rejected.
-3. **Documentation**: CloudRETIC strongly encourages detailed documentation of code, and pull requests will be evaluated on quality of comments and external documentation in `/docs`.
+3. **Documentation**: CloudRETIC strongly encourages in-code documentation. Maintainers may request that you add additional documentation to your code.
 4. **Style**: Follow good Go code practices. We use [this list](https://github.com/golang/go/wiki/CodeReviewComments#gofmt) to evaluate style.
 5. **Zero-Dependency**: Matcha does not use any external libraries. Changes with dependencies will be rejected.
 
@@ -66,10 +65,10 @@ We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub C
 
 ## Versioning Policy
 
-Matcha's latest stable release is `v1.1.1` (major version 1, minor version 1, patch 0). Releases are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
+Matcha's latest stable release is `v1.2.0` (major version 1, minor version 2, patch 0). Releases are tagged in the GitHub repository. We follow these guidelines when deciding if a change is major, minor, or patch:
 
 - Major: The change is non-essential and breaks the existing API. Major changes are not currently being accepted.
-- Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.2.0`.
+- Minor: The change doesn't break the existing API, but changes large portions of the internals of the library, or adds significant functionality to the API. Minor changes should relate to branch `v1.3.0`.
 - Patch: The change is a bugfix, minor performance improvement, minor API change, or auxilary component (like middleware). Patches should relate to branch `main`.
 
 ### Deprecated Features

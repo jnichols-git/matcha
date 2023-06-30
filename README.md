@@ -11,11 +11,9 @@
 - Flexible routing--handle your API specifications with ease
 - Extensible components for edge cases and integration with 3rd-party tools
 - High performance that scales to larger APIs
-- Comprehensive and passing test coverage, and extensive benchmarks to track performance
-- Easy conversion from standard library; uses stdlib handler signatures
+- Comprehensive and passing test coverage, and extensive benchmarks to track performance on key features
+- Easy conversion from standard library; uses stdlib handler signatures and types
 - Zero dependencies, zero dependency management
-
-For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 
 ## Installation
 
@@ -23,7 +21,7 @@ For a preview of what's upcoming, see our [roadmap](docs/roadmap.md).
 
 ## Basic Usage
 
-Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`
+Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`.
 
 ```go
 package examples
@@ -71,9 +69,18 @@ Benchmark | ns/request | B/request | allocs/request
 Sequential | 2226 ns/request | 1909 bytes/request | 27 allocs/request
 Concurrent | 1953 ns/request | 1943 bytes/request | 29 allocs/request
 
+### MockBoards Mounted API (v2) Benchmark
+
+This mounts a copy of the API at `/v2` and runs requests against both the v1 and v2 APIs.
+
+Benchmark | ns/request | B/request | allocs/request
+--- | --- | --- | ---
+Sequential | 2797 ns/request | 2046 bytes/request | 29 allocs/request
+Concurrent | 2097 ns/request | 2139 bytes/request | 30 allocs/request
+
 ### MockBoards API Routing-Only Benchmark
 
-This is the same spec as above, but with the non-path features stripped out to give a better idea of pure routing costs.
+This is the v1 spec, but with the non-path features stripped out to give a better idea of pure routing costs.
 
 Benchmark | ns/request | B/request | allocs/request
 --- | --- | --- | ---
@@ -85,3 +92,19 @@ Concurrent | 1353 ns/request | 1453 bytes/request | 14 allocs/request
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
 Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@cloudretic.com>
+
+## License
+
+Copyright 2023 CloudRETIC LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

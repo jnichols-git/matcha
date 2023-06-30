@@ -76,12 +76,8 @@ func TestAPIv1(t *testing.T) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
 		r := route.Declare(tr.method, tr.path)
-		for _, mw := range tr.mws {
-			r.Attach(mw)
-		}
-		for _, rq := range tr.rqs {
-			r.Require(rq)
-		}
+		r.Attach(tr.mws...)
+		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}
 	w := httptest.NewRecorder()
@@ -105,12 +101,8 @@ func BenchmarkAPIv1(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		for _, mw := range tr.mws {
-			r.Attach(mw)
-		}
-		for _, rq := range tr.rqs {
-			r.Require(rq)
-		}
+		r.Attach(tr.mws...)
+		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}
 	b.Run(b.Name()+"-sequential", func(b *testing.B) {
