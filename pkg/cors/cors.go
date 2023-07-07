@@ -1,6 +1,6 @@
 // Package cors defines a set of useful handlers and middleware for setting access control values.
 //
-// See [https://github.com/cloudretic/matcha/blob/main/docs/other-features.md#cross-origin-resource-sharing-cors].
+// See [https://github.com/decentplatforms/matcha/blob/main/docs/other-features.md#cross-origin-resource-sharing-cors].
 package cors
 
 import (

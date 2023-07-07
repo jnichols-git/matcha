@@ -12,11 +12,11 @@ import (
 
 	"sync"
 
-	"github.com/cloudretic/matcha/pkg/cors"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/cors"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 
-	"github.com/cloudretic/matcha/pkg/rctx"
-	"github.com/cloudretic/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/rctx"
+	"github.com/decentplatforms/matcha/pkg/route"
 )
 
 // Return a handler that writes OK to all requests

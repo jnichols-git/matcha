@@ -1,13 +1,13 @@
 // Package route defines the API for creating and interacting with a route, and its internal behavior.
 //
-// See [https://github.com/cloudretic/matcha/blob/main/docs/routes.md].
+// See [https://github.com/decentplatforms/matcha/blob/main/docs/routes.md].
 package route
 
 import (
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 )
 
 type Route interface {

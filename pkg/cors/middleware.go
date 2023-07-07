@@ -3,7 +3,7 @@ package cors
 import (
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/middleware"
 )
 
 // CORS middleware

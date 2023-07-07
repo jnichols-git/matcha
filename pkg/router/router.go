@@ -1,13 +1,13 @@
 // Package router defines the API for creating and interacting with a router, and its internal behavior.
 //
-// See [https://github.com/cloudretic/matcha/blob/main/docs/routers.md].
+// See [https://github.com/decentplatforms/matcha/blob/main/docs/routers.md].
 package router
 
 import (
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/route"
 )
 
 type Router interface {

@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cloudretic/matcha/pkg/cors"
-	"github.com/cloudretic/matcha/pkg/rctx"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/cors"
+	"github.com/decentplatforms/matcha/pkg/rctx"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 )
 
 func invalidConfigFunc(r Route) error {
@@ -428,13 +428,13 @@ func TestCORS(t *testing.T) {
 }
 
 func TestRequire(t *testing.T) {
-	webhost := require.Hosts("cloudretic.com", "www.cloudretic.com")
-	apihost := require.Hosts("api.cloudretic.com")
+	webhost := require.Hosts("decentplatforms.com", "www.decentplatforms.com")
+	apihost := require.Hosts("api.decentplatforms.com")
 	webr := Declare(http.MethodGet, "/", Require(webhost))
 	apir := Declare(http.MethodGet, "/")
 	apir.Require(apihost)
 
-	req := httptest.NewRequest(http.MethodGet, "https://www.cloudretic.com", nil)
+	req := httptest.NewRequest(http.MethodGet, "https://www.decentplatforms.com", nil)
 	if !require.Execute(req, webr.Required()) {
 		t.Error("expected match")
 	}
@@ -442,7 +442,7 @@ func TestRequire(t *testing.T) {
 		t.Error("expected no match")
 	}
 
-	req = httptest.NewRequest(http.MethodGet, "https://api.cloudretic.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com", nil)
 	if !require.Execute(req, apir.Required()) {
 		t.Error("expected match")
 	}
@@ -455,7 +455,7 @@ func TestRequire(t *testing.T) {
 	apir = Declare(http.MethodGet, "/+")
 	apir.Require(apihost)
 
-	req = httptest.NewRequest(http.MethodGet, "https://www.cloudretic.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://www.decentplatforms.com", nil)
 	if !require.Execute(req, webr.Required()) {
 		t.Error("expected match")
 	}
@@ -463,7 +463,7 @@ func TestRequire(t *testing.T) {
 		t.Error("expected no match")
 	}
 
-	req = httptest.NewRequest(http.MethodGet, "https://api.cloudretic.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com", nil)
 	if !require.Execute(req, apir.Required()) {
 		t.Error("expected match")
 	}

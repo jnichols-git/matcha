@@ -1,10 +1,10 @@
 # matcha
 
-[![Coverage Status](https://coveralls.io/repos/github/cloudretic/matcha/badge.svg?branch=main)](https://coveralls.io/github/cloudretic/matcha?branch=main)
-[![Go Report Card](https://goreportcard.com/badge/github.com/cloudretic/matcha)](https://goreportcard.com/report/github.com/cloudretic/matcha)
+[![Coverage Status](https://coveralls.io/repos/github/decentplatforms/matcha/badge.svg?branch=main)](https://coveralls.io/github/decentplatforms/matcha?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/decentplatforms/matcha)](https://goreportcard.com/report/github.com/decentplatforms/matcha)
 [![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
-`cloudretic/matcha` is an HTTP router designed for ease of use, power, and extensibility.
+Matcha is an HTTP router designed for ease of use, power, and extensibility.
 
 ## Features
 
@@ -17,7 +17,7 @@
 
 ## Installation
 
-`go get github.com/cloudretic/matcha@v1.2.0`
+`go get github.com/decentplatforms/matcha@v1.2.1`
 
 ## Basic Usage
 
@@ -29,7 +29,7 @@ package examples
 import (
     "net/http"
 
-    "github.com/cloudretic/matcha/pkg/router"
+    "github.com/decentplatforms/matcha/pkg/router"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {
@@ -91,11 +91,11 @@ Concurrent | 1353 ns/request | 1453 bytes/request | 14 allocs/request
 
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
-Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@cloudretic.com>
+Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@decentplatforms.com>
 
 ## License
 
-Copyright 2023 CloudRETIC LLC
+Copyright 2023 Decent Platforms LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
