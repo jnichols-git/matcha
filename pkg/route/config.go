@@ -1,9 +1,9 @@
 package route
 
 import (
-	"github.com/cloudretic/matcha/pkg/cors"
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/cors"
+	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 )
 
 // RouteConfigFuncs can be applied to a Route at creation.

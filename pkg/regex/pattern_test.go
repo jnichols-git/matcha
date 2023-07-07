@@ -3,22 +3,22 @@ package regex
 import "testing"
 
 func TestPattern(t *testing.T) {
-	rs, isrs, err := CompilePattern("{(api|www)}.cloudretic.{.*}")
+	rs, isrs, err := CompilePattern("{(api|www)}.decentplatforms.{.*}")
 	if err != nil {
 		t.Errorf("expected expression to compile, got %s", err)
 	} else if !isrs {
 		t.Errorf("expected expression to compile to pattern")
 	}
-	if ok := rs.Match("api.cloudretic.com"); !ok {
+	if ok := rs.Match("api.decentplatforms.com"); !ok {
 		t.Error("expected match")
 	}
-	if ok := rs.Match("blog.cloudretic.com"); ok {
+	if ok := rs.Match("blog.decentplatforms.com"); ok {
 		t.Error("expected no match")
 	}
 	if ok := rs.Match("api.google.com"); ok {
 		t.Error("expected no match")
 	}
-	if ok := rs.Match("cloudretic.com"); ok {
+	if ok := rs.Match("decentplatforms.com"); ok {
 		t.Error("expected no match")
 	}
 	rs, isrs, err = CompilePattern("{.{4}}{.+}")
@@ -33,22 +33,22 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("abcd"); ok {
 		t.Error("expected no match")
 	}
-	rs, _, _ = CompilePattern("{.+}.cloudretic.com")
-	if ok := rs.Match("cloudretic.com"); ok {
+	rs, _, _ = CompilePattern("{.+}.decentplatforms.com")
+	if ok := rs.Match("decentplatforms.com"); ok {
 		t.Error("expected no match")
 	}
-	if ok := rs.Match("www.cloudretic.com:80"); ok {
+	if ok := rs.Match("www.decentplatforms.com:80"); ok {
 		t.Error("expected no match")
 	}
 
-	rs, isrs, err = CompilePattern("api.cloudretic.com")
+	rs, isrs, err = CompilePattern("api.decentplatforms.com")
 	if err != nil {
 		t.Errorf("expected no error")
 	}
 	if isrs {
 		t.Errorf("static string is not a Pattern")
 	}
-	_, _, err = CompilePattern("{.+}.cloudretic.{.+")
+	_, _, err = CompilePattern("{.+}.decentplatforms.{.+")
 	if err == nil {
 		t.Errorf("should fail with unbalanced braces")
 	}

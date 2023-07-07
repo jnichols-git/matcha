@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cloudretic/matcha/pkg/route"
-	"github.com/cloudretic/matcha/pkg/router"
+	"github.com/decentplatforms/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/router"
 )
 
 /*
@@ -34,20 +34,20 @@ import (
 // MockBoards API
 var apiRoutes = []benchRoute{
 	// Get/create posts
-	{method: http.MethodGet, path: "/[board]/posts", testPath: "/cloudretic/posts", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPut, path: "/[board]/posts", testPath: "/cloudretic/posts", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/[board]/posts/[order]{new|top}", testPath: "/cloudretic/posts/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/[board]/posts", testPath: "/decentplatforms/posts", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPut, path: "/[board]/posts", testPath: "/decentplatforms/posts", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/[board]/posts/[order]{new|top}", testPath: "/decentplatforms/posts/new", mws: api_mws, rqs: api_rqs},
 	// Get/update/delete post
-	{method: http.MethodPatch, path: "/[board]/posts/[id]", testPath: "/cloudretic/posts/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodDelete, path: "/[board]/posts/[id]", testPath: "/cloudretic/posts/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPatch, path: "/[board]/posts/[id]", testPath: "/decentplatforms/posts/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodDelete, path: "/[board]/posts/[id]", testPath: "/decentplatforms/posts/2719", mws: api_mws, rqs: api_rqs},
 	// Get/create comments
-	{method: http.MethodGet, path: "/[board]/posts/[id]/comments", testPath: "/cloudretic/posts/2719/comments", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPut, path: "/[board]/posts/[id]/comments", testPath: "/cloudretic/posts/2719/comments", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/[board]/posts/[id]/comments/[order]{new|top}", testPath: "/cloudretic/posts/2719/comments/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/[board]/posts/[id]/comments", testPath: "/decentplatforms/posts/2719/comments", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPut, path: "/[board]/posts/[id]/comments", testPath: "/decentplatforms/posts/2719/comments", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/[board]/posts/[id]/comments/[order]{new|top}", testPath: "/decentplatforms/posts/2719/comments/new", mws: api_mws, rqs: api_rqs},
 	// Get/update/delete comment
-	{method: http.MethodGet, path: "/[board]/posts/[id]/comments/[id]", testPath: "/cloudretic/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPatch, path: "/[board]/posts/[id]/comments/[id]", testPath: "/cloudretic/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodDelete, path: "/[board]/posts/[id]/comments/[id]", testPath: "/cloudretic/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/[board]/posts/[id]/comments/[id]", testPath: "/decentplatforms/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPatch, path: "/[board]/posts/[id]/comments/[id]", testPath: "/decentplatforms/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodDelete, path: "/[board]/posts/[id]/comments/[id]", testPath: "/decentplatforms/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
 	// Get user info
 	// Posts/comments
 	{method: http.MethodGet, path: "/[user]/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},

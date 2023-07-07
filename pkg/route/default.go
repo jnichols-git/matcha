@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/path"
-	"github.com/cloudretic/matcha/pkg/rctx"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/path"
+	"github.com/decentplatforms/matcha/pkg/rctx"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 )
 
 //=====PARTS=====

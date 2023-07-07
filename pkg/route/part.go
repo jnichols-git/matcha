@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/cloudretic/matcha/pkg/regex"
+	"github.com/decentplatforms/matcha/pkg/regex"
 )
 
 const (

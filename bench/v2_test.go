@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cloudretic/matcha/pkg/route"
-	"github.com/cloudretic/matcha/pkg/router"
+	"github.com/decentplatforms/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/router"
 )
 
 /*

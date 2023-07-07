@@ -45,8 +45,8 @@ type pmf func(string, int) int
 
 // Patterns are a combination of static string components and regex validation.
 // Any piece of the string contained in brackets {} will be matched as regex, while any outside of brackets
-// will be matched as itself; for example, {.*}.cloudretic.{.*} matches any subdomain and top-level domain for
-// cloudretic. Patterns *must* contain some regex. It performs generally equivalent to the exact same regex in
+// will be matched as itself; for example, {.*}.decentplatforms.{.*} matches any subdomain and top-level domain for
+// decentplatforms. Patterns *must* contain some regex. It performs generally equivalent to the exact same regex in
 // brackets (see regex_bench_test.go) and better if static string parts are swapped out of the expression entirely.
 type Pattern struct {
 	fs      []pmf

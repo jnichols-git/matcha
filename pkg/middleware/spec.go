@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/regex"
+	"github.com/decentplatforms/matcha/pkg/regex"
 )
 
 // ExpectQueryParam checks for the presence of a query parameter.

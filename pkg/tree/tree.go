@@ -1,14 +1,14 @@
 // Package tree defines a method of recursively matching route paths by part.
 //
-// See [https://github.com/cloudretic/matcha/blob/main/docs/routers.md#matching].
+// See [https://github.com/decentplatforms/matcha/blob/main/docs/routers.md#matching].
 package tree
 
 import (
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/path"
-	"github.com/cloudretic/matcha/pkg/route"
-	"github.com/cloudretic/matcha/pkg/route/require"
+	"github.com/decentplatforms/matcha/pkg/path"
+	"github.com/decentplatforms/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/route/require"
 )
 
 const NO_LEAF_ID = int(0)

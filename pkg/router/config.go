@@ -3,9 +3,9 @@ package router
 import (
 	"net/http"
 
-	"github.com/cloudretic/matcha/pkg/cors"
-	"github.com/cloudretic/matcha/pkg/middleware"
-	"github.com/cloudretic/matcha/pkg/route"
+	"github.com/decentplatforms/matcha/pkg/cors"
+	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/decentplatforms/matcha/pkg/route"
 )
 
 // ConfigFuncs run on Routers, usually to add a route or attach middleware.

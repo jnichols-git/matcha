@@ -86,14 +86,14 @@ func TestLogRequests(t *testing.T) {
 }
 
 func TestLogRequestsIf(t *testing.T) {
-	t.Run("log request with origin cloudretic.com", func(t *testing.T) {
+	t.Run("log request with origin decentplatforms.com", func(t *testing.T) {
 		var builder strings.Builder
 		mw := LogRequestsIf(func(r *http.Request) bool {
-			return r.Header.Get("Origin") == "cloudretic.com"
+			return r.Header.Get("Origin") == "decentplatforms.com"
 		}, &builder)
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
-		req.Header.Set("Origin", "cloudretic.com")
+		req.Header.Set("Origin", "decentplatforms.com")
 		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
@@ -102,9 +102,9 @@ func TestLogRequestsIf(t *testing.T) {
 		if err != nil {
 			t.Errorf("error parsing log entry: %v", err)
 		}
-		if log.Origin != "cloudretic.com" {
+		if log.Origin != "decentplatforms.com" {
 			t.Errorf(
-				"log should have an origin of cloudretic.com, got %s",
+				"log should have an origin of decentplatforms.com, got %s",
 				log.Origin,
 			)
 		}

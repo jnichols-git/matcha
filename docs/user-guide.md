@@ -17,7 +17,7 @@ Hello! This is a step-by-step guide to using Matcha for HTTP handling in Go.
 
 ### Hello World
 
-To start us off, here's a basic example. You can find project examples in the GitHub [here](https://github.com/cloudretic/matcha/tree/main/examples) if you want to experiment with them.
+To start us off, here's a basic example. You can find project examples in the GitHub [here](https://github.com/decentplatforms/matcha/tree/main/examples) if you want to experiment with them.
 
 ```go
 package examples
@@ -25,7 +25,7 @@ package examples
 import (
     "net/http"
 
-    "github.com/cloudretic/matcha/pkg/router"
+    "github.com/decentplatforms/matcha/pkg/router"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {
@@ -53,8 +53,8 @@ package examples
 import (
     "net/http"
 
-    "github.com/cloudretic/matcha/pkg/rctx"
-    "github.com/cloudretic/matcha/pkg/router"
+    "github.com/decentplatforms/matcha/pkg/rctx"
+    "github.com/decentplatforms/matcha/pkg/router"
 )
 
 func echoAdmin(w http.ResponseWriter, req *http.Request) {
@@ -91,8 +91,8 @@ import (
     "net/http"
     "os"
 
-    "github.com/cloudretic/matcha/pkg/rctx"
-    "github.com/cloudretic/matcha/pkg/router"
+    "github.com/decentplatforms/matcha/pkg/rctx"
+    "github.com/decentplatforms/matcha/pkg/router"
 )
 
 type fileServer struct {
@@ -169,9 +169,9 @@ Matcha uses `func(w http.ResponseWriter, req *http.Request) *http.Request` for m
 package main
 
 import (
-    "github.com/cloudretic/matcha/pkg/router"
-    "github.com/cloudretic/matcha/pkg/route"
-    "github.com/cloudretic/matcha/pkg/middleware"
+    "github.com/decentplatforms/matcha/pkg/router"
+    "github.com/decentplatforms/matcha/pkg/route"
+    "github.com/decentplatforms/matcha/pkg/middleware"
 )
 
 func main() {
@@ -193,10 +193,10 @@ Matcha provides an interface for matching things that are not paths in package `
 ```go
 webRoute, err := route.New(
     http.MethodGet, "/",
-    route.Require(require.HostPorts("https://{www.|}cloudretic.com")),
+    route.Require(require.HostPorts("https://{www.|}decentplatforms.com")),
 )
 apiRoute, err := route.New(
     http.MethodGet, "/",
-    require.HostPorts("https://api.cloudretic.com"),
+    require.HostPorts("https://api.decentplatforms.com"),
 )
 ```
