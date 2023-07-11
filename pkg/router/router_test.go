@@ -332,10 +332,10 @@ func TestCORS(t *testing.T) {
 		"header": http.Header{},
 	})
 	runEvalRequest(t, s, "/", reqGenHeaders(
-		http.MethodOptions, http.Header{"Origin": {"test-origin"}, "Access-Control-Request-Headers": {"X-Header-1"}},
+		http.MethodOptions, http.Header{"Origin": {"test-origin"}, "Access-Control-Request-Headers": {"x-header-1"}},
 	), map[string]any{
 		"code":   http.StatusNoContent,
-		"header": http.Header{"Access-Control-Allow-Headers": {"X-Header-1"}},
+		"header": http.Header{"Access-Control-Allow-Headers": {"x-header-1"}},
 	})
 
 	// Test invalid route for preflight
