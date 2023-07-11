@@ -16,8 +16,8 @@ var aco1 = &AccessControlOptions{
 var aco2 = &AccessControlOptions{
 	AllowOrigin:      []string{"origin.com"},
 	AllowMethods:     []string{http.MethodGet, http.MethodPost},
-	AllowHeaders:     []string{"X-Header-1", "X-Header-2", "X-Header-3"},
-	ExposeHeaders:    []string{"X-Header-Out"},
+	AllowHeaders:     []string{"x-Header-1", "x-Header-2", "x-Header-3"},
+	ExposeHeaders:    []string{"x-Header-Out"},
 	MaxAge:           1000,
 	AllowCredentials: false,
 }
@@ -88,8 +88,8 @@ func TestReflectCORSRequestHeaders(t *testing.T) {
 	if len(resp_headers.AllowHeaders) != 2 || resp_headers.AllowHeaders[0] != "X-Header-1" || resp_headers.AllowHeaders[1] != "X-Header-2" {
 		t.Errorf("expected allow-headers X-Header-1 and X-Header-2, got %v", resp_headers.AllowHeaders)
 	}
-	if len(resp_headers.ExposeHeaders) != 1 || resp_headers.ExposeHeaders[0] != "X-Header-Out" {
-		t.Errorf("expected expose-headers X-Header-Out, got %v", resp_headers.ExposeHeaders)
+	if len(resp_headers.ExposeHeaders) != 1 || resp_headers.ExposeHeaders[0] != "x-Header-Out" {
+		t.Errorf("expected expose-headers x-Header-Out, got %v", resp_headers.ExposeHeaders)
 	}
 	if resp_headers.AllowCredentials {
 		t.Errorf("expected no allowed credentials")
