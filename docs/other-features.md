@@ -1,14 +1,13 @@
 # Other Features
 
-- [Other Features](#other-features)
-  - [Cross-Origin Resource Sharing (CORS)](#cross-origin-resource-sharing-cors)
-    - [How CORS Works](#how-cors-works)
-    - [Setting Up CORS](#setting-up-cors)
-    - [Example](#example)
-  - [Logging](#logging)
-  - [Adapters](#adapters)
-    - [Implementing the Adapter Interface](#implementing-the-adapter-interface)
-  - [Route Validation](#route-validation)
+- [Cross-Origin Resource Sharing (CORS)](#cross-origin-resource-sharing-cors)
+  - [How CORS Works](#how-cors-works)
+  - [Setting Up CORS](#setting-up-cors)
+  - [Example](#example)
+- [Logging](#logging)
+- [Adapters](#adapters)
+  - [Implementing the Adapter Interface](#implementing-the-adapter-interface)
+- [Route Validation](#route-validation)
 
 ## Cross-Origin Resource Sharing (CORS)
 
@@ -31,6 +30,8 @@ If the request is simple, it's sent as normal. If it is not simple, the browser 
 - `Access-Control-Allow-Credentials`: Indicates if a request may use credentials (cookies, authorization, or TLS).
 
 All of these can be empty, a list, or `*`, which indicates that any value is allowed/exposed. Matcha represents these with the `*AccessControlOptions` struct, used to define how a Router should treat CORS requests.
+
+> Header names in `Access-Control-Allow-Headers` are case sensitive. [This issue](https://github.com/decentplatforms/matcha/issues/97) is fixed in the upcoming patch `v1.2.2`.
 
 ### Setting Up CORS
 

@@ -77,6 +77,12 @@ func TestExpectHeader(t *testing.T) {
 			t.Error("ExpectHeader did not recognize foo was provided")
 		}
 		r = httptest.NewRequest("GET", "http://example.com", nil)
+		r.Header.Set("Foo", "bar")
+		w = httptest.NewRecorder()
+		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
+			t.Error("ExpectHeader should have recognized Foo was provided")
+		}
+		r = httptest.NewRequest("GET", "http://example.com", nil)
 		r.Header.Set("foo", "baz")
 		w = httptest.NewRecorder()
 		if ExecuteMiddleware([]Middleware{m}, w, r) != nil {
@@ -93,7 +99,7 @@ func TestExpectHeader(t *testing.T) {
 			t.Error("ExpectHeader did not recognize foo was provided")
 		}
 		r = httptest.NewRequest("GET", "http://example.com", nil)
-		r.Header.Set("foo", "baz")
+		r.Header.Set("Foo", "baz")
 		w = httptest.NewRecorder()
 		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
 			t.Error("ExpectHeader did not recognize foo was provided")

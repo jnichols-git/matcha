@@ -6,6 +6,7 @@ package cors
 import (
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -94,8 +95,9 @@ func ReflectCORSRequestHeaders(aco *AccessControlOptions, crh *CORSRequestHeader
 		hct := 0
 	allowed:
 		for _, allowedHeader := range aco.AllowHeaders {
+			allowedHeader = strings.ToLower(allowedHeader)
 			for _, requestedHeader := range crh.RequestHeaders {
-				if allowedHeader == requestedHeader {
+				if allowedHeader == strings.ToLower(requestedHeader) {
 					out.AllowHeaders[hct] = requestedHeader
 					hct++
 					continue allowed

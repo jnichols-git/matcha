@@ -81,8 +81,8 @@ func TestSetCORSResponseHeaders(t *testing.T) {
 			t.Errorf("expected allow-method '%s', got %v", http.MethodPost, am)
 		}
 		ah = res.Headers[AllowHeaders]
-		if len(ah) != 2 || ah[0] != "X-Header-1" || ah[1] != "X-Header-2" {
-			t.Errorf("expected allowed headers 'X-Header-1,X-Header-2', got %v", ah)
+		if len(ah) != 2 || ah[0] != "X-Header-1" || ah[1] != "x-Header-2" {
+			t.Errorf("expected allowed headers 'X-Header-1,x-Header-2', got %v", ah)
 		}
 		eh = res.Headers[ExposeHeaders]
 		if len(eh) != 1 || eh[0] != "*" {
@@ -106,8 +106,8 @@ func TestSetCORSResponseHeaders(t *testing.T) {
 			t.Errorf("expected no allowed headers, got %v", ah)
 		}
 		eh := res.Headers[ExposeHeaders]
-		if len(eh) != 1 || eh[0] != "X-Header-Out" {
-			t.Errorf("expected exposed header X-Header-Out, got %v", eh)
+		if len(eh) != 1 || eh[0] != "x-Header-Out" {
+			t.Errorf("expected exposed header x-Header-Out, got %v", eh)
 		}
 
 		w, req, res, _ = adp.Adapt(preflight_request)
@@ -121,12 +121,12 @@ func TestSetCORSResponseHeaders(t *testing.T) {
 			t.Errorf("expected allow-method '%s', got %v", http.MethodPost, am)
 		}
 		ah = res.Headers[AllowHeaders]
-		if len(ah) != 2 || ah[0] != "X-Header-1" || ah[1] != "X-Header-2" {
-			t.Errorf("expected allowed headers X-Header-1,X-Header-2, got %v", ah)
+		if len(ah) != 2 || ah[0] != "X-Header-1" || ah[1] != "x-Header-2" {
+			t.Errorf("expected allowed headers X-Header-1,x-Header-2, got %v", ah)
 		}
 		eh = res.Headers[ExposeHeaders]
-		if len(eh) != 1 || eh[0] != "X-Header-Out" {
-			t.Errorf("expected exposed headers X-Header-Out, got %v", eh)
+		if len(eh) != 1 || eh[0] != "x-Header-Out" {
+			t.Errorf("expected exposed headers x-Header-Out, got %v", eh)
 		}
 	})
 }
