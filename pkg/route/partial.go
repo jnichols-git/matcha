@@ -26,7 +26,7 @@ func parse_partialEndPart(token string) (*partialEndPart, error) {
 	subToken := token[:len(token)-1]
 	// if subToken is empty, use an unqualified anyWord
 	if subToken == "/" {
-		result.subPart = &regexPart{"", regexp_anyWord_compiled}
+		result.subPart = &wildcardPart{""}
 		return result, nil
 	}
 	// otherwise, parse out subToken
