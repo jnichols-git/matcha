@@ -188,7 +188,6 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		handler := rt.handlers[req.Method][leaf_id]
-		fmt.Println("Handler is nil?", handler == nil)
 		if handler != nil {
 			handler.ServeHTTP(w, reqWithCtx)
 		} else {
