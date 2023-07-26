@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/decentplatforms/matcha/pkg/middleware"
@@ -50,7 +51,13 @@ func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
 	if rt.handlers[r.Method()] == nil {
 		rt.handlers[r.Method()] = make(map[int]http.Handler)
 	}
-	rt.handlers[r.Method()][id] = h
+	if h != nil {
+		rt.handlers[r.Method()][id] = h
+
+	} else {
+		rt.handlers[r.Method()][id] = nil
+	}
+
 }
 
 func register(rt *defaultRouter, r route.Route, h http.Handler) {
@@ -85,7 +92,13 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 	if err != nil {
 		return err
 	}
-	register(rt, r, h)
+	if h != nil {
+		fmt.Println("Registering handler from HandleFunc")
+		register(rt, r, h)
+	} else {
+		fmt.Println("Registering nil handler from HandleFunc")
+		register(rt, r, nil)
+	}
 	return nil
 }
 
@@ -93,14 +106,29 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 //
 // See interface Router.
 func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
-	register(rt, r, h)
+
+	if h != nil {
+		fmt.Println("Registering handler from HandleRoute")
+		register(rt, r, h)
+	} else {
+		fmt.Println("Registering nil handler from HandleRoute")
+		register(rt, r, nil)
+	}
 }
 
 // Add a route to the router.
 //
 // See interface Router.
 func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
-	register(rt, r, h)
+
+	if h != nil {
+		fmt.Println("Registering handler from HandleRouteFunc")
+		register(rt, r, h)
+	} else {
+		fmt.Println("Registering nil handler from HandleRouteFunc")
+
+		register(rt, r, nil)
+	}
 }
 
 // Mount mounts a handler at path.
@@ -159,7 +187,15 @@ func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			rctx.ReturnRequestContext(req)
 			return
 		}
-		rt.handlers[req.Method][leaf_id].ServeHTTP(w, reqWithCtx)
+		handler := rt.handlers[req.Method][leaf_id]
+		fmt.Println("Handler is nil?", handler == nil)
+		if handler != nil {
+			handler.ServeHTTP(w, reqWithCtx)
+		} else {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
+
 		rctx.ReturnRequestContext(req)
 		return
 	}
