@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/decentplatforms/matcha/pkg/middleware"
@@ -93,10 +92,8 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 		return err
 	}
 	if h != nil {
-		fmt.Println("Registering handler from HandleFunc")
 		register(rt, r, h)
 	} else {
-		fmt.Println("Registering nil handler from HandleFunc")
 		register(rt, r, nil)
 	}
 	return nil
@@ -108,10 +105,8 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
 
 	if h != nil {
-		fmt.Println("Registering handler from HandleRoute")
 		register(rt, r, h)
 	} else {
-		fmt.Println("Registering nil handler from HandleRoute")
 		register(rt, r, nil)
 	}
 }
@@ -122,10 +117,8 @@ func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
 func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
 
 	if h != nil {
-		fmt.Println("Registering handler from HandleRouteFunc")
 		register(rt, r, h)
 	} else {
-		fmt.Println("Registering nil handler from HandleRouteFunc")
 
 		register(rt, r, nil)
 	}
