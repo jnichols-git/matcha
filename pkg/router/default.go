@@ -103,25 +103,14 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 //
 // See interface Router.
 func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
-
-	if h != nil {
-		register(rt, r, h)
-	} else {
-		register(rt, r, nil)
-	}
+	register(rt, r, h)
 }
 
 // Add a route to the router.
 //
 // See interface Router.
 func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
-
-	if h != nil {
-		register(rt, r, h)
-	} else {
-
-		register(rt, r, nil)
-	}
+	register(rt, r, h)
 }
 
 // Mount mounts a handler at path.
