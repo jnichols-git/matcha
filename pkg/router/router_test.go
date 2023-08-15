@@ -419,6 +419,7 @@ func TestComposition(t *testing.T) {
 	api1 := Default()
 	api1.HandleFunc(http.MethodGet, "/hello", h1)
 	api1.HandleFunc(http.MethodPost, "/hello", h1)
+	api1.HandleFunc(http.MethodGet, "/hello/[name]", h1)
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
@@ -429,6 +430,20 @@ func TestComposition(t *testing.T) {
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodPost, "/hello", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/hello/jakenichols2719", nil)
+	api1.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/hello/jakenichols2719.github.com", nil)
 	api1.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
@@ -465,6 +480,13 @@ func TestComposition(t *testing.T) {
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
+	api2.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Error(200, w.Code)
+	}
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/hello/jakenichols2719.github.com", nil)
 	api2.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
