@@ -40,23 +40,11 @@ func (rt *defaultRouter) Attach(mws ...middleware.Middleware) {
 
 // Add a route to the router.
 //
+// AddRoute is deprecated; use HandleRoute instead.
+//
 // See interface Router.
 func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
-	id := rt.rtree.Add(r)
-	if rt.routes[r.Method()] == nil {
-		rt.routes[r.Method()] = make(map[int]route.Route)
-	}
-	rt.routes[r.Method()][id] = r
-	if rt.handlers[r.Method()] == nil {
-		rt.handlers[r.Method()] = make(map[int]http.Handler)
-	}
-	if h != nil {
-		rt.handlers[r.Method()][id] = h
-
-	} else {
-		rt.handlers[r.Method()][id] = nil
-	}
-
+	register(rt, r, h)
 }
 
 func register(rt *defaultRouter, r route.Route, h http.Handler) {
@@ -68,7 +56,11 @@ func register(rt *defaultRouter, r route.Route, h http.Handler) {
 	if rt.handlers[r.Method()] == nil {
 		rt.handlers[r.Method()] = make(map[int]http.Handler)
 	}
-	rt.handlers[r.Method()][id] = h
+	if h != nil {
+		rt.handlers[r.Method()][id] = h
+	} else {
+		rt.handlers[r.Method()][id] = nil
+	}
 }
 
 // Add a route to the router.
@@ -110,7 +102,11 @@ func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
 //
 // See interface Router.
 func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
-	register(rt, r, h)
+	if h != nil {
+		register(rt, r, h)
+	} else {
+		register(rt, r, nil)
+	}
 }
 
 // Mount mounts a handler at path.

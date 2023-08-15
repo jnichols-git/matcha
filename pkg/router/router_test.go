@@ -225,10 +225,10 @@ func TestEdgeCaseRoutes(t *testing.T) {
 		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
 		HandleRoute(route.Declare(http.MethodGet, "/reject", route.WithMiddleware(reject)), okHandler("never")),
 	)
-	r.HandleFunc(http.MethodGet, "/not/implemented", nil)
-	r.Handle(http.MethodGet, "/not/implemented", nil)
-	r.HandleRoute(route.Declare(http.MethodGet, "/"), nil)
-	r.HandleRouteFunc(route.Declare(http.MethodGet, "/"), nil)
+	r.HandleFunc(http.MethodGet, "/not/implemented/handler", nil)
+	r.Handle(http.MethodGet, "/not/implemented/func", nil)
+	r.HandleRoute(route.Declare(http.MethodGet, "/not/implemented/routehandler"), nil)
+	r.HandleRouteFunc(route.Declare(http.MethodGet, "/not/implemented/routefunc"), nil)
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/odd/path", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
@@ -241,7 +241,16 @@ func TestEdgeCaseRoutes(t *testing.T) {
 	runEvalRequest(t, s, "/reject", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusForbidden,
 	})
-	runEvalRequest(t, s, "/not/implemented", reqGen(http.MethodGet), map[string]any{
+	runEvalRequest(t, s, "/not/implemented/handler", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusNotImplemented,
+	})
+	runEvalRequest(t, s, "/not/implemented/func", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusNotImplemented,
+	})
+	runEvalRequest(t, s, "/not/implemented/routehandler", reqGen(http.MethodGet), map[string]any{
+		"code": http.StatusNotImplemented,
+	})
+	runEvalRequest(t, s, "/not/implemented/routefunc", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusNotImplemented,
 	})
 
