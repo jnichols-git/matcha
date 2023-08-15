@@ -17,7 +17,7 @@ Matcha is an HTTP router designed for ease of use, power, and extensibility.
 
 ## Installation
 
-`go get github.com/decentplatforms/matcha@v1.2.1`
+`go get github.com/decentplatforms/matcha@v1.2.2`
 
 ## Basic Usage
 
