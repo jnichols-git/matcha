@@ -12,16 +12,11 @@ const (
 	// part matching
 	regexp_wildcard = string(`/\[(.*?)\](.*)`)
 	regexp_regex    = string(`[/\]]{(.*)}`)
-	// handy constants to have around
-	regexp_anyWord = string(`\w+`)
 )
 
 // Regex used for parsing tokens
 var regexp_wildcard_compiled *regexp.Regexp = regexp.MustCompile(regexp_wildcard)
 var regexp_regex_compiled *regexp.Regexp = regexp.MustCompile(regexp_regex)
-
-// Compiled regex for any word
-var regexp_anyWord_compiled *regexp.Regexp = regexp.MustCompile(regexp_anyWord)
 
 // Parts are the main body of a Route, and are an interface defining
 // a Match function against tokens in a request URL.
