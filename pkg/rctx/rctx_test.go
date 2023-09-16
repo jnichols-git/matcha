@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"sync"
 	"testing"
 	"time"
@@ -169,10 +168,6 @@ func TestImplementContext(t *testing.T) {
 	cancel()
 	// Test nil parent
 	req = &http.Request{}
-	req.URL, err = url.Parse("/")
-	if err != nil {
-		t.Fatal(err)
-	}
 	req = PrepareRequestContext(req, DefaultMaxParams)
 	if ctx, ok := req.Context().(*Context); !ok {
 		t.Fatal("need *rctx.Context")

@@ -2,6 +2,7 @@ package rctx
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 )
 
@@ -15,12 +16,17 @@ func BenchmarkNewParams(b *testing.B) {
 }
 
 func BenchmarkPrepare(b *testing.B) {
-	req := &http.Request{}
+	url, _ := url.Parse("/")
+	req := &http.Request{
+		URL: url,
+	}
 	for i := 0; i < b.N; i++ {
 		req = PrepareRequestContext(req, DefaultMaxParams)
 		//req = req.WithContext(context.Background())
 		// req = req.WithContext(context.Background())
-		req = &http.Request{}
+		req = &http.Request{
+			URL: url,
+		}
 	}
 }
 

@@ -42,7 +42,9 @@ func new(parent context.Context, maxParams int) *Context {
 // PrepareRequestContext prepares the context of a request for matching.
 func PrepareRequestContext(req *http.Request, maxParams int) *http.Request {
 	rctx := new(req.Context(), maxParams)
-	rctx.params.set(rctx, reserved_fullpath, req.URL.Path)
+	if req.URL != nil {
+		rctx.params.set(rctx, reserved_fullpath, req.URL.Path)
+	}
 	return req.WithContext(rctx)
 }
 
