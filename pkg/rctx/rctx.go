@@ -42,6 +42,7 @@ func new(parent context.Context, maxParams int) *Context {
 // PrepareRequestContext prepares the context of a request for matching.
 func PrepareRequestContext(req *http.Request, maxParams int) *http.Request {
 	rctx := new(req.Context(), maxParams)
+	rctx.params.set(rctx, reserved_fullpath, req.URL.Path)
 	return req.WithContext(rctx)
 }
 
@@ -65,6 +66,7 @@ func ReturnRequestContext(req *http.Request) {
 			rctx.params.rps[i].key = ""
 			rctx.params.rps[i].value = ""
 		}
+		rctx.params.reserved.reset()
 		rctxPool.Put(rctx)
 	}
 }
@@ -99,7 +101,7 @@ func GetParam(ctx context.Context, key string) string {
 // the maximum number of params.
 func SetParam(ctx context.Context, key, value string) error {
 	if rctx, ok := ctx.(*Context); ok {
-		return rctx.params.set(paramKey(key), value)
+		return rctx.params.set(rctx, paramKey(key), value)
 	}
 	return errors.New("cannot SetParam on non-rctx Context")
 }

@@ -12,18 +12,20 @@ type routeParam struct {
 }
 
 type routeParams struct {
-	rps  []routeParam
-	cap  int
-	head int
+	rps      []routeParam
+	reserved reservedParams
+	cap      int
+	head     int
 }
 
 // PARAMETERS
 
 func newParams(size int) *routeParams {
 	rps := &routeParams{
-		rps:  make([]routeParam, size),
-		cap:  size,
-		head: 0,
+		rps:      make([]routeParam, size),
+		reserved: reservedParams{},
+		cap:      size,
+		head:     0,
 	}
 	for i := 0; i < size; i++ {
 		rps.rps[i] = routeParam{}
@@ -32,6 +34,9 @@ func newParams(size int) *routeParams {
 }
 
 func (rps *routeParams) get(key paramKey) string {
+	if value, reserved := rps.reserved.get(key); reserved {
+		return value
+	}
 	for i := 0; i < rps.head; i++ {
 		kv := rps.rps[i]
 		if kv.key == key {
@@ -41,7 +46,10 @@ func (rps *routeParams) get(key paramKey) string {
 	return ""
 }
 
-func (rps *routeParams) set(key paramKey, value string) error {
+func (rps *routeParams) set(in *Context, key paramKey, value string) error {
+	if reserved, err := rps.reserved.set(in, key, value); reserved {
+		return err
+	}
 	idx := rps.head
 	inc := true
 	for i := 0; i < rps.head; i++ {
