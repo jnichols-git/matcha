@@ -1,5 +1,9 @@
 package rctx
 
+import (
+	"context"
+)
+
 const FULLPATH = string("matcha_fullpath")
 const key_reserved_fullpath = paramKey(FULLPATH)
 const MOUNTPROXYTO = string("matcha_mountProxyTo")
@@ -25,14 +29,17 @@ func (rps *reservedParams) get(key paramKey) (string, bool) {
 
 // set sets a reserved rctx param.
 // Returns true if the key is reserved.
-func (rps *reservedParams) set(in *Context, key paramKey, value string) (bool, error) {
+func (rps *reservedParams) set(parent context.Context, key paramKey, value string) (bool, error) {
 	switch key {
 	case key_reserved_fullpath:
 		if rps.fullpath == "" {
-			if orig := in.parent.Value(key_reserved_fullpath); orig != nil && orig.(string) != "" {
-				value = orig.(string)
+			if parent == nil {
+				rps.fullpath = value
+			} else if orig := parent.Value(key_reserved_fullpath); orig != nil && orig.(string) != "" {
+				rps.fullpath = orig.(string)
+			} else {
+				rps.fullpath = value
 			}
-			rps.fullpath = value
 		}
 		return true, nil
 	case key_reserved_mountProxyTo:

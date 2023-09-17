@@ -47,7 +47,7 @@ func (rps *routeParams) get(key paramKey) string {
 }
 
 func (rps *routeParams) set(in *Context, key paramKey, value string) error {
-	if reserved, err := rps.reserved.set(in, key, value); reserved {
+	if reserved, err := rps.reserved.set(in.parent, key, value); reserved {
 		return err
 	}
 	idx := rps.head

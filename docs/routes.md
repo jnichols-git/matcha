@@ -35,9 +35,7 @@ You can designate a wildcard parameter using a part surrounded by square bracket
 r, err := route.New(http.MethodGet, "/devices/[deviceName]/data")
 ```
 
-Some wildcards are *reserved* by Matcha; you can't use them in request URLs, as they have a designated use as request parameters. These are:
-
-- `fullpath`
+Wildcards starting with `matcha_` are reserved for use by Matcha. This isn't strictly enforced, but implementing something this way may lead to undesirable behavior down the line. You've been warned.
 
 ### Regex
 
