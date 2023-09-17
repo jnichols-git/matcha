@@ -2,11 +2,11 @@ on:
   pull_request:
     branches:
       - main
-      - v?.?.?
+      - v1.3.0
   push:
     branches:
       - main
-      - v?.?.?
+      - v1.3.0
 
 name: Continuous Integration
 
