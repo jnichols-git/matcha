@@ -1,18 +1,23 @@
 package rctx
 
-const FULLPATH = string("fullpath")
-const reserved_fullpath = paramKey("fullpath")
+const FULLPATH = string("matcha_fullpath")
+const key_reserved_fullpath = paramKey(FULLPATH)
+const MOUNTPROXYTO = string("matcha_mountProxyTo")
+const key_reserved_mountProxyTo = paramKey(MOUNTPROXYTO)
 
 type reservedParams struct {
-	fullpath string
+	fullpath     string
+	mountProxyTo string
 }
 
 // get gets a reserved rctx param.
 // Returns the value, and true if key is reserved.
 func (rps *reservedParams) get(key paramKey) (string, bool) {
-	switch string(key) {
-	case "fullpath":
+	switch key {
+	case key_reserved_fullpath:
 		return rps.fullpath, true
+	case key_reserved_mountProxyTo:
+		return rps.mountProxyTo, true
 	default:
 		return "", false
 	}
@@ -22,13 +27,16 @@ func (rps *reservedParams) get(key paramKey) (string, bool) {
 // Returns true if the key is reserved.
 func (rps *reservedParams) set(in *Context, key paramKey, value string) (bool, error) {
 	switch key {
-	case reserved_fullpath:
+	case key_reserved_fullpath:
 		if rps.fullpath == "" {
-			if orig := in.parent.Value(reserved_fullpath); orig != nil && orig.(string) != "" {
+			if orig := in.parent.Value(key_reserved_fullpath); orig != nil && orig.(string) != "" {
 				value = orig.(string)
 			}
 			rps.fullpath = value
 		}
+		return true, nil
+	case key_reserved_mountProxyTo:
+		rps.mountProxyTo = value
 		return true, nil
 	default:
 		return false, nil
@@ -40,4 +48,5 @@ func (rps *reservedParams) set(in *Context, key paramKey, value string) (bool, e
 // default values so that behavior can be replicated on pooled context.
 func (rps *reservedParams) reset() {
 	rps.fullpath = ""
+	rps.mountProxyTo = ""
 }

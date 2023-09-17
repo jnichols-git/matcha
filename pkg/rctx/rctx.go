@@ -43,7 +43,7 @@ func new(parent context.Context, maxParams int) *Context {
 func PrepareRequestContext(req *http.Request, maxParams int) *http.Request {
 	rctx := new(req.Context(), maxParams)
 	if req.URL != nil {
-		rctx.params.set(rctx, reserved_fullpath, req.URL.Path)
+		rctx.params.set(rctx, key_reserved_fullpath, req.URL.Path)
 	}
 	return req.WithContext(rctx)
 }
