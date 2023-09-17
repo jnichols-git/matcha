@@ -1,5 +1,6 @@
 package rctx
 
+const FULLPATH = string("fullpath")
 const reserved_fullpath = paramKey("fullpath")
 
 type reservedParams struct {
