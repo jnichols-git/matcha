@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"sync"
 	"testing"
 	"time"
@@ -250,5 +251,46 @@ func TestNested(t *testing.T) {
 	rctx.parent = nil
 	if p1 := GetParam(req.Context(), "p1"); p1 != "" {
 		t.Error("", p1)
+	}
+}
+
+func TestFullPath(t *testing.T) {
+	// Regular case
+	req := httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
+	req = PrepareRequestContext(req, 0)
+	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+		t.Error(fp)
+	}
+	// Empty
+	req = httptest.NewRequest(http.MethodGet, "http://test.com", nil)
+	req = PrepareRequestContext(req, 0)
+	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+		t.Error(fp)
+	}
+	// Nil; should pass and fullpath should be empty
+	req = &http.Request{}
+	req = PrepareRequestContext(req, 0)
+	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+		t.Error(fp)
+	}
+	// Nested; should be equal to fullpath of first context
+	req = httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
+	req = PrepareRequestContext(req, 0)
+	req.URL, _ = url.Parse("/path")
+	req = PrepareRequestContext(req, 0)
+	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+		t.Error(fp)
+	}
+	// Nested with non-rctx context in between
+	req = httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
+	req = PrepareRequestContext(req, 0)
+	req = req.WithContext(context.WithValue(req.Context(), "someKey", "someValue"))
+	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+		t.Error(fp)
+	}
+	req.URL, _ = url.Parse("/path")
+	req = PrepareRequestContext(req, 0)
+	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+		t.Error(fp)
 	}
 }

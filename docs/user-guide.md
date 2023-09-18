@@ -147,11 +147,7 @@ func main() {
 }
 ```
 
-Usage notes:
-
-- This automatically trims the given prefix, so routes in `api2` do *not* need to include `/v2` in their paths.
-- Mounting currently only supports static string paths.
-- The underlying path used for mounting is a partial path, and comes with all of the same caveats.
+This serves all incoming requests to `/v2/+` with the prefix trimmed, so `api2` can assume that inbound requests do not start their paths with `/v2`. If you need to know the original path of the request as received by the root router, you can use `rctx.GetParam(req.Context(), rctx.FULLPATH)`.
 
 ### Complex Routes
 

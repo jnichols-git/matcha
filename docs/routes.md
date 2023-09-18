@@ -35,6 +35,8 @@ You can designate a wildcard parameter using a part surrounded by square bracket
 r, err := route.New(http.MethodGet, "/devices/[deviceName]/data")
 ```
 
+Wildcards starting with `matcha_` are reserved for use by Matcha. This isn't strictly enforced, but implementing something this way may lead to undesirable behavior down the line. You've been warned.
+
 ### Regex
 
 You can design routes to reject any requests that have improper formatting on a part-by-part basis by using a part surrounded by squiggly brackets, `{}`. You can also combine this with a wildcard to validate route parameters. Building on the following example, if IDs are specifically a string of four lowercase letters or digits in any order:

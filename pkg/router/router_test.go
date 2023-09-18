@@ -492,15 +492,27 @@ func TestComposition(t *testing.T) {
 		t.Error(200, w.Code)
 	}
 
-	// Invalid path test
-	api2 = Default()
-	err := api2.Mount("/{", api1)
-	if err == nil {
-		t.Error("expected failure due to route formatting")
+	// Mount with URI parameter
+	api1.HandleFunc(http.MethodGet, "/version", func(w http.ResponseWriter, r *http.Request) {
+		version := rctx.GetParam(r.Context(), "version")
+		w.Write([]byte(version))
+	})
+	api3 := Default()
+	err := api3.Mount("/api/[version]", api1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1.2.3/version", nil)
+	api3.ServeHTTP(w, req)
+	if body := w.Body.String(); body != "v1.2.3" {
+		t.Error(w.Result().StatusCode, body)
 	}
 
-	err = api2.Mount("/api/[version]", api1)
+	// Invalid path test
+	api2 = Default()
+	err = api2.Mount("/{", api1)
 	if err == nil {
-		t.Error("expected error due to route formatting")
+		t.Error("expected failure due to route formatting")
 	}
 }

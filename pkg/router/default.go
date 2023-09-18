@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/decentplatforms/matcha/pkg/middleware"
@@ -119,16 +118,14 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 			http.MethodOptions, http.MethodHead, http.MethodTrace, http.MethodConnect,
 		}
 	}
-	trim := middleware.TrimPrefix(rpath)
-	rpath = path.MakePartial(rpath, "")
-	validate := route.ConfigFunc(func(r route.Route) error {
-		if route.NumParams(r) > 0 {
-			return errors.New("invalid mount path; must be static strings only")
-		}
-		return nil
-	})
+	trim := func(w http.ResponseWriter, req *http.Request) *http.Request {
+		proxyTo := rctx.GetParam(req.Context(), rctx.MOUNTPROXYTO)
+		req.URL.Path = proxyTo
+		return req
+	}
+	rpath = path.MakePartial(rpath, rctx.MOUNTPROXYTO)
 	for _, method := range methods {
-		r, err := route.New(method, rpath, validate)
+		r, err := route.New(method, rpath)
 		if err != nil {
 			return err
 		}
