@@ -4,10 +4,10 @@ import (
 	"context"
 )
 
-const FULLPATH = string("matcha_fullpath")
-const key_reserved_fullpath = paramKey(FULLPATH)
-const MOUNTPROXYTO = string("matcha_mountProxyTo")
-const key_reserved_mountProxyTo = paramKey(MOUNTPROXYTO)
+const PARAM_FULLPATH = string("matcha_fullpath")
+const key_reserved_fullpath = paramKey(PARAM_FULLPATH)
+const PARAM_MOUNTPROXYTO = string("matcha_mountProxyTo")
+const key_reserved_mountProxyTo = paramKey(PARAM_MOUNTPROXYTO)
 
 type reservedParams struct {
 	fullpath     string

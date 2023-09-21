@@ -258,19 +258,19 @@ func TestFullPath(t *testing.T) {
 	// Regular case
 	req := httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	// Empty
 	req = httptest.NewRequest(http.MethodGet, "http://test.com", nil)
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "" {
 		t.Error(fp)
 	}
 	// Nil; should pass and fullpath should be empty
 	req = &http.Request{}
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "" {
 		t.Error(fp)
 	}
 	// Nested; should be equal to fullpath of first context
@@ -278,19 +278,19 @@ func TestFullPath(t *testing.T) {
 	req = PrepareRequestContext(req, 0)
 	req.URL, _ = url.Parse("/path")
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	// Nested with non-rctx context in between
 	req = httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
 	req = PrepareRequestContext(req, 0)
 	req = req.WithContext(context.WithValue(req.Context(), "someKey", "someValue"))
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	req.URL, _ = url.Parse("/path")
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 }

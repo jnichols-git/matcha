@@ -119,11 +119,11 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 		}
 	}
 	trim := func(w http.ResponseWriter, req *http.Request) *http.Request {
-		proxyTo := rctx.GetParam(req.Context(), rctx.MOUNTPROXYTO)
+		proxyTo := rctx.GetParam(req.Context(), rctx.PARAM_MOUNTPROXYTO)
 		req.URL.Path = proxyTo
 		return req
 	}
-	rpath = path.MakePartial(rpath, rctx.MOUNTPROXYTO)
+	rpath = path.MakePartial(rpath, rctx.PARAM_MOUNTPROXYTO)
 	for _, method := range methods {
 		r, err := route.New(method, rpath)
 		if err != nil {
