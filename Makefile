@@ -8,3 +8,6 @@ cover: test
 
 bench: FORCE
 	go test -benchmem -bench=. ./pkg/...
+
+license:
+	addlicense -c "Decent Platforms" -l apache -y 2023 .

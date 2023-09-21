@@ -1,3 +1,17 @@
+// Copyright 2023 Decent Platforms
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Package router defines the API for creating and interacting with a router, and its internal behavior.
 //
 // See [https://github.com/decentplatforms/matcha/blob/main/docs/routers.md].
