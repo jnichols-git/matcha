@@ -1,3 +1,17 @@
+// Copyright 2023 Decent Platforms
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rctx
 
 import (
@@ -258,19 +272,19 @@ func TestFullPath(t *testing.T) {
 	// Regular case
 	req := httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	// Empty
 	req = httptest.NewRequest(http.MethodGet, "http://test.com", nil)
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "" {
 		t.Error(fp)
 	}
 	// Nil; should pass and fullpath should be empty
 	req = &http.Request{}
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "" {
 		t.Error(fp)
 	}
 	// Nested; should be equal to fullpath of first context
@@ -278,19 +292,19 @@ func TestFullPath(t *testing.T) {
 	req = PrepareRequestContext(req, 0)
 	req.URL, _ = url.Parse("/path")
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	// Nested with non-rctx context in between
 	req = httptest.NewRequest(http.MethodGet, "http://test.com/test/path", nil)
 	req = PrepareRequestContext(req, 0)
 	req = req.WithContext(context.WithValue(req.Context(), "someKey", "someValue"))
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 	req.URL, _ = url.Parse("/path")
 	req = PrepareRequestContext(req, 0)
-	if fp := GetParam(req.Context(), FULLPATH); fp != "/test/path" {
+	if fp := GetParam(req.Context(), PARAM_FULLPATH); fp != "/test/path" {
 		t.Error(fp)
 	}
 }
