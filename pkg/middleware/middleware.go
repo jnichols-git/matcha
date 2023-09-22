@@ -4,7 +4,6 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,8 +15,6 @@ import (
 //
 // Returns an *http.Request; the middleware can set router params or reject a request by returning nil.
 type Middleware func(http.ResponseWriter, *http.Request) *http.Request
-
-type RequestIDGenerator func() string
 
 // The string used to indicate an absent origin in log entries.
 //
@@ -36,19 +33,6 @@ const OriginAbsent = "-"
 func LogRequests(w io.Writer) Middleware {
 	return func(_ http.ResponseWriter, r *http.Request) *http.Request {
 		logRequest(w, r)
-		return r
-	}
-}
-
-func RequestID(generator RequestIDGenerator, key string, isContext bool) Middleware {
-	return func(_ http.ResponseWriter, r *http.Request) *http.Request {
-		if isContext {
-			ctx := context.WithValue(r.Context(), key, generator())
-			return r.WithContext(ctx)
-		}
-
-		r.Header.Add(key, generator())
-
 		return r
 	}
 }
