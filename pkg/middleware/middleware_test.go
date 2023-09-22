@@ -51,7 +51,7 @@ func TestRequestId(t *testing.T) {
 			t.Fatal("request was nil, should be unchanged")
 		}
 
-		cv := req.Context().Value("X-Request-ID")
+		cv := req.Context().Value(requestIdKey("X-Request-ID"))
 
 		if cv != "test_value" {
 			t.Errorf("expected context value to be test_value, got %s", cv)
