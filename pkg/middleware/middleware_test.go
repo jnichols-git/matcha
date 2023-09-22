@@ -22,6 +22,57 @@ import (
 	"testing"
 )
 
+func TestRequestId(t *testing.T) {
+	t.Run("request id is added to header", func(t *testing.T) {
+		w := httptest.NewRecorder()
+
+		g := func() string {
+			return "test_value"
+		}
+
+		mw := RequestID(g, "X-Request-ID", false)
+
+		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
+
+		if req == nil {
+			t.Fatal("request was nil, should be unchanged")
+		}
+
+		h := req.Header.Get("X-Request-ID")
+
+		if h != "test_value" {
+			t.Errorf("expected header value to be test_value, got %s", h)
+		}
+
+	})
+
+	t.Run("request id is added to context", func(t *testing.T) {
+		w := httptest.NewRecorder()
+
+		g := func() string {
+			return "test_value"
+		}
+
+		mw := RequestID(g, "X-Request-ID", true)
+
+		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
+
+		req = ExecuteMiddleware([]Middleware{mw}, w, req)
+
+		if req == nil {
+			t.Fatal("request was nil, should be unchanged")
+		}
+
+		cv := req.Context().Value(requestIdKey("X-Request-ID"))
+
+		if cv != "test_value" {
+			t.Errorf("expected context value to be test_value, got %s", cv)
+		}
+	})
+}
+
 func TestLogRequests(t *testing.T) {
 	t.Run("log request with no origin", func(t *testing.T) {
 		var builder strings.Builder
