@@ -95,7 +95,7 @@ Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@decentplatforms
 
 ## License
 
-Copyright 2023 Decent Platforms LLC
+Copyright 2023 Matcha Authors LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
