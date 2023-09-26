@@ -40,7 +40,7 @@ func TestRequestId(t *testing.T) {
 			t.Fatal("request was nil, should be unchanged")
 		}
 
-		h := req.Header.Get("X-Request-ID")
+		h := GetRequestIDHeader(req, "X-Request-ID")
 
 		if h != "test_value" {
 			t.Errorf("expected header value to be test_value, got %s", h)
@@ -59,13 +59,19 @@ func TestRequestId(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodGet, "https://example.com/", nil)
 
+		cv := GetRequestIDContext(req, "X-Request-ID")
+
+		if cv != "" {
+			t.Errorf(cv)
+		}
+
 		req = ExecuteMiddleware([]Middleware{mw}, w, req)
 
 		if req == nil {
 			t.Fatal("request was nil, should be unchanged")
 		}
 
-		cv := req.Context().Value(requestIdKey("X-Request-ID"))
+		cv = GetRequestIDContext(req, "X-Request-ID")
 
 		if cv != "test_value" {
 			t.Errorf("expected context value to be test_value, got %s", cv)
