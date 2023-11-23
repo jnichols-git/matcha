@@ -60,7 +60,7 @@ func TestMakePartial(t *testing.T) {
 	if px := MakePartial("/hello/+", ""); px != "/hello/+" {
 		t.Error("/hello/+", px)
 	}
-	if px := MakePartial("/hello", "next"); px != "/hello/[next]+" {
-		t.Error("/hello/[next]+", px)
+	if px := MakePartial("/hello", "next"); px != "/hello/{next}+" {
+		t.Error("/hello/{next}+", px)
 	}
 }

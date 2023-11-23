@@ -19,7 +19,7 @@ func echo(w http.ResponseWriter, req *http.Request) {
 
 func EchoExample() {
 	rt := router.Default()
-	rt.HandleFunc(http.MethodGet, "/hello/[name]{admin:.+}", echoAdmin)
-	rt.HandleFunc(http.MethodGet, "/hello/[name]", echo)
+	rt.HandleFunc(http.MethodGet, "/hello/{name}{admin:.+}", echoAdmin)
+	rt.HandleFunc(http.MethodGet, "/hello/{name}", echo)
 	http.ListenAndServe(":3000", rt)
 }

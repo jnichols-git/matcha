@@ -36,10 +36,10 @@ func declareReq(path string) *http.Request {
 func BenchmarkSingleRequests(b *testing.B) {
 	rt := Declare(Default(),
 		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
 		HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{id}{[\w]{4}}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	benchReqs := []*http.Request{
 		declareReq("/"),
@@ -61,10 +61,10 @@ func BenchmarkSingleRequests(b *testing.B) {
 func BenchmarkBasicRouter(b *testing.B) {
 	rt := Declare(Default(),
 		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
 		HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{id}{[\w]{4}}`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}{\w+(?:\.\w+)?}+`), rpHandler("filename")),
 	)
 	benchReqs := []*http.Request{
 		declareReq("/"),

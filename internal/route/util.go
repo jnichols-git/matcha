@@ -5,7 +5,7 @@ func NumParams(r Route) int {
 	ct := 0
 	ps := r.Parts()
 	for _, p := range ps {
-		if pp, ok := p.(paramPart); ok && pp.ParameterName() != "" {
+		if p.Parameter() != "" {
 			ct++
 		}
 	}

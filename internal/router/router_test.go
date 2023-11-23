@@ -166,12 +166,12 @@ func TestBasicRoutes(t *testing.T) {
 	r := Declare(Default(),
 		Handle(http.MethodGet, "/", okHandler("root")),
 		HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey")),
-		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		HandleRouteFunc(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters")),
+		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
+		HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters")),
 		WithMiddleware(testMiddleware),
 	)
-	r.Handle(http.MethodGet, `/route/[id]{[\w]{4}}`, rpHandler("id"))
-	r.HandleFunc(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`, rpHandler("filename"))
+	r.Handle(http.MethodGet, `/route/{id}[[\w]{4}]`, rpHandler("id"))
+	r.HandleFunc(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`, rpHandler("filename"))
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
@@ -259,10 +259,10 @@ func TestEdgeCaseRoutes(t *testing.T) {
 func TestConcurrent(t *testing.T) {
 	r := Declare(Default(),
 		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		HandleRoute(route.Declare(http.MethodGet, "/[wildcard]"), rpHandler("wildcard")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[a-zA-Z]+}`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/[id]{[\w]{4}}`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/static/file/[filename]{\w+(?:\.\w+)?}+`), rpHandler("filename")),
+		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{id}[[a-zA-Z]+]`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/route/{id}[[\w]{4}]`), rpHandler("id")),
+		HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`), rpHandler("filename")),
 	)
 	s := httptest.NewServer(r)
 	wg := sync.WaitGroup{}
@@ -357,7 +357,7 @@ func TestCORS(t *testing.T) {
 	})
 
 	// Test invalid route for preflight
-	if _, err := New(Default(), PreflightCORS("/{(}", aco)); err == nil {
+	if _, err := New(Default(), PreflightCORS("/[(]", aco)); err == nil {
 		t.Error("expected invalid route to fail with preflightcors")
 	}
 }
@@ -419,7 +419,7 @@ func TestComposition(t *testing.T) {
 	api1 := Default()
 	api1.HandleFunc(http.MethodGet, "/hello", h1)
 	api1.HandleFunc(http.MethodPost, "/hello", h1)
-	api1.HandleFunc(http.MethodGet, "/hello/[name]", h1)
+	api1.HandleFunc(http.MethodGet, "/hello/{name}", h1)
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
@@ -499,7 +499,7 @@ func TestComposition(t *testing.T) {
 		t.Error("expected failure due to route formatting")
 	}
 
-	err = api2.Mount("/api/[version]", api1)
+	err = api2.Mount("/api/{version}", api1)
 	if err == nil {
 		t.Error("expected error due to route formatting")
 	}

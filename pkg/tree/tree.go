@@ -74,13 +74,13 @@ func (n *node) match(req *http.Request, expr string, last int) int {
 	}
 	// Get the next token from the path and match it against the route.Part of the current node.
 	token, next := path.Next(expr, last)
-	ok := n.p.Match(nil, token)
+	ok := n.p.Match(token)
 	if !ok {
 		// If the part doesn't match, return NO_LEAF_ID.
 		return NO_LEAF_ID
 	} else if n.isLeaf() {
 		// If the part matches...
-		if route.IsPartialEndPart(n.p) {
+		if n.p.Multi() {
 			// ...and the leaf is partial, return the result of recursively matching until termination.
 			return n.match(req, expr, next)
 		} else if next == -1 {
@@ -121,7 +121,7 @@ func New() *RouteTree {
 func (rtree *RouteTree) Add(r route.Route) int {
 	root, ok := rtree.methodRoot[r.Method()]
 	if !ok || root == nil {
-		root = createNode(nil)
+		root = createNode(route.Part{})
 		rtree.methodRoot[r.Method()] = root
 	}
 	rtree.nextId++

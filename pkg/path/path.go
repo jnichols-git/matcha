@@ -35,7 +35,7 @@ func Next(path string, last int) (string, int) {
 // This effectively appends /+ to the path.
 func MakePartial(path string, param string) string {
 	if param != "" {
-		param = "[" + param + "]"
+		param = "{" + param + "}"
 	}
 	i := len(path) - 1
 	if path[i-1:] == "/+" {

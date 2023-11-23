@@ -25,6 +25,6 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func FileServer(dir string) {
 	rt := router.Default()
-	rt.Handle(http.MethodGet, "/files/[filepath]+", &fileServer{dir})
+	rt.Handle(http.MethodGet, "/files/{filepath}+", &fileServer{dir})
 	http.ListenAndServe(":3000", rt)
 }

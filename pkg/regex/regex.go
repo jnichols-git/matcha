@@ -3,6 +3,8 @@ package regex
 
 import (
 	"regexp"
+
+	"slices"
 )
 
 // Convenience function for getting groups from a regex match
@@ -13,6 +15,8 @@ func Groups(r *regexp.Regexp, token string) []string {
 	if matches == nil {
 		return nil
 	} else {
-		return matches[0][1:]
+		return slices.DeleteFunc(matches[0][1:], func(s string) bool {
+			return s == ""
+		})
 	}
 }

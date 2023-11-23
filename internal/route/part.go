@@ -1,7 +1,7 @@
 package route
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -9,64 +9,79 @@ import (
 )
 
 const (
-	// part matching
+	// Part matching
 	regexp_wildcard = string(`/\[(.*?)\](.*)`)
 	regexp_regex    = string(`[/\]]{(.*)}`)
+	regexp_part     = string(`^(?:(\/\w*)|\/(\{.+\})?(\[.+\])?(\+)?)$`)
 )
 
 // Regex used for parsing tokens
 var regexp_wildcard_compiled *regexp.Regexp = regexp.MustCompile(regexp_wildcard)
 var regexp_regex_compiled *regexp.Regexp = regexp.MustCompile(regexp_regex)
+var regexp_part_compiled *regexp.Regexp = regexp.MustCompile(regexp_part)
 
-// Parts are the main body of a Route, and are an interface defining
-// a Match function against tokens in a request URL.
-type Part interface {
-	// Match should return nil if the Part doesn't match the token.
-	// If it does, it should return the request, with any modifications done on
-	// behalf of the Part (usually wildcard tokens)
-	Match(ctx context.Context, token string) bool
-	// Compare to another part.
-	// Should return equal iff the result of Match would be the exact same, given the same context and token.
-	Eq(other Part) bool
+type Part struct {
+	expr    string
+	param   string
+	pattern *regexp.Regexp
+	multi   bool
 }
 
-// paramParts may or may not store some parameter.
-// This is for internal use in package route only, so that extensions of Part/Route can specialize behavior
-// for Parts that do or don't have parameters.
-type paramPart interface {
-	ParameterName() string
-	SetParameterName(string)
+// Match checks if a Part matches an input token.
+// Tokens should not contain a leading or trailing forward-slash.
+func (p Part) Match(token string) (matched bool) {
+	clean := token[1:]
+	matched = (p.expr != "" && p.expr == token) ||
+		(p.pattern != nil && p.pattern.FindString(clean) == clean) ||
+		(p.expr == "" && p.pattern == nil)
+	fmt.Printf("%s | expr: %s, param: %s, pattern: %s | %t\n", token, p.expr, p.param, p.pattern, matched)
+	return
 }
 
-// Parse a token into a route Part.
-func parse(token string) (Part, error) {
-	// wildcard check
-	if groups := regex.Groups(regexp_wildcard_compiled, token); groups != nil {
-		// There must be at least one group here.
-		wildcardExpr := groups[0]
-		// If there's another group, we need to specialize further.
-		// Otherwise, it's a regular wildcardPart.
-		if len(groups) > 1 {
-			// regex check
-			if groups := regex.Groups(regexp_regex_compiled, token); groups != nil {
-				regexExpr := groups[0]
-				return build_regexPart(wildcardExpr, regexExpr)
-			}
-		}
-		if len(wildcardExpr)+3 != len(token) {
-			return nil, fmt.Errorf("error parsing expression %s: got a wildcard part with a non-regex addition, which is invalid", token)
-		}
-		return build_wildcardPart(wildcardExpr)
+// Eq checks if a Part is equal to another Part.
+// This is used in tree-building for routers.
+func (p Part) Eq(other Part) (eq bool) {
+	eq = p.expr == other.expr &&
+		p.param == other.param &&
+		p.pattern != nil && other.pattern != nil && p.pattern.String() == other.pattern.String()
+	return
+}
+
+func (p Part) Nil() (isNil bool) {
+	isNil = p.expr == "" && p.param == "" && p.pattern == nil
+	return
+}
+
+// Parameter returns the name of a URI parameter attached to this Part, if there is one.
+func (p Part) Parameter() string {
+	return p.param
+}
+
+// Multi returns true if the part should be permitted to match multiple route tokens.
+func (p Part) Multi() bool {
+	return p.multi
+}
+
+func ParsePart(token string) (p Part, err error) {
+	groups := regex.Groups(regexp_part_compiled, token)
+	if groups == nil {
+		err = errors.New("provided Part expression does not match regex " + regexp_part)
+		return
 	}
-
-	// If we get here, it's not a wildcard.
-
-	// regex check
-	if groups := regex.Groups(regexp_regex_compiled, token); groups != nil {
-		regexExpr := groups[0]
-		return build_regexPart("", regexExpr)
+	for _, group := range groups {
+		switch group[0] {
+		case '{':
+			p.param = group[1 : len(group)-1]
+		case '[':
+			p.pattern, err = regexp.Compile(group[1 : len(group)-1])
+		case '+':
+			p.multi = true
+		default:
+			p.expr = group
+		}
 	}
-
-	// Not wildcard or regex; just return as stringPart
-	return build_stringPart(token)
+	if p.expr != "" && (p.param != "" || p.pattern != nil || p.multi) {
+		err = errors.Join(err, errors.New("Parts cannot have an expression and a param/pattern/multi modifier"))
+	}
+	return
 }

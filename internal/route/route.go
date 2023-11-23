@@ -11,10 +11,6 @@ import (
 )
 
 type Route interface {
-	// Get a prefix for the route.
-	//
-	// Route implementations should return a literal string for the first Part in the route, or "*" if not applicable.
-	Prefix() string
 	// Get a unique hash value for the route.
 	//
 	// Route implementations must ensure Hash is always unique for two different Routes.
@@ -54,11 +50,7 @@ func New(method, expr string, confs ...ConfigFunc) (Route, error) {
 	// Determine route type
 	var r Route
 	var err error
-	if isPartialRouteExpr(expr) {
-		r, err = build_partialRoute(method, expr)
-	} else {
-		r, err = build_defaultRoute(method, expr)
-	}
+	r, err = ParseRoute(method, expr)
 	if err != nil {
 		return nil, err
 	}
