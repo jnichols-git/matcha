@@ -14,7 +14,7 @@ We welcome community contributions to Matcha!
 ## Getting Started
 
 1. Ensure you have [installed Golang](https://go.dev/dl/) on your development machine. Matcha is currently on version `1.20.2`.
-2. `git clone git@github.com:decentplatforms/matcha.git`
+2. `git clone git@github.com:jnichols-git/matcha/v2.git`
 
 ## Making Changes
 

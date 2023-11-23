@@ -1,6 +1,6 @@
 // Package middleware defines the middleware format for Matcha.
 //
-// See [https://github.com/decentplatforms/matcha/blob/main/docs/routers.md#middleware].
+// See [https://github.com/jnichols-git/matcha/v2/blob/main/docs/routers.md#middleware].
 package middleware
 
 import (

@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/decentplatforms/matcha/pkg/rctx"
-	"github.com/decentplatforms/matcha/pkg/route"
-	"github.com/decentplatforms/matcha/pkg/route/require"
+	"github.com/jnichols-git/matcha/v2/pkg/rctx"
+	"github.com/jnichols-git/matcha/v2/pkg/route"
+	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 func TestTree(t *testing.T) {

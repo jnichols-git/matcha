@@ -31,7 +31,7 @@ If the request is simple, it's sent as normal. If it is not simple, the browser 
 
 All of these can be empty, a list, or `*`, which indicates that any value is allowed/exposed. Matcha represents these with the `*AccessControlOptions` struct, used to define how a Router should treat CORS requests.
 
-> Header names in `Access-Control-Allow-Headers` are case sensitive. [This issue](https://github.com/decentplatforms/matcha/issues/97) is fixed in the upcoming patch `v1.2.2`.
+> Header names in `Access-Control-Allow-Headers` are case sensitive. [This issue](https://github.com/jnichols-git/matcha/v2/issues/97) is fixed in the upcoming patch `v1.2.2`.
 
 ### Setting Up CORS
 

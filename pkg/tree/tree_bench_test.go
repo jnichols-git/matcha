@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/decentplatforms/matcha/pkg/route"
+	"github.com/jnichols-git/matcha/v2/pkg/route"
 )
 
 var routes []string = []string{

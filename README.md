@@ -1,7 +1,7 @@
 # matcha
 
-[![Coverage Status](https://coveralls.io/repos/github/decentplatforms/matcha/badge.svg?branch=main)](https://coveralls.io/github/decentplatforms/matcha?branch=main)
-[![Go Report Card](https://goreportcard.com/badge/github.com/decentplatforms/matcha)](https://goreportcard.com/report/github.com/decentplatforms/matcha)
+[![Coverage Status](https://coveralls.io/repos/github/jnichols-git/matcha/v2/badge.svg?branch=main)](https://coveralls.io/github/jnichols-git/matcha/v2?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jnichols-git/matcha/v2)](https://goreportcard.com/report/github.com/jnichols-git/matcha/v2)
 [![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
 Matcha is an HTTP router designed for ease of use, power, and extensibility.
@@ -17,7 +17,7 @@ Matcha is an HTTP router designed for ease of use, power, and extensibility.
 
 ## Installation
 
-`go get github.com/decentplatforms/matcha@v1.2.2`
+`go get github.com/jnichols-git/matcha/v2@v1.2.2`
 
 ## Basic Usage
 
@@ -29,7 +29,7 @@ package examples
 import (
     "net/http"
 
-    "github.com/decentplatforms/matcha/pkg/router"
+    "github.com/jnichols-git/matcha/v2/pkg/router"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {

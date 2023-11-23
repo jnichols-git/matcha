@@ -4,11 +4,11 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/decentplatforms/matcha/pkg/middleware"
-	"github.com/decentplatforms/matcha/pkg/path"
-	"github.com/decentplatforms/matcha/pkg/rctx"
-	"github.com/decentplatforms/matcha/pkg/route"
-	"github.com/decentplatforms/matcha/pkg/tree"
+	"github.com/jnichols-git/matcha/v2/pkg/middleware"
+	"github.com/jnichols-git/matcha/v2/pkg/path"
+	"github.com/jnichols-git/matcha/v2/pkg/rctx"
+	"github.com/jnichols-git/matcha/v2/pkg/route"
+	"github.com/jnichols-git/matcha/v2/pkg/tree"
 )
 
 type defaultRouter struct {

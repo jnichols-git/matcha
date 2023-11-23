@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/decentplatforms/matcha/pkg/cors"
-	"github.com/decentplatforms/matcha/pkg/rctx"
-	"github.com/decentplatforms/matcha/pkg/route/require"
+	"github.com/jnichols-git/matcha/v2/pkg/cors"
+	"github.com/jnichols-git/matcha/v2/pkg/rctx"
+	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 func invalidConfigFunc(r Route) error {

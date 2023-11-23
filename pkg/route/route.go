@@ -1,13 +1,13 @@
 // Package route defines the API for creating and interacting with a route, and its internal behavior.
 //
-// See [https://github.com/decentplatforms/matcha/blob/main/docs/routes.md].
+// See [https://github.com/jnichols-git/matcha/v2/blob/main/docs/routes.md].
 package route
 
 import (
 	"net/http"
 
-	"github.com/decentplatforms/matcha/pkg/middleware"
-	"github.com/decentplatforms/matcha/pkg/route/require"
+	"github.com/jnichols-git/matcha/v2/pkg/middleware"
+	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 type Route interface {

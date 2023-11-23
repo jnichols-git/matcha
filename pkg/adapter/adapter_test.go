@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/decentplatforms/matcha/pkg/route"
-	"github.com/decentplatforms/matcha/pkg/router"
+	"github.com/jnichols-git/matcha/v2/pkg/route"
+	"github.com/jnichols-git/matcha/v2/pkg/router"
 )
 
 /*

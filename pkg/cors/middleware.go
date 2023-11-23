@@ -3,7 +3,7 @@ package cors
 import (
 	"net/http"
 
-	"github.com/decentplatforms/matcha/pkg/middleware"
+	"github.com/jnichols-git/matcha/v2/pkg/middleware"
 )
 
 // CORS middleware

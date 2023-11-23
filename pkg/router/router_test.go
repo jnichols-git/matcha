@@ -12,11 +12,11 @@ import (
 
 	"sync"
 
-	"github.com/decentplatforms/matcha/pkg/cors"
-	"github.com/decentplatforms/matcha/pkg/route/require"
+	"github.com/jnichols-git/matcha/v2/pkg/cors"
+	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 
-	"github.com/decentplatforms/matcha/pkg/rctx"
-	"github.com/decentplatforms/matcha/pkg/route"
+	"github.com/jnichols-git/matcha/v2/pkg/rctx"
+	"github.com/jnichols-git/matcha/v2/pkg/route"
 )
 
 // Return a handler that writes OK to all requests
