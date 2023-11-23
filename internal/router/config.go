@@ -3,9 +3,9 @@ package router
 import (
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/pkg/cors"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
-	"github.com/jnichols-git/matcha/v2/pkg/route"
 )
 
 // ConfigFuncs run on Routers, usually to add a route or attach middleware.

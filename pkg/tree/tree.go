@@ -6,9 +6,9 @@ package tree
 import (
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2/internal/route"
+	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/path"
-	"github.com/jnichols-git/matcha/v2/pkg/route"
-	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 const NO_LEAF_ID = int(0)

@@ -6,8 +6,8 @@ package route
 import (
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
-	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 type Route interface {

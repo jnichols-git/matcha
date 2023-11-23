@@ -1,9 +1,9 @@
 package route
 
 import (
+	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/cors"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
-	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 // RouteConfigFuncs can be applied to a Route at creation.

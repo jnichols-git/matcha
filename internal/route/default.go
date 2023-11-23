@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"regexp"
 
+	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
 	"github.com/jnichols-git/matcha/v2/pkg/path"
 	"github.com/jnichols-git/matcha/v2/pkg/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/route/require"
 )
 
 //=====PARTS=====

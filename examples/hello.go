@@ -3,7 +3,7 @@ package examples
 import (
 	"net/http"
 
-	"github.com/jnichols-git/matcha/v2/pkg/router"
+	"github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {

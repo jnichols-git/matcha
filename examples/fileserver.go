@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jnichols-git/matcha/v2/internal/router"
 	"github.com/jnichols-git/matcha/v2/pkg/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/router"
 )
 
 type fileServer struct {

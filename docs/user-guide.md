@@ -25,7 +25,7 @@ package examples
 import (
     "net/http"
 
-    "github.com/jnichols-git/matcha/v2/pkg/router"
+    "github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {
@@ -54,7 +54,7 @@ import (
     "net/http"
 
     "github.com/jnichols-git/matcha/v2/pkg/rctx"
-    "github.com/jnichols-git/matcha/v2/pkg/router"
+    "github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 func echoAdmin(w http.ResponseWriter, req *http.Request) {
@@ -92,7 +92,7 @@ import (
     "os"
 
     "github.com/jnichols-git/matcha/v2/pkg/rctx"
-    "github.com/jnichols-git/matcha/v2/pkg/router"
+    "github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 type fileServer struct {
@@ -169,8 +169,8 @@ Matcha uses `func(w http.ResponseWriter, req *http.Request) *http.Request` for m
 package main
 
 import (
-    "github.com/jnichols-git/matcha/v2/pkg/router"
-    "github.com/jnichols-git/matcha/v2/pkg/route"
+    "github.com/jnichols-git/matcha/v2/internal/router"
+    "github.com/jnichols-git/matcha/v2/internal/route"
     "github.com/jnichols-git/matcha/v2/pkg/middleware"
 )
 

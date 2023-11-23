@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
 	"github.com/jnichols-git/matcha/v2/pkg/path"
 	"github.com/jnichols-git/matcha/v2/pkg/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/route"
 	"github.com/jnichols-git/matcha/v2/pkg/tree"
 )
 
