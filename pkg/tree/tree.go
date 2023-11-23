@@ -43,7 +43,7 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 
 // Propagate a set of parts through the tree, with this node as the root.
 // If there are no parts left to propagate, the node will instead be set to leaf leaf_id.
-func (n *node) propagate(r route.Route, ps []route.Part, leaf_id int) {
+func (n *node) propagate(r *route.Route, ps []route.Part, leaf_id int) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
 		n.leaf_required = r.Required()
@@ -118,7 +118,7 @@ func New() *RouteTree {
 
 // Add a route to the tree.
 // Returns the leaf ID of the added route.
-func (rtree *RouteTree) Add(r route.Route) int {
+func (rtree *RouteTree) Add(r *route.Route) int {
 	root, ok := rtree.methodRoot[r.Method()]
 	if !ok || root == nil {
 		root = createNode(route.Part{})

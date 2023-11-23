@@ -12,7 +12,7 @@ import (
 	"github.com/jnichols-git/matcha/v2/pkg/rctx"
 )
 
-func invalidConfigFunc(r Route) error {
+func invalidConfigFunc(r *Route) error {
 	return errors.New("invalid config")
 }
 

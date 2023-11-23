@@ -13,7 +13,7 @@ import (
 
 type defaultRouter struct {
 	mws       []middleware.Middleware
-	routes    map[string]map[int]route.Route
+	routes    map[string]map[int]*route.Route
 	rtree     *tree.RouteTree
 	handlers  map[string]map[int]http.Handler
 	notfound  http.Handler
@@ -23,7 +23,7 @@ type defaultRouter struct {
 func Default() *defaultRouter {
 	return &defaultRouter{
 		mws:       make([]middleware.Middleware, 0),
-		routes:    make(map[string]map[int]route.Route),
+		routes:    make(map[string]map[int]*route.Route),
 		rtree:     tree.New(),
 		handlers:  make(map[string]map[int]http.Handler),
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
@@ -43,14 +43,14 @@ func (rt *defaultRouter) Attach(mws ...middleware.Middleware) {
 // AddRoute is deprecated; use HandleRoute instead.
 //
 // See interface Router.
-func (rt *defaultRouter) AddRoute(r route.Route, h http.Handler) {
+func (rt *defaultRouter) AddRoute(r *route.Route, h http.Handler) {
 	register(rt, r, h)
 }
 
-func register(rt *defaultRouter, r route.Route, h http.Handler) {
+func register(rt *defaultRouter, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	if rt.routes[r.Method()] == nil {
-		rt.routes[r.Method()] = make(map[int]route.Route)
+		rt.routes[r.Method()] = make(map[int]*route.Route)
 	}
 	rt.routes[r.Method()][id] = r
 	if rt.handlers[r.Method()] == nil {
@@ -94,14 +94,14 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) HandleRoute(r route.Route, h http.Handler) {
+func (rt *defaultRouter) HandleRoute(r *route.Route, h http.Handler) {
 	register(rt, r, h)
 }
 
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) HandleRouteFunc(r route.Route, h http.HandlerFunc) {
+func (rt *defaultRouter) HandleRouteFunc(r *route.Route, h http.HandlerFunc) {
 	if h != nil {
 		register(rt, r, h)
 	} else {
@@ -121,7 +121,7 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 	}
 	trim := middleware.TrimPrefix(rpath)
 	rpath = path.MakePartial(rpath, "")
-	validate := route.ConfigFunc(func(r route.Route) error {
+	validate := route.ConfigFunc(func(r *route.Route) error {
 		if route.NumParams(r) > 0 {
 			return errors.New("invalid mount path; must be static strings only")
 		}

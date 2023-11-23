@@ -8,47 +8,132 @@ import (
 
 	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/middleware"
+	"github.com/jnichols-git/matcha/v2/pkg/path"
+	"github.com/jnichols-git/matcha/v2/pkg/rctx"
 )
 
-type Route interface {
-	// Get a unique hash value for the route.
-	//
-	// Route implementations must ensure Hash is always unique for two different Routes.
-	Hash() string
-	// Get the length of the route.
-	//
-	// Route implementations may determine how to represent their own length.
-	Length() int
-	// Get the parts of the route.
-	//
-	// Route implementations must return an exact slice of their parts.
-	Parts() []Part
-	// Get the method of the route.
-	//
-	// Route implementations must return a nonempty string containing exactly one method, compliant with http.MethodX
-	Method() string
-	// Match a request and update its context.
-	//
-	// Route implementations must return nil if a request does not match the Route, but may otherwise define any return behavior.
-	MatchAndUpdateContext(*http.Request) *http.Request
-	// Attach middleware to the route.
-	//
-	// Middleware cannot be removed from a router once it is added.
-	Attach(mws ...middleware.Middleware)
-	// Attach a validator to the route.
-	//
-	// Validators cannot be removed from a router once they are added.
-	Require(rs ...require.Required)
-	// Get the middleware attached to the route.
-	Middleware() []middleware.Middleware
-	// Get the validators attached to the route.
-	Required() []require.Required
+// Route is the default behavior for router, which is to match requests exactly.
+type Route struct {
+	origExpr   string
+	method     string
+	parts      []Part
+	middleware []middleware.Middleware
+	required   []require.Required
+}
+
+// Tokenize and parse a route expression into a Route.
+//
+// See interface Route.
+func ParseRoute(method, expr string) (*Route, error) {
+	route := &Route{
+		origExpr:   "",
+		method:     method,
+		parts:      make([]Part, 0),
+		middleware: make([]middleware.Middleware, 0),
+		required:   make([]require.Required, 0),
+	}
+	var token string
+	for next := 0; next < len(expr); {
+		token, next = path.Next(expr, next)
+		route.origExpr += token
+		part, err := ParsePart(token)
+		if err != nil {
+			return nil, err
+		}
+		route.parts = append(route.parts, part)
+		if next == -1 {
+			break
+		}
+	}
+	return route, nil
+}
+
+// Get a string value unique to the route.
+//
+// See interface Route.
+func (route *Route) Hash() string {
+	return route.method + " " + route.origExpr
+}
+
+// Get the length of the route.
+// For Routes, this is the total number of Parts it contains.
+//
+// See interface Route.
+func (route *Route) Length() int {
+	return len(route.parts)
+}
+
+// Get the parts of the route.
+//
+// See interface Route.
+func (route *Route) Parts() []Part {
+	return route.parts
+}
+
+// Return the route method.
+//
+// See interface Route.
+func (route *Route) Method() string {
+	return route.method
+}
+
+// Match a request and update its context.
+//
+// See interface Route.
+func (route *Route) MatchAndUpdateContext(req *http.Request) *http.Request {
+	if req.Method != route.method {
+		return nil
+	}
+	// route.ctx.ResetOnto(req.Context())
+	// Check for path length
+	expr := req.URL.Path
+	rctx.ResetRequestContext(req)
+
+	var token string
+	var partIdx int
+	for next := 0; next < len(expr); {
+		part := route.parts[partIdx]
+		token, next = path.Next(expr, next)
+		if ok := part.Match(token); !ok {
+			return nil
+		}
+		if param := part.Parameter(); param != "" {
+			val := token[1:]
+			if part.Multi() {
+				val = rctx.GetParam(req.Context(), param) + "/" + val
+			}
+			rctx.SetParam(req.Context(), param, val)
+		}
+		if !part.Multi() {
+			partIdx++
+		}
+		if next == -1 || partIdx >= route.Length() {
+			break
+		}
+	}
+	return req
+}
+
+func (route *Route) Attach(mws ...middleware.Middleware) {
+	route.middleware = append(route.middleware, mws...)
+}
+
+func (route *Route) Require(rs ...require.Required) {
+	route.required = append(route.required, rs...)
+}
+
+func (route *Route) Middleware() []middleware.Middleware {
+	return route.middleware
+}
+
+func (route *Route) Required() []require.Required {
+	return route.required
 }
 
 // Create a new Route based on a string expression.
-func New(method, expr string, confs ...ConfigFunc) (Route, error) {
+func New(method, expr string, confs ...ConfigFunc) (*Route, error) {
 	// Determine route type
-	var r Route
+	var r *Route
 	var err error
 	r, err = ParseRoute(method, expr)
 	if err != nil {
@@ -65,7 +150,7 @@ func New(method, expr string, confs ...ConfigFunc) (Route, error) {
 
 // Create a new Route based on a string expression, and panic if this fails.
 // You should not use this unless you are creating a route on program start and do not intend to modify the route after the fact.
-func Declare(method, expr string, confs ...ConfigFunc) Route {
+func Declare(method, expr string, confs ...ConfigFunc) *Route {
 	r, err := New(method, expr, confs...)
 	if err != nil {
 		panic(err)

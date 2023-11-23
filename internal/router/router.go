@@ -18,7 +18,7 @@ type Router interface {
 	// Add a route to the router.
 	//
 	// AddRoute was deprecated in v1.2.0. Use HandleRoute instead.
-	AddRoute(r route.Route, h http.Handler)
+	AddRoute(r *route.Route, h http.Handler)
 	// Handle a method and path.
 	// This constructs a basic Route internally. Returns an error if routing path rules are
 	// violated; see routes.md.
@@ -29,10 +29,10 @@ type Router interface {
 	HandleFunc(method, path string, h http.HandlerFunc) error
 	// Handle a more complex path.
 	// If you're only using method+path, use Handle instead.
-	HandleRoute(r route.Route, h http.Handler)
+	HandleRoute(r *route.Route, h http.Handler)
 	// Handle a more complex path.
 	// If you're only using method+path, use Handle instead.
-	HandleRouteFunc(r route.Route, h http.HandlerFunc)
+	HandleRouteFunc(r *route.Route, h http.HandlerFunc)
 	// Mount a handler at a path.
 	// Forwards all requests at path to the provided handler, optionally limited to a set
 	// of methods passed in the variadic methods parameter. Use this if you want to

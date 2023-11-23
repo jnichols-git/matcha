@@ -14,7 +14,7 @@ type ConfigFunc func(rt Router) error
 // Add a Route for the Router to handle.
 //
 // AddRoute was deprecated in v1.2.0. Use HandleRoute instead.
-func WithRoute(r route.Route, h http.Handler) ConfigFunc {
+func WithRoute(r *route.Route, h http.Handler) ConfigFunc {
 	return func(rt Router) error {
 		rt.AddRoute(r, h)
 		return nil
@@ -33,14 +33,14 @@ func HandleFunc(method, path string, h http.HandlerFunc) ConfigFunc {
 	}
 }
 
-func HandleRoute(r route.Route, h http.Handler) ConfigFunc {
+func HandleRoute(r *route.Route, h http.Handler) ConfigFunc {
 	return func(rt Router) error {
 		rt.HandleRoute(r, h)
 		return nil
 	}
 }
 
-func HandleRouteFunc(r route.Route, h http.HandlerFunc) ConfigFunc {
+func HandleRouteFunc(r *route.Route, h http.HandlerFunc) ConfigFunc {
 	return func(rt Router) error {
 		rt.HandleRouteFunc(r, h)
 		return nil
