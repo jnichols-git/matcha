@@ -51,7 +51,7 @@ func ParseRoute(method, expr string) (*Route, error) {
 // Get a string value unique to the route.
 //
 // See interface Route.
-func (route *Route) Hash() string {
+func (route *Route) String() string {
 	return route.method + " " + route.origExpr
 }
 
