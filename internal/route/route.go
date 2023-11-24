@@ -114,12 +114,14 @@ func (route *Route) MatchAndUpdateContext(req *http.Request) *http.Request {
 	return req
 }
 
-func (route *Route) Use(mws ...middleware.Middleware) {
+func (route *Route) Use(mws ...middleware.Middleware) *Route {
 	route.middleware = append(route.middleware, mws...)
+	return route
 }
 
-func (route *Route) Require(rs ...require.Required) {
+func (route *Route) Require(rs ...require.Required) *Route {
 	route.required = append(route.required, rs...)
+	return route
 }
 
 func (route *Route) Middleware() []middleware.Middleware {

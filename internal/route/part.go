@@ -2,7 +2,6 @@ package route
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 
 	"github.com/jnichols-git/matcha/v2/pkg/regex"
@@ -34,7 +33,6 @@ func (p Part) Match(token string) (matched bool) {
 	matched = (p.expr != "" && p.expr == token) ||
 		(p.pattern != nil && p.pattern.FindString(clean) == clean) ||
 		(p.expr == "" && p.pattern == nil)
-	fmt.Printf("%s | expr: %s, param: %s, pattern: %s | %t\n", token, p.expr, p.param, p.pattern, matched)
 	return
 }
 

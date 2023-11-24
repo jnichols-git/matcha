@@ -10,7 +10,7 @@ import (
 	"github.com/jnichols-git/matcha/v2/pkg/tree"
 )
 
-type defaultRouter struct {
+type Router struct {
 	mws       []middleware.Middleware
 	routes    map[string]map[int]*route.Route
 	rtree     *tree.RouteTree
@@ -19,8 +19,8 @@ type defaultRouter struct {
 	maxParams int
 }
 
-func Default() *defaultRouter {
-	return &defaultRouter{
+func Default() *Router {
+	return &Router{
 		mws:       make([]middleware.Middleware, 0),
 		routes:    make(map[string]map[int]*route.Route),
 		rtree:     tree.New(),
@@ -33,7 +33,7 @@ func Default() *defaultRouter {
 // Attach middleware to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) Use(mws ...middleware.Middleware) {
+func (rt *Router) Use(mws ...middleware.Middleware) {
 	rt.mws = append(rt.mws, mws...)
 }
 
@@ -42,11 +42,11 @@ func (rt *defaultRouter) Use(mws ...middleware.Middleware) {
 // AddRoute is deprecated; use HandleRoute instead.
 //
 // See interface Router.
-func (rt *defaultRouter) AddRoute(r *route.Route, h http.Handler) {
+func (rt *Router) AddRoute(r *route.Route, h http.Handler) {
 	register(rt, r, h)
 }
 
-func register(rt *defaultRouter, r *route.Route, h http.Handler) {
+func register(rt *Router, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	if rt.routes[r.Method()] == nil {
 		rt.routes[r.Method()] = make(map[int]*route.Route)
@@ -65,7 +65,7 @@ func register(rt *defaultRouter, r *route.Route, h http.Handler) {
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) Handle(method, path string, h http.Handler) error {
+func (rt *Router) Handle(method, path string, h http.Handler) error {
 	r, err := route.New(method, path)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (rt *defaultRouter) Handle(method, path string, h http.Handler) error {
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) error {
+func (rt *Router) HandleFunc(method, path string, h http.HandlerFunc) error {
 	r, err := route.New(method, path)
 	if err != nil {
 		return err
@@ -93,14 +93,14 @@ func (rt *defaultRouter) HandleFunc(method, path string, h http.HandlerFunc) err
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) HandleRoute(r *route.Route, h http.Handler) {
+func (rt *Router) HandleRoute(r *route.Route, h http.Handler) {
 	register(rt, r, h)
 }
 
 // Add a route to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) HandleRouteFunc(r *route.Route, h http.HandlerFunc) {
+func (rt *Router) HandleRouteFunc(r *route.Route, h http.HandlerFunc) {
 	if h != nil {
 		register(rt, r, h)
 	} else {
@@ -111,7 +111,7 @@ func (rt *defaultRouter) HandleRouteFunc(r *route.Route, h http.HandlerFunc) {
 // Mount mounts a handler at path.
 //
 // See interface Router.
-func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) error {
+func (rt *Router) Mount(rpath string, h http.Handler, methods ...string) error {
 	if len(methods) == 0 {
 		methods = []string{
 			http.MethodPut, http.MethodGet, http.MethodPatch, http.MethodDelete, http.MethodPost,
@@ -134,7 +134,7 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 // Set the handler for instances where no route is found.
 //
 // See interface Router.
-func (rt *defaultRouter) AddNotFound(h http.Handler) {
+func (rt *Router) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
@@ -143,7 +143,7 @@ func (rt *defaultRouter) AddNotFound(h http.Handler) {
 // Serve request using the registered middleware, routes, and handlers.
 // Tree Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
 // path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
-func (rt *defaultRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req = middleware.ExecuteMiddleware(rt.mws, w, req)
 	if req == nil {
 		return

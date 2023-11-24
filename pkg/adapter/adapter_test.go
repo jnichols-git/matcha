@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/internal/router"
 )
 
@@ -85,10 +84,8 @@ func handleTest(w http.ResponseWriter, req *http.Request) {
 
 func testHandler(ctx context.Context, in *testAdaptable) (*testAdapted, error) {
 	adapter := &testAdapter{}
-	rt := router.Declare(
-		router.Default(),
-		router.HandleRoute(route.Declare(http.MethodGet, "/"), http.HandlerFunc(handleTest)),
-	)
+	rt := router.Default()
+	rt.HandleFunc(http.MethodGet, "/", http.HandlerFunc(handleTest))
 	w, req, out, err := adapter.Adapt(in)
 	if err != nil {
 		return nil, err

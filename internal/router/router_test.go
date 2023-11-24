@@ -145,33 +145,16 @@ func runEvalRequest(t *testing.T,
 	})
 }
 
-// Test all options of New().
-// Doesn't check to see if those options work, just that they compile and don't cause errors. Check options individually.
-func TestNewRouter(t *testing.T) {
-	_, err := New(Default(),
-		HandleFunc(http.MethodGet, "/", okHandler("root")),
-		WithNotFound(nfHandler()),
-		WithMiddleware(testMiddleware),
-	)
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = New(Default(), errConf)
-	if err == nil {
-		t.Error("router New should return an error if config returns an error")
-	}
-}
-
 func TestBasicRoutes(t *testing.T) {
-	r := Declare(Default(),
-		Handle(http.MethodGet, "/", okHandler("root")),
-		HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey")),
-		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
-		HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters")),
-		WithMiddleware(testMiddleware),
-	)
+	r := Default()
+	r.Handle(http.MethodGet, "/", okHandler("root"))
+	r.HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey"))
+	r.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
+	r.HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
 	r.Handle(http.MethodGet, `/route/{id}[[\w]{4}]`, rpHandler("id"))
 	r.HandleFunc(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`, rpHandler("filename"))
+	r.Use(testMiddleware)
+
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
@@ -208,25 +191,12 @@ func TestBasicRoutes(t *testing.T) {
 		"code": http.StatusOK,
 		"body": "mwval",
 	})
-	// Invalid routes
-	r, err := New(Default(), Handle(http.MethodGet, "/{", nil))
-	if err == nil {
-		t.Error()
-	}
-	r, err = New(Default(), HandleFunc(http.MethodGet, "/{", nil))
-	if err == nil {
-		t.Error()
-	}
 }
 
 func TestEdgeCaseRoutes(t *testing.T) {
-	r := Declare(
-		Default(),
-		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
-	)
-	r_reject := route.Declare(http.MethodGet, "/reject")
-	r_reject.Use(reject)
-	r.HandleRoute(r_reject, okHandler("never"))
+	r := Default()
+	r.HandleRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd"))
+	r.HandleRoute(route.Declare(http.MethodGet, "/reject").Use(reject), okHandler("never"))
 	r.HandleFunc(http.MethodGet, "/not/implemented/handler", nil)
 	r.Handle(http.MethodGet, "/not/implemented/func", nil)
 	r.HandleRoute(route.Declare(http.MethodGet, "/not/implemented/routehandler"), nil)
@@ -259,13 +229,14 @@ func TestEdgeCaseRoutes(t *testing.T) {
 }
 
 func TestConcurrent(t *testing.T) {
-	r := Declare(Default(),
-		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root")),
-		HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/{id}[[a-zA-Z]+]`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/route/{id}[[\w]{4}]`), rpHandler("id")),
-		HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`), rpHandler("filename")),
-	)
+	r := Default()
+	r.Handle(http.MethodGet, "/", okHandler("root"))
+	r.HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey"))
+	r.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
+	r.HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
+	r.Handle(http.MethodGet, `/route/{id}[[\w]{4}]`, rpHandler("id"))
+	r.HandleFunc(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`, rpHandler("filename"))
+	r.Use(testMiddleware)
 	s := httptest.NewServer(r)
 	wg := sync.WaitGroup{}
 	for i := 0; i < 100; i++ {
@@ -311,20 +282,12 @@ func TestConcurrent(t *testing.T) {
 
 func TestDeclare(t *testing.T) {
 	// Test rejection middleware
-	r := Declare(Default(), WithMiddleware(reject))
+	r := Default()
+	r.Use(reject)
 	s := httptest.NewServer(r)
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusForbidden,
 	})
-	// Test declaration fail
-	var err error
-	defer func() {
-		err = recover().(error)
-	}()
-	Declare(Default(), errConf)
-	if err == nil {
-		t.Error("expected declare to fail and panic")
-	}
 }
 
 var aco = &cors.AccessControlOptions{
@@ -337,13 +300,14 @@ var aco = &cors.AccessControlOptions{
 }
 
 func TestCORS(t *testing.T) {
-	r := Declare(
-		Default(),
-		DefaultCORSHeaders(aco),
-		PreflightCORS("/", aco),
-		HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("ok")),
-		WithNotFound(nfHandler()),
-	)
+	r := Default()
+	r.Use(cors.CORSMiddleware(aco))
+	r.HandleFunc(http.MethodOptions, "/", func(w http.ResponseWriter, r *http.Request) {
+		cors.SetCORSResponseHeaders(w, r, aco)
+		w.WriteHeader(http.StatusNoContent)
+	})
+	r.Handle(http.MethodGet, "/", okHandler("ok"))
+	r.AddNotFound(nfHandler())
 	s := httptest.NewServer(r)
 
 	runEvalRequest(t, s, "/", reqGenHeaders(http.MethodGet, http.Header{"Origin": {"test-origin"}}), map[string]any{
@@ -357,11 +321,6 @@ func TestCORS(t *testing.T) {
 		"code":   http.StatusNoContent,
 		"header": http.Header{"Access-Control-Allow-Headers": {"x-header-1"}},
 	})
-
-	// Test invalid route for preflight
-	if _, err := New(Default(), PreflightCORS("/[(]", aco)); err == nil {
-		t.Error("expected invalid route to fail with preflightcors")
-	}
 }
 
 func TestDuplicate(t *testing.T) {
@@ -371,11 +330,9 @@ func TestDuplicate(t *testing.T) {
 	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTeapot)
 	})
-	r := Declare(
-		Default(),
-		HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h1),
-		HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2),
-	)
+	r := Default()
+	r.HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h1)
+	r.HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/duplicate/route", nil)
 	r.ServeHTTP(w, req)
@@ -391,9 +348,7 @@ func TestValidatedDuplicate(t *testing.T) {
 	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	})
-	rt := Declare(
-		Default(),
-	)
+	rt := Default()
 	r_origin := route.Declare(http.MethodGet, "/")
 	r_origin.Require(require.Hosts("origin.com"))
 	rt.HandleRoute(r_origin, h1)
