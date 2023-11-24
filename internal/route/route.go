@@ -114,7 +114,7 @@ func (route *Route) MatchAndUpdateContext(req *http.Request) *http.Request {
 	return req
 }
 
-func (route *Route) Attach(mws ...middleware.Middleware) {
+func (route *Route) Use(mws ...middleware.Middleware) {
 	route.middleware = append(route.middleware, mws...)
 }
 
@@ -131,7 +131,7 @@ func (route *Route) Required() []require.Required {
 }
 
 // Create a new Route based on a string expression.
-func New(method, expr string, confs ...ConfigFunc) (*Route, error) {
+func New(method, expr string) (*Route, error) {
 	// Determine route type
 	var r *Route
 	var err error
@@ -139,19 +139,13 @@ func New(method, expr string, confs ...ConfigFunc) (*Route, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, conf := range confs {
-		err = conf(r)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return r, nil
 }
 
 // Create a new Route based on a string expression, and panic if this fails.
 // You should not use this unless you are creating a route on program start and do not intend to modify the route after the fact.
-func Declare(method, expr string, confs ...ConfigFunc) *Route {
-	r, err := New(method, expr, confs...)
+func Declare(method, expr string) *Route {
+	r, err := New(method, expr)
 	if err != nil {
 		panic(err)
 	}

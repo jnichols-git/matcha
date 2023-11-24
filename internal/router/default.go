@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/jnichols-git/matcha/v2/internal/route"
@@ -34,7 +33,7 @@ func Default() *defaultRouter {
 // Attach middleware to the router.
 //
 // See interface Router.
-func (rt *defaultRouter) Attach(mws ...middleware.Middleware) {
+func (rt *defaultRouter) Use(mws ...middleware.Middleware) {
 	rt.mws = append(rt.mws, mws...)
 }
 
@@ -121,18 +120,12 @@ func (rt *defaultRouter) Mount(rpath string, h http.Handler, methods ...string) 
 	}
 	trim := middleware.TrimPrefix(rpath)
 	rpath = path.MakePartial(rpath, "")
-	validate := route.ConfigFunc(func(r *route.Route) error {
-		if route.NumParams(r) > 0 {
-			return errors.New("invalid mount path; must be static strings only")
-		}
-		return nil
-	})
 	for _, method := range methods {
-		r, err := route.New(method, rpath, validate)
+		r, err := route.New(method, rpath)
 		if err != nil {
 			return err
 		}
-		r.Attach(trim)
+		r.Use(trim)
 		rt.HandleRoute(r, h)
 	}
 	return nil

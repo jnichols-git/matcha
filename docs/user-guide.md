@@ -182,7 +182,7 @@ func main() {
     rt := router.Default()
     rt.Handle(http.MethodGet, "/", h1),
     rt.HandleRoute(userRoute, h2)
-    server.Attach(middleware.LogRequests())
+    server.Use(middleware.LogRequests())
 }
 ```
 

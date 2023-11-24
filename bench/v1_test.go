@@ -76,7 +76,7 @@ func TestAPIv1(t *testing.T) {
 	rt := router.Default()
 	for _, tr := range apiRoutes {
 		r := route.Declare(tr.method, tr.path)
-		r.Attach(tr.mws...)
+		r.Use(tr.mws...)
 		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}
@@ -101,7 +101,7 @@ func BenchmarkAPIv1(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		r.Attach(tr.mws...)
+		r.Use(tr.mws...)
 		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}

@@ -71,7 +71,9 @@ func TestDuplicate(t *testing.T) {
 
 func TestRequire(t *testing.T) {
 	rtree := New()
-	a := rtree.Add(route.Declare(http.MethodGet, "/", route.Require(require.Hosts("test.com"))))
+	r_a := route.Declare(http.MethodGet, "/")
+	r_a.Require(require.Hosts("test.com"))
+	a := rtree.Add(r_a)
 	b := rtree.Add(route.Declare(http.MethodGet, "/"))
 	if a != 1 {
 		t.Errorf("expected leaf_id 1, got %d", a)

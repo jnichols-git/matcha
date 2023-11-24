@@ -192,13 +192,6 @@ func TestRouteEdgeCases(t *testing.T) {
 	}
 }
 
-func TestInvalidConfig(t *testing.T) {
-	rt, err := New(http.MethodGet, "/static/path", invalidConfigFunc)
-	if err == nil || rt != nil {
-		t.Errorf("expected New to fail if ConfigFunc returns error")
-	}
-}
-
 func TestCORS(t *testing.T) {
 	// Basic
 	var aco = &cors.AccessControlOptions{
@@ -209,7 +202,8 @@ func TestCORS(t *testing.T) {
 		MaxAge:           1000,
 		AllowCredentials: false,
 	}
-	rt, err := New(http.MethodGet, "/static/path", CORSHeaders(aco))
+	rt, err := New(http.MethodGet, "/static/path")
+	rt.Use(cors.CORSMiddleware(aco))
 	if err != nil || len(rt.Middleware()) != 1 {
 		t.Fatal(err)
 	}
@@ -228,10 +222,12 @@ func TestCORS(t *testing.T) {
 		t.Errorf("Expected origin origin.com, got %s", headers.Get("Origin"))
 	}
 	// Partial/Non-builtin conf
-	rt, err = New(http.MethodGet, "/static/path/{add}+", WithMiddleware(cors.CORSMiddleware(aco)))
+	rt, err = New(http.MethodGet, "/static/path/{add}+")
+	rt.Use(cors.CORSMiddleware(aco))
 	if err != nil || len(rt.Middleware()) != 1 {
 		t.Fatal(err)
 	}
+	rt.Use(cors.CORSMiddleware(aco))
 	u, _ = url.Parse("http://test.com/static/path/with/addition")
 	req = &http.Request{
 		Method: http.MethodGet,
@@ -254,7 +250,8 @@ func TestCORS(t *testing.T) {
 func TestRequire(t *testing.T) {
 	webhost := require.Hosts("decentplatforms.com", "www.decentplatforms.com")
 	apihost := require.Hosts("api.decentplatforms.com")
-	webr := Declare(http.MethodGet, "/", Require(webhost))
+	webr := Declare(http.MethodGet, "/")
+	webr.Require(webhost)
 	apir := Declare(http.MethodGet, "/")
 	apir.Require(apihost)
 
@@ -275,7 +272,8 @@ func TestRequire(t *testing.T) {
 	}
 
 	// Repeat for partial routes
-	webr = Declare(http.MethodGet, "/+", Require(webhost))
+	webr = Declare(http.MethodGet, "/+")
+	webr.Require(webhost)
 	apir = Declare(http.MethodGet, "/+")
 	apir.Require(apihost)
 

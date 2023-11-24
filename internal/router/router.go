@@ -14,7 +14,7 @@ type Router interface {
 	// Attach middleware to the router.
 	//
 	// Router implementations must run all attached middleware on all incoming requests.
-	Attach(mw ...middleware.Middleware)
+	Use(mw ...middleware.Middleware)
 	// Add a route to the router.
 	//
 	// AddRoute was deprecated in v1.2.0. Use HandleRoute instead.

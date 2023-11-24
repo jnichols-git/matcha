@@ -223,8 +223,10 @@ func TestEdgeCaseRoutes(t *testing.T) {
 	r := Declare(
 		Default(),
 		WithRoute(route.Declare(http.MethodGet, "/odd///path"), okHandler("odd")),
-		HandleRoute(route.Declare(http.MethodGet, "/reject", route.WithMiddleware(reject)), okHandler("never")),
 	)
+	r_reject := route.Declare(http.MethodGet, "/reject")
+	r_reject.Use(reject)
+	r.HandleRoute(r_reject, okHandler("never"))
 	r.HandleFunc(http.MethodGet, "/not/implemented/handler", nil)
 	r.Handle(http.MethodGet, "/not/implemented/func", nil)
 	r.HandleRoute(route.Declare(http.MethodGet, "/not/implemented/routehandler"), nil)
@@ -391,12 +393,11 @@ func TestValidatedDuplicate(t *testing.T) {
 	})
 	rt := Declare(
 		Default(),
-		HandleRoute(route.Declare(
-			http.MethodGet, "/",
-			route.Require(require.Hosts("origin.com")),
-		), h1),
-		HandleRoute(route.Declare(http.MethodGet, "/"), h2),
 	)
+	r_origin := route.Declare(http.MethodGet, "/")
+	r_origin.Require(require.Hosts("origin.com"))
+	rt.HandleRoute(r_origin, h1)
+	rt.HandleRoute(route.Declare(http.MethodGet, "/"), h2)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "http://origin.com/", nil)
 	rt.ServeHTTP(w, req)
@@ -497,10 +498,5 @@ func TestComposition(t *testing.T) {
 	err := api2.Mount("/{", api1)
 	if err == nil {
 		t.Error("expected failure due to route formatting")
-	}
-
-	err = api2.Mount("/api/{version}", api1)
-	if err == nil {
-		t.Error("expected error due to route formatting")
 	}
 }

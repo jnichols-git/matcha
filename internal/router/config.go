@@ -58,7 +58,7 @@ func WithNotFound(h http.Handler) ConfigFunc {
 // Give a default set of CORS headers.
 func DefaultCORSHeaders(aco *cors.AccessControlOptions) ConfigFunc {
 	return func(rt Router) error {
-		rt.Attach(cors.CORSMiddleware(aco))
+		rt.Use(cors.CORSMiddleware(aco))
 		return nil
 	}
 }
@@ -85,7 +85,7 @@ func PreflightCORS(expr string, aco *cors.AccessControlOptions) ConfigFunc {
 // Attach generic middleware to the Router
 func WithMiddleware(mws ...middleware.Middleware) ConfigFunc {
 	return func(rt Router) error {
-		rt.Attach(mws...)
+		rt.Use(mws...)
 		return nil
 	}
 }

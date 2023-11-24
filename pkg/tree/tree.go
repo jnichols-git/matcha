@@ -93,8 +93,7 @@ func (n *node) match(req *http.Request, expr string, last int) int {
 	}
 	// Iterate through the children of this node.
 	for _, child := range n.children {
-		match_leaf_id := child.match(req, expr, next)
-		if match_leaf_id != 0 {
+		if match_leaf_id := child.match(req, expr, next); match_leaf_id != NO_LEAF_ID {
 			// If a child matches the entire remaining route, return its leaf_id.
 			return match_leaf_id
 		}
