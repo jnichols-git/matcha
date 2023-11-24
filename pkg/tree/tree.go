@@ -5,18 +5,19 @@ package tree
 
 import (
 	"net/http"
+	"sync/atomic"
 
 	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/internal/route/require"
 	"github.com/jnichols-git/matcha/v2/pkg/path"
 )
 
-const NO_LEAF_ID = int(0)
+const NO_LEAF_ID = int64(0)
 
 type node struct {
 	p             route.Part
 	children      []*node
-	leaf_id       int
+	leaf_id       int64
 	leaf_required []require.Required
 }
 
@@ -31,7 +32,7 @@ func createNode(p route.Part) *node {
 	}
 }
 
-func (n *node) resolveLeafForRequest(req *http.Request) int {
+func (n *node) resolveLeafForRequest(req *http.Request) int64 {
 	if n.leaf_id == NO_LEAF_ID {
 		return NO_LEAF_ID
 	}
@@ -43,7 +44,7 @@ func (n *node) resolveLeafForRequest(req *http.Request) int {
 
 // Propagate a set of parts through the tree, with this node as the root.
 // If there are no parts left to propagate, the node will instead be set to leaf leaf_id.
-func (n *node) propagate(r *route.Route, ps []route.Part, leaf_id int) {
+func (n *node) propagate(r *route.Route, ps []route.Part, leaf_id int64) {
 	if len(ps) == 0 {
 		n.leaf_id = leaf_id
 		n.leaf_required = r.Required()
@@ -65,7 +66,7 @@ func (n *node) propagate(r *route.Route, ps []route.Part, leaf_id int) {
 }
 
 // match traverses a subtree of nodes to find the first matching route.
-func (n *node) match(req *http.Request, expr string, last int) int {
+func (n *node) match(req *http.Request, expr string, last int) int64 {
 	// If we've reached the end of the expression, return the leaf_id of the current node.
 	// This encapsulates several edge cases where it's difficult to know if the routine should return early or not,
 	// like with partial leaves.
@@ -104,33 +105,33 @@ func (n *node) match(req *http.Request, expr string, last int) int {
 
 type RouteTree struct {
 	methodRoot map[string]*node
-	nextId     int
+	nextId     atomic.Int64
 }
 
 // Create a new RouteTree.
 func New() *RouteTree {
 	return &RouteTree{
 		methodRoot: make(map[string]*node),
-		nextId:     0,
+		nextId:     atomic.Int64{},
 	}
 }
 
 // Add a route to the tree.
 // Returns the leaf ID of the added route.
-func (rtree *RouteTree) Add(r *route.Route) int {
+func (rtree *RouteTree) Add(r *route.Route) int64 {
 	root, ok := rtree.methodRoot[r.Method()]
 	if !ok || root == nil {
 		root = createNode(route.Part{})
 		rtree.methodRoot[r.Method()] = root
 	}
-	rtree.nextId++
-	root.propagate(r, r.Parts(), rtree.nextId)
-	return rtree.nextId
+	id := rtree.nextId.Add(1)
+	root.propagate(r, r.Parts(), id)
+	return id
 }
 
 // Match a request to the tree.
 // Returns the leaf ID of the matched route, or NO_LEAF_ID if no match is found.
-func (rtree *RouteTree) Match(req *http.Request) int {
+func (rtree *RouteTree) Match(req *http.Request) int64 {
 	root, ok := rtree.methodRoot[req.Method]
 	if !ok || root == nil {
 		return 0

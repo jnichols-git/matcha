@@ -12,9 +12,9 @@ import (
 
 type Router struct {
 	mws       []middleware.Middleware
-	routes    map[string]map[int]*route.Route
+	routes    map[string]map[int64]*route.Route
 	rtree     *tree.RouteTree
-	handlers  map[string]map[int]http.Handler
+	handlers  map[string]map[int64]http.Handler
 	notfound  http.Handler
 	maxParams int
 }
@@ -22,9 +22,9 @@ type Router struct {
 func Default() *Router {
 	return &Router{
 		mws:       make([]middleware.Middleware, 0),
-		routes:    make(map[string]map[int]*route.Route),
+		routes:    make(map[string]map[int64]*route.Route),
 		rtree:     tree.New(),
-		handlers:  make(map[string]map[int]http.Handler),
+		handlers:  make(map[string]map[int64]http.Handler),
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
@@ -37,23 +37,14 @@ func (rt *Router) Use(mws ...middleware.Middleware) {
 	rt.mws = append(rt.mws, mws...)
 }
 
-// Add a route to the router.
-//
-// AddRoute is deprecated; use HandleRoute instead.
-//
-// See interface Router.
-func (rt *Router) AddRoute(r *route.Route, h http.Handler) {
-	register(rt, r, h)
-}
-
 func register(rt *Router, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	if rt.routes[r.Method()] == nil {
-		rt.routes[r.Method()] = make(map[int]*route.Route)
+		rt.routes[r.Method()] = make(map[int64]*route.Route)
 	}
 	rt.routes[r.Method()][id] = r
 	if rt.handlers[r.Method()] == nil {
-		rt.handlers[r.Method()] = make(map[int]http.Handler)
+		rt.handlers[r.Method()] = make(map[int64]http.Handler)
 	}
 	if h != nil {
 		rt.handlers[r.Method()][id] = h
