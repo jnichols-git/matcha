@@ -21,7 +21,7 @@ func BenchmarkStringRoute(b *testing.B) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
-		out = rt.MatchAndUpdateContext(req)
+		out = rt.Execute(req)
 	}
 	use(out)
 }
@@ -35,7 +35,7 @@ func BenchmarkWildcardRoute(b *testing.B) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
-		out = rt.MatchAndUpdateContext(req)
+		out = rt.Execute(req)
 	}
 	use(out)
 }
@@ -49,7 +49,7 @@ func BenchmarkRegexRoute(b *testing.B) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
-		out = rt.MatchAndUpdateContext(req)
+		out = rt.Execute(req)
 	}
 	use(out)
 }
@@ -63,7 +63,7 @@ func BenchmarkPartialRoute(b *testing.B) {
 	req = rctx.PrepareRequestContext(req, rctx.DefaultMaxParams)
 	var out *http.Request
 	for i := 0; i < b.N; i++ {
-		out = rt.MatchAndUpdateContext(req)
+		out = rt.Execute(req)
 	}
 	use(out)
 }

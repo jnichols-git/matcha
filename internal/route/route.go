@@ -77,26 +77,16 @@ func (route *Route) Method() string {
 	return route.method
 }
 
-// Match a request and update its context.
-//
-// See interface Route.
-func (route *Route) MatchAndUpdateContext(req *http.Request) *http.Request {
-	if req.Method != route.method {
-		return nil
-	}
-	// route.ctx.ResetOnto(req.Context())
-	// Check for path length
+// Execute updates the context of a Request with the Route's content.
+func (route *Route) Execute(req *http.Request) *http.Request {
+
 	expr := req.URL.Path
-	rctx.ResetRequestContext(req)
 
 	var token string
 	var partIdx int
 	for next := 0; next < len(expr); {
 		part := route.parts[partIdx]
 		token, next = path.Next(expr, next)
-		if ok := part.Match(token); !ok {
-			return nil
-		}
 		if param := part.Parameter(); param != "" {
 			val := token[1:]
 			if part.Multi() {

@@ -12,9 +12,9 @@ import (
 
 type Router struct {
 	mws       []middleware.Middleware
-	routes    map[string]map[int64]*route.Route
 	rtree     *tree.RouteTree
-	handlers  map[string]map[int64]http.Handler
+	routes    map[int64]*route.Route
+	handlers  map[int64]http.Handler
 	notfound  http.Handler
 	maxParams int
 }
@@ -22,9 +22,9 @@ type Router struct {
 func Default() *Router {
 	return &Router{
 		mws:       make([]middleware.Middleware, 0),
-		routes:    make(map[string]map[int64]*route.Route),
 		rtree:     tree.New(),
-		handlers:  make(map[string]map[int64]http.Handler),
+		routes:    make(map[int64]*route.Route),
+		handlers:  make(map[int64]http.Handler),
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
@@ -39,17 +39,11 @@ func (rt *Router) Use(mws ...middleware.Middleware) {
 
 func register(rt *Router, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
-	if rt.routes[r.Method()] == nil {
-		rt.routes[r.Method()] = make(map[int64]*route.Route)
-	}
-	rt.routes[r.Method()][id] = r
-	if rt.handlers[r.Method()] == nil {
-		rt.handlers[r.Method()] = make(map[int64]http.Handler)
-	}
+	rt.routes[id] = r
 	if h != nil {
-		rt.handlers[r.Method()][id] = h
+		rt.handlers[id] = h
 	} else {
-		rt.handlers[r.Method()][id] = nil
+		rt.handlers[id] = nil
 	}
 }
 
@@ -141,15 +135,15 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	leaf_id := rt.rtree.Match(req)
 	if leaf_id != tree.NO_LEAF_ID {
-		r := rt.routes[req.Method][leaf_id]
+		r := rt.routes[leaf_id]
 		req = rctx.PrepareRequestContext(req, route.NumParams(r))
-		reqWithCtx := r.MatchAndUpdateContext(req)
+		reqWithCtx := r.Execute(req)
 		reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
 		if reqWithCtx == nil {
 			rctx.ReturnRequestContext(req)
 			return
 		}
-		handler := rt.handlers[req.Method][leaf_id]
+		handler := rt.handlers[leaf_id]
 		if handler != nil {
 			handler.ServeHTTP(w, reqWithCtx)
 		} else {
