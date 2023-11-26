@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"sync/atomic"
 
+	"github.com/jnichols-git/matcha/v2/internal/path"
 	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/internal/route/require"
-	"github.com/jnichols-git/matcha/v2/pkg/path"
 )
 
 const NO_LEAF_ID = int64(0)
