@@ -134,26 +134,26 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	leaf_id := rt.rtree.Match(req)
-	if leaf_id != tree.NO_LEAF_ID {
-		r := rt.routes[leaf_id]
-		req = rctx.PrepareRequestContext(req, route.NumParams(r))
-		reqWithCtx := r.Execute(req)
-		reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
-		if reqWithCtx == nil {
-			rctx.ReturnRequestContext(req)
-			return
-		}
-		handler := rt.handlers[leaf_id]
-		if handler != nil {
-			handler.ServeHTTP(w, reqWithCtx)
-		} else {
-			w.WriteHeader(http.StatusNotImplemented)
-			return
-		}
-
+	if leaf_id == tree.NO_LEAF_ID {
+		rt.notfound.ServeHTTP(w, req)
+		return
+	}
+	r := rt.routes[leaf_id]
+	req = rctx.PrepareRequestContext(req, route.NumParams(r))
+	reqWithCtx := r.Execute(req)
+	reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
+	if reqWithCtx == nil {
 		rctx.ReturnRequestContext(req)
 		return
 	}
-	rt.notfound.ServeHTTP(w, req)
+	handler := rt.handlers[leaf_id]
+	if handler != nil {
+		handler.ServeHTTP(w, reqWithCtx)
+	} else {
+		w.WriteHeader(http.StatusNotImplemented)
+		return
+	}
+
+	rctx.ReturnRequestContext(req)
 	return
 }
