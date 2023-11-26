@@ -3,8 +3,8 @@ package examples
 import (
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2/internal/rctx"
 	"github.com/jnichols-git/matcha/v2/internal/router"
-	"github.com/jnichols-git/matcha/v2/pkg/rctx"
 )
 
 func echoAdmin(w http.ResponseWriter, req *http.Request) {
