@@ -3,7 +3,7 @@ package regex
 import "testing"
 
 func TestPattern(t *testing.T) {
-	rs, isrs, err := CompilePattern("{(api|www)}.decentplatforms.{.*}")
+	rs, isrs, err := CompilePattern("[(api|www)].decentplatforms.[.*]")
 	if err != nil {
 		t.Errorf("expected expression to compile, got %s", err)
 	} else if !isrs {
@@ -21,7 +21,7 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("decentplatforms.com"); ok {
 		t.Error("expected no match")
 	}
-	rs, isrs, err = CompilePattern("{.{4}}{.+}")
+	rs, isrs, err = CompilePattern("[.{4}.+]")
 	if err != nil {
 		t.Error(err)
 	} else if !isrs {
@@ -33,7 +33,7 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("abcd"); ok {
 		t.Error("expected no match")
 	}
-	rs, _, _ = CompilePattern("{.+}.decentplatforms.com")
+	rs, _, _ = CompilePattern("[.+].decentplatforms.com")
 	if ok := rs.Match("decentplatforms.com"); ok {
 		t.Error("expected no match")
 	}
@@ -48,15 +48,15 @@ func TestPattern(t *testing.T) {
 	if isrs {
 		t.Errorf("static string is not a Pattern")
 	}
-	_, _, err = CompilePattern("{.+}.decentplatforms.{.+")
+	_, _, err = CompilePattern("[.+].decentplatforms.[.+")
 	if err == nil {
 		t.Errorf("should fail with unbalanced braces")
 	}
-	_, _, err = CompilePattern("{[}{.*}")
+	_, _, err = CompilePattern("[[}{.*]")
 	if err == nil {
 		t.Errorf("should fail with invalid regex")
 	}
-	_, _, err = CompilePattern("{[}")
+	_, _, err = CompilePattern("[[]")
 	if err == nil {
 		t.Errorf("should fail with invalid regex")
 	}

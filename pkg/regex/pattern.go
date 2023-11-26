@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// findAllRegexGroups finds all regex expressions contained in {}s.
+// findAllRegexGroups finds all regex expressions contained in []s.
 // These groups are returned in [][]int, an array of int paipatt representing the start
 // and end of the regex groups. Returns an error if unbalanced brackets are found.
 func findAllRegexGroups(expr string) ([][]int, error) {
@@ -14,13 +14,13 @@ func findAllRegexGroups(expr string) ([][]int, error) {
 	start, end := -1, -1
 	depth := 0
 	for i, r := range expr {
-		if r == '{' {
+		if r == '[' {
 			if depth == 0 {
 				start = i
 			}
 			depth++
 		}
-		if r == '}' {
+		if r == ']' {
 			depth--
 			if depth == 0 {
 				end = i
@@ -60,7 +60,7 @@ type Pattern struct {
 // Returns pmf, isStatic, err, where isStatic represents the choice to use a static string or not; Patterns
 // need this during compilation to store static parts, used to delimit inputs during matching.
 func matchf(tk string) (pmf, bool, error) {
-	if tk[0] == '{' && tk[len(tk)-1] == '}' {
+	if tk[0] == '[' && tk[len(tk)-1] == ']' {
 		expr, err := regexp.Compile(tk[1 : len(tk)-1])
 		if err != nil {
 			return nil, false, err
@@ -102,7 +102,7 @@ func resolve(patt *Pattern, expr string, set []int) error {
 // if the provided expression is valid, but not a pattern (a static string).
 func CompilePattern(expr string) (*Pattern, bool, error) {
 	// Static strings begone
-	if !strings.ContainsAny(expr, "{}") {
+	if !strings.ContainsAny(expr, "[]") {
 		return nil, false, nil
 	}
 	patt := &Pattern{

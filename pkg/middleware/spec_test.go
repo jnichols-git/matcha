@@ -21,7 +21,7 @@ func TestExpectQueryParam(t *testing.T) {
 	})
 
 	t.Run("foo=bar,baz", func(t *testing.T) {
-		m := ExpectQueryParam("foo", "{bar|baz}", "{[}")
+		m := ExpectQueryParam("foo", "[bar|baz]", "[[]")
 		r := httptest.NewRequest("GET", "http://example.com?foo=bar", nil)
 		w := httptest.NewRecorder()
 		if ExecuteMiddleware([]Middleware{m}, w, r) != r {
@@ -91,7 +91,7 @@ func TestExpectHeader(t *testing.T) {
 	})
 
 	t.Run("foo: bar,baz", func(t *testing.T) {
-		m := ExpectHeader("foo", "{bar|baz}", "{[}")
+		m := ExpectHeader("foo", "[bar|baz]", "[[]")
 		r := httptest.NewRequest("GET", "http://example.com", nil)
 		r.Header.Set("foo", "bar")
 		w := httptest.NewRecorder()

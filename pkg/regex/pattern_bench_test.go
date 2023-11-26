@@ -15,7 +15,7 @@ func BenchmarkHostPattern(b *testing.B) {
 		}
 	})
 	b.Run("regex.Pattern-full", func(b *testing.B) {
-		rs, isrs, err := CompilePattern(`{.+\.decentplatforms\..+}`)
+		rs, isrs, err := CompilePattern(`[.+\.decentplatforms\..+]`)
 		if err != nil || !isrs {
 			b.Fatal(err)
 		}
@@ -24,7 +24,7 @@ func BenchmarkHostPattern(b *testing.B) {
 		}
 	})
 	b.Run("regex.Pattern-partial", func(b *testing.B) {
-		rs, isrs, err := CompilePattern(`{.+}.decentplatforms.{.+}`)
+		rs, isrs, err := CompilePattern(`[.+].decentplatforms.[.+]`)
 		if err != nil || !isrs {
 			b.Fatal(err)
 		}

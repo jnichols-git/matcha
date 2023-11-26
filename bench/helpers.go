@@ -47,4 +47,4 @@ func mwIsUserParam(userParam string) middleware.Middleware {
 
 var api_mws = []middleware.Middleware{mwCORS(), mwID}
 var api_mws_auth = []middleware.Middleware{mwIsUserParam("user"), mwCORS(), mwID}
-var api_rqs = []require.Required{require.Hosts("{.*}")}
+var api_rqs = []require.Required{require.Hosts("[.*]")}

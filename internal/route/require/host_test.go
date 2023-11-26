@@ -27,7 +27,7 @@ func TestGetReqHost(t *testing.T) {
 }
 
 func TestRequireHosts(t *testing.T) {
-	rq := Hosts("localhost", "{.+}.decentplatforms.com")
+	rq := Hosts("localhost", "[.+].decentplatforms.com")
 	// Positive cases
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:3000", nil)
 	if !rq(req) {
@@ -65,7 +65,7 @@ func TestRequireHosts(t *testing.T) {
 }
 
 func TestRequireHostPorts(t *testing.T) {
-	rq := HostPorts("localhost:3000", "localhost:3001-4000,4500", "https://{.+}.decentplatforms.com")
+	rq := HostPorts("localhost:3000", "localhost:3001-4000,4500", "https://[.+].decentplatforms.com")
 	// Positive cases
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:3000", nil)
 	if !rq(req) {
