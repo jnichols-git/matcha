@@ -91,11 +91,11 @@ Concurrent | 1353 ns/request | 1453 bytes/request | 14 allocs/request
 
 Name | Role | Pronouns | GitHub Username | Contact
 ---|---|---|---|---
-Jake Nichols | Creator | they/them | jakenichols2719 | <jnichols@decentplatforms.com>
+Jake Nichols | Creator | they/them | jakenichols2719 | <mail@jnichols.info>
 
 ## License
 
-Copyright 2023 Decent Platforms LLC
+Copyright 2023 Matcha Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

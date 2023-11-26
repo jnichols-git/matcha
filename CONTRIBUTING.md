@@ -52,11 +52,11 @@ Currently, new submissions to Matcha are subject to the following criteria:
 
 1. **Performance**: Changes must not significantly decrease performance unless they are urgent bugfixes. End-to-end benchmarks are provided in the docs folder; additionally, if your feature or change is to a system that is integrated heavily, we suggest you add and check benchmarks for it.
 2. **Testing**: Test coverage should stay above 95%. New behavior is expected to have associated unit tests, and PRs that drop coverage by more than 2%, or below 90%, will be automatically rejected.
-3. **Documentation**: Decent Platforms strongly encourages in-code documentation. Maintainers may request that you add additional documentation to your code.
+3. **Documentation**: Maintainers may request that you add additional documentation to your code.
 4. **Style**: Run `gofmt` on your code.
 5. **Zero-Dependency**: Matcha does not use any external libraries. Changes with dependencies will be rejected.
 
-We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub Copilot in your contributions to Matcha. Decent Platforms has concerns regarding the ethics and copyright implications of scraping open-source code for training data, and would prefer that any work submitted be attributable to the users that directly contribute to it.
+We additionally ask that you avoid the use of AI tools like ChatGPT and GitHub Copilot in your contributions to Matcha. I have concerns regarding the ethics and copyright implications of scraping open-source code for training data, and would prefer that any work submitted be attributable to the users that directly contribute to it.
 
 ## Versioning Policy
 

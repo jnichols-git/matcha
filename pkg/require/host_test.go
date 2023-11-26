@@ -27,7 +27,7 @@ func TestGetReqHost(t *testing.T) {
 }
 
 func TestRequireHosts(t *testing.T) {
-	rq := Hosts("localhost", "[.+].decentplatforms.com")
+	rq := Hosts("localhost", "[.+].jnichols.info")
 	// Positive cases
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:3000", nil)
 	if !rq(req) {
@@ -37,15 +37,15 @@ func TestRequireHosts(t *testing.T) {
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://www.decentplatforms.com:443", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://www.jnichols.info:443", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com:443", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.jnichols.info:443", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.jnichols.info", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
@@ -53,19 +53,19 @@ func TestRequireHosts(t *testing.T) {
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "http://api.decentplatforms.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "http://api.jnichols.info", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
 	// Negative cases
-	req = httptest.NewRequest(http.MethodGet, "https://decentplatforms.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://jnichols.info", nil)
 	if rq(req) {
 		t.Error("expected no match")
 	}
 }
 
 func TestRequireHostPorts(t *testing.T) {
-	rq := HostPorts("localhost:3000", "localhost:3001-4000,4500", "https://[.+].decentplatforms.com")
+	rq := HostPorts("localhost:3000", "localhost:3001-4000,4500", "https://[.+].jnichols.info")
 	// Positive cases
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:3000", nil)
 	if !rq(req) {
@@ -82,15 +82,15 @@ func TestRequireHostPorts(t *testing.T) {
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://www.decentplatforms.com:443", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://www.jnichols.info:443", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com:443", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.jnichols.info:443", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "https://api.decentplatforms.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "https://api.jnichols.info", nil)
 	if !rq(req) {
 		t.Error("expected match")
 	}
@@ -99,7 +99,7 @@ func TestRequireHostPorts(t *testing.T) {
 	if rq(req) {
 		t.Error("expected no match")
 	}
-	req = httptest.NewRequest(http.MethodGet, "http://api.decentplatforms.com", nil)
+	req = httptest.NewRequest(http.MethodGet, "http://api.jnichols.info", nil)
 	if rq(req) {
 		t.Error("expected no match")
 	}

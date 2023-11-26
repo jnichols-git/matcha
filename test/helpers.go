@@ -21,7 +21,7 @@ type benchRoute struct {
 
 func mwCORS() middleware.Middleware {
 	return cors.CORSMiddleware(&cors.AccessControlOptions{
-		AllowOrigin:  []string{"decentplatforms.com"},
+		AllowOrigin:  []string{"jnichols.info"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete},
 		AllowHeaders: []string{"client_id"},
 	})

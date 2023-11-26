@@ -193,10 +193,10 @@ Matcha provides an interface for matching things that are not paths in package `
 ```go
 webRoute, err := route.New(
     http.MethodGet, "/",
-    route.Require(require.HostPorts("https://{www.|}decentplatforms.com")),
+    route.Require(require.HostPorts("https://{www.|}jnichols.info")),
 )
 apiRoute, err := route.New(
     http.MethodGet, "/",
-    require.HostPorts("https://api.decentplatforms.com"),
+    require.HostPorts("https://api.jnichols.info"),
 )
 ```
