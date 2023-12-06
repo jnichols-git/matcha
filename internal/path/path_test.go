@@ -37,6 +37,16 @@ func TestNext(t *testing.T) {
 		}
 		i++
 	}
+	path = "/trailing/slash/"
+	expected = []string{"/trailing", "/slash", "/"}
+	i = 0
+	for next = 0; next != -1; {
+		tk, next = Next(path, next)
+		if tk != expected[i] {
+			t.Errorf("Expected '%s' at %d, got '%s'", expected[i], i, tk)
+		}
+		i++
+	}
 }
 
 func BenchmarkNext(b *testing.B) {

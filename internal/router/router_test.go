@@ -145,52 +145,71 @@ func runEvalRequest(t *testing.T,
 	})
 }
 
-func TestBasicRoutes(t *testing.T) {
-	r := Default()
-	r.Handle(http.MethodGet, "/", okHandler("root"))
-	r.HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey"))
-	r.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
-	r.HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
-	r.Handle(http.MethodGet, `/route/{id}[[\w]{4}]`, rpHandler("id"))
-	r.HandleFunc(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`, rpHandler("filename"))
-	r.Use(testMiddleware)
+// Test routes; method, route, positive test, negative test, expected response
+var testRoutes = [][5]string{
+	{http.MethodGet, `/`, `/`, `/a`, "Got root"},
+	{http.MethodGet, `/hello/world`, "/hello/world", "/hello", "Hello, World!"},
+	{http.MethodGet, `/collection/`, "/collection/", "/collection", "Got root of /collection/"},
+	{http.MethodGet, `/collection/{item}`, "/collection/testItem", "/collection/testItem/more", "Got collection item testItem"},
+	{http.MethodGet, `/users/{id}[\d{4}]`, "/users/1234", "/users/abcd", "Got user 1234"},
+	{http.MethodGet, `/file.txt`, "/file.txt", "/file", "Got file.txt"},
+	{http.MethodGet, `/files/`, "/files/", "/files", "Got root of /files/"},
+	{http.MethodGet, `/files/{filename}+`, "/files/test/file.txt", "/files/test/other.txt", "Got file /test/file.txt"},
+}
 
-	s := httptest.NewServer(r)
-	runEvalRequest(t, s, "", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "root",
-	})
-	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "root",
-	})
-	runEvalRequest(t, s, "/test", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "test",
-	})
-	runEvalRequest(t, s, "/route/word", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "letters",
-	})
-	runEvalRequest(t, s, "/route/id01", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "id01",
-	})
-	runEvalRequest(t, s, "/route/n0tID", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusNotFound,
-	})
-	runEvalRequest(t, s, "/static/file/docs/README.md", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "/docs/README.md",
-	})
-	runEvalRequest(t, s, "/static/file", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusInternalServerError,
-		"body": "router param filename not found",
-	})
-	runEvalRequest(t, s, "/middlewareTest", reqGen(http.MethodGet), map[string]any{
-		"code": http.StatusOK,
-		"body": "mwval",
-	})
+var testHandlers = []http.HandlerFunc{
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got root"))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, World!"))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got root of /collection/"))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got collection item " + rctx.GetParam(r.Context(), "item")))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got user " + rctx.GetParam(r.Context(), "id")))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got file.txt"))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got root of /files/"))
+	},
+	func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got file " + rctx.GetParam(r.Context(), "filename")))
+	},
+}
+
+func TestBasicRoutes(t *testing.T) {
+	rt := Default()
+	for i, tr := range testRoutes {
+		rt.HandleFunc(tr[0], tr[1], testHandlers[i])
+	}
+
+	for _, tr := range testRoutes {
+		t.Run(tr[1], func(t *testing.T) {
+			// Test positive case
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest(tr[0], tr[2], nil)
+			rt.ServeHTTP(w, req)
+			res := w.Body.String()
+			if w.Result().StatusCode != http.StatusOK || res != tr[4] {
+				t.Error(tr[4], res)
+			}
+			// Test negative case
+			w = httptest.NewRecorder()
+			req = httptest.NewRequest(tr[0], tr[3], nil)
+			rt.ServeHTTP(w, req)
+			res = w.Body.String()
+			if w.Result().StatusCode == http.StatusOK && res == tr[4] {
+				t.Error(tr[3], "should have failed")
+			}
+		})
+	}
 }
 
 func TestEdgeCaseRoutes(t *testing.T) {

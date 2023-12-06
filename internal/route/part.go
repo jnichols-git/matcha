@@ -11,7 +11,7 @@ const (
 	// Part matching
 	regexp_wildcard = string(`/\[(.*?)\](.*)`)
 	regexp_regex    = string(`[/\]]{(.*)}`)
-	regexp_part     = string(`^(?:(\/\w*)|\/(\{.+\})?(\[.+\])?(\+)?)$`)
+	regexp_part     = string(`^(?:(\/[\w\.\~]*)|\/(\{.+\})?(\[.+\])?(\+)?)$`)
 )
 
 // Regex used for parsing tokens
