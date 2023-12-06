@@ -61,7 +61,6 @@ func (n *node) propagate(r *route.Route, ps []route.Part, leaf_id int64) {
 	}
 	child := createNode(next)
 	child.propagate(r, ps[1:], leaf_id)
-	child.propagate(r, ps[1:], leaf_id)
 	n.children = append(n.children, child)
 }
 
@@ -91,6 +90,10 @@ func (n *node) match(req *http.Request, expr string, last int) int64 {
 			// ...and the route has not been exhausted, return NO_LEAF_ID.
 			return NO_LEAF_ID
 		}
+	}
+	// If next is -1, we've exhausted the path without matching.
+	if next == -1 {
+		return NO_LEAF_ID
 	}
 	// Iterate through the children of this node.
 	for _, child := range n.children {
