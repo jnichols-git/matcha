@@ -38,7 +38,7 @@ func sayHello(w http.ResponseWriter, req *http.Request) {
 func HelloExample() {
 	rt := matcha.Router()
 	rt.HandleFunc(http.MethodGet, "/hello", sayHello)
-	http.ListenAndServe(":3000", rt)
+	http.ListenAndServe(":3000", rt.Handler())
 }
 ```
 
@@ -70,7 +70,7 @@ func echo(w http.ResponseWriter, req *http.Request) {
 func EchoExample() {
 	rt := matcha.Router()
 	rt.HandleFunc(http.MethodGet, "/hello/:name", echo)
-	http.ListenAndServe(":3000", rt)
+	http.ListenAndServe(":3000", rt.Handler())
 }
 ```
 
@@ -113,7 +113,7 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func FileServer(dir string) {
 	rt := matcha.Router()
 	rt.Handle(http.MethodGet, "/files/:filepath+", &fileServer{dir})
-	http.ListenAndServe(":3000", rt)
+	http.ListenAndServe(":3000", rt.Handler())
 }
 ```
 
@@ -133,8 +133,8 @@ func main() {
     api1 := matcha.Router()
     api2 := matcha.Router()
     // Register some handlers here.
-    api1.Mount("/v2", api2)
-    http.ListenAndServe(":3000", api1)
+    api1.Mount("/v2", api2.Handler())
+    http.ListenAndServe(":3000", api1.Handler())
 }
 ```
 
@@ -142,7 +142,7 @@ You can use `router.Mount` to pass *all* requests to a handler. `/v2` is treated
 
 ### Middleware
 
-You can `Use` a `func(w http.ResponseWriter, req *http.Request) *http.Request` with any Route or Router to perform actions before handlers. Routers will run middleware before routing a request, and Routes will run it before their handlers. Returning `nil` will reject the request.
+Middleware is defined in `teaware` as a `func(next http.Handler) http.Handler`. You can `Use` middleware with any Route or Router to perform actions before handlers. Routers will run middleware before routing a request, and Routes will run it before their handlers. Returning `nil` will reject the request.
 
 ```go
 package main
@@ -153,13 +153,15 @@ import (
 	"github.com/jnichols-git/matcha/v2"
 )
 
-func ValidateName(w http.ResponseWriter, req *http.Request) *http.Request {
-	if name := matcha.RouteParam(req, "name"); name[0] != 'A' {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Names must start with 'A'.\n"))
-		return nil
-	}
-	return req
+func ValidateName(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if name := matcha.RouteParam(r, "name"); name[0] != 'A' {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Names must start with 'A'.\n"))
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func MiddlewareExample() {
@@ -167,8 +169,9 @@ func MiddlewareExample() {
 	nameRoute, _ := matcha.Route(http.MethodGet, "/hello/:name")
 	nameRoute.Use(ValidateName)
 	router.HandleRouteFunc(nameRoute, echo)
-	http.ListenAndServe(":3000", router)
+	http.ListenAndServe(":3000", router.Handler())
 }
+
 ```
 
 ```sh
@@ -184,7 +187,7 @@ $
 
 ### Requirements
 
-If you need more tools to check routes, you can `Require` a `func(*http.Request) bool` with any Route. If this function returns false for any request, the route is not matched, but it can still match any routes after.
+Requirements are defined in `require` as a `func(*http.Request) bool`. If you need more tools to check routes, you can `Require` a requirement with any Route. If this function returns false for any request, the route is not matched, but it can still match any routes after.
 
 ```go
 webRoute, err := route.New(

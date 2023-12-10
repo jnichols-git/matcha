@@ -25,5 +25,5 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func FileServerExample() {
 	rt := matcha.Router()
 	rt.Handle(http.MethodGet, "/files/:filepath+", &fileServer{"./examples/"})
-	http.ListenAndServe(":3000", rt.Compile())
+	http.ListenAndServe(":3000", rt.Handler())
 }

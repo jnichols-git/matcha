@@ -199,7 +199,7 @@ func TestBasicRoutes(t *testing.T) {
 			// Test positive case
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest(tr[0], tr[2], nil)
-			rt.Compile().ServeHTTP(w, req)
+			rt.Handler().ServeHTTP(w, req)
 			res := w.Body.String()
 			if w.Result().StatusCode != http.StatusOK || res != tr[4] {
 				t.Error(tr[4], res)
@@ -207,7 +207,7 @@ func TestBasicRoutes(t *testing.T) {
 			// Test negative case
 			w = httptest.NewRecorder()
 			req = httptest.NewRequest(tr[0], tr[3], nil)
-			rt.Compile().ServeHTTP(w, req)
+			rt.Handler().ServeHTTP(w, req)
 			res = w.Body.String()
 			if w.Result().StatusCode == http.StatusOK && res == tr[4] {
 				t.Error(tr[3], "should have failed")
@@ -224,7 +224,7 @@ func TestEdgeCaseRoutes(t *testing.T) {
 	r.Handle(http.MethodGet, "/not/implemented/func", nil)
 	r.HandleRoute(route.Declare(http.MethodGet, "/not/implemented/routehandler"), nil)
 	r.HandleRouteFunc(route.Declare(http.MethodGet, "/not/implemented/routefunc"), nil)
-	s := httptest.NewServer(r.Compile())
+	s := httptest.NewServer(r.Handler())
 	runEvalRequest(t, s, "/odd/path", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusOK,
 		"body": "odd",
@@ -260,7 +260,7 @@ func TestConcurrent(t *testing.T) {
 	r.Handle(http.MethodGet, `/route/:id[[\w]{4}]`, rpHandler("id"))
 	r.HandleFunc(http.MethodGet, `/static/file/:filename[\w+(?:\.\w+)?]+`, rpHandler("filename"))
 	r.Use(testMiddleware)
-	s := httptest.NewServer(r.Compile())
+	s := httptest.NewServer(r.Handler())
 	wg := sync.WaitGroup{}
 	for i := 0; i < 100; i++ {
 		parseBody := func(res *http.Response) string {
@@ -307,7 +307,7 @@ func TestDeclare(t *testing.T) {
 	// Test rejection middleware
 	r := Default()
 	r.Use(reject)
-	s := httptest.NewServer(r.Compile())
+	s := httptest.NewServer(r.Handler())
 	runEvalRequest(t, s, "/", reqGen(http.MethodGet), map[string]any{
 		"code": http.StatusForbidden,
 	})
@@ -331,7 +331,7 @@ func TestCORS(t *testing.T) {
 	})
 	r.Handle(http.MethodGet, "/", okHandler("ok"))
 	r.AddNotFound(nfHandler())
-	s := httptest.NewServer(r.Compile())
+	s := httptest.NewServer(r.Handler())
 
 	runEvalRequest(t, s, "/", reqGenHeaders(http.MethodGet, http.Header{"Origin": {"test-origin"}}), map[string]any{
 		"code":   http.StatusOK,
@@ -358,7 +358,7 @@ func TestDuplicate(t *testing.T) {
 	r.HandleRoute(route.Declare(http.MethodGet, "/duplicate/route"), h2)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/duplicate/route", nil)
-	r.Compile().ServeHTTP(w, req)
+	r.Handler().ServeHTTP(w, req)
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("re-declaration should be noop; expected %d, got %d", http.StatusOK, w.Result().StatusCode)
 	}
@@ -378,13 +378,13 @@ func TestValidatedDuplicate(t *testing.T) {
 	rt.HandleRoute(route.Declare(http.MethodGet, "/"), h2)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "http://origin.com/", nil)
-	rt.Compile().ServeHTTP(w, req)
+	rt.Handler().ServeHTTP(w, req)
 	if w.Code != http.StatusOK {
 		t.Errorf("origin.com request should be OK; got %d", w.Code)
 	}
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/", nil)
-	rt.Compile().ServeHTTP(w, req)
+	rt.Handler().ServeHTTP(w, req)
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("example.com request should fall through to BadRequest; got %d", w.Code)
 	}
@@ -402,78 +402,78 @@ func TestComposition(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
-	api1.Compile().ServeHTTP(w, req)
+	api1.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodPost, "/hello", nil)
-	api1.Compile().ServeHTTP(w, req)
+	api1.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/hello/jakenichols2719", nil)
-	api1.Compile().ServeHTTP(w, req)
+	api1.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/hello/jakenichols2719.github.com", nil)
-	api1.Compile().ServeHTTP(w, req)
+	api1.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	// Pass through ONLY get
 	api2 := Default()
-	api2.Mount("/api", api1.Compile(), http.MethodGet)
+	api2.Mount("/api", api1.Handler(), http.MethodGet)
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
-	api2.Compile().ServeHTTP(w, req)
+	api2.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
-	api2.Compile().ServeHTTP(w, req)
+	api2.Handler().ServeHTTP(w, req)
 	if w.Code != 404 {
 		t.Error(404, w.Code)
 	}
 
 	// Pass through all methods
 	api2 = Default()
-	api2.Mount("/api", api1.Compile())
+	api2.Mount("/api", api1.Handler())
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/api/hello", nil)
-	api2.Compile().ServeHTTP(w, req)
+	api2.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodPost, "/api/hello", nil)
-	api2.Compile().ServeHTTP(w, req)
+	api2.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/api/hello/jakenichols2719.github.com", nil)
-	api2.Compile().ServeHTTP(w, req)
+	api2.Handler().ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Error(200, w.Code)
 	}
 
 	// Invalid path test
 	api2 = Default()
-	err := api2.Mount("/{", api1.Compile())
+	err := api2.Mount("/{", api1.Handler())
 	if err == nil {
 		t.Error("expected failure due to route formatting")
 	}

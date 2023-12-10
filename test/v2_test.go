@@ -45,8 +45,8 @@ func TestAPIv2(t *testing.T) {
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}
-	v1.Mount("/v2", v2.Compile())
-	h := v1.Compile()
+	v1.Mount("/v2", v2.Handler())
+	h := v1.Handler()
 	w := httptest.NewRecorder()
 	for i := 0; i < len(apiRoutes); i++ {
 		br := apiRoutes[i]
@@ -78,8 +78,8 @@ func BenchmarkAPIv2(b *testing.B) {
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}
-	v1.Mount("/v2", v2.Compile())
-	h := v1.Compile()
+	v1.Mount("/v2", v2.Handler())
+	h := v1.Handler()
 	b.Run(b.Name()+"-sequential", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			w := httptest.NewRecorder()

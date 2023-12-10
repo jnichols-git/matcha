@@ -40,7 +40,7 @@ func (rt *Router) Use(mws ...teaware.Middleware) {
 func register(rt *Router, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	rt.routes[id] = r
-	h = teaware.Compile(h, r.Middleware()...)
+	h = teaware.Handler(h, r.Middleware()...)
 	if h != nil {
 		rt.handlers[id] = h
 	} else {
@@ -124,9 +124,9 @@ func (rt *Router) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
-func (rt *Router) Compile() http.Handler {
+func (rt *Router) Handler() http.Handler {
 	var h http.Handler = http.HandlerFunc(rt.matchRoute)
-	h = teaware.Compile(h, rt.mws...)
+	h = teaware.Handler(h, rt.mws...)
 	return h
 }
 
