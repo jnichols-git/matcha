@@ -3,8 +3,8 @@ package examples
 import (
 	"net/http"
 
+	"github.com/jnichols-git/matcha/v2"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 func echoAdmin(w http.ResponseWriter, req *http.Request) {
@@ -18,8 +18,8 @@ func echo(w http.ResponseWriter, req *http.Request) {
 }
 
 func EchoExample() {
-	rt := router.Default()
-	rt.HandleFunc(http.MethodGet, "/hello/{name}{admin:.+}", echoAdmin)
-	rt.HandleFunc(http.MethodGet, "/hello/{name}", echo)
+	rt := matcha.Router()
+	rt.HandleFunc(http.MethodGet, "/hello/:name{admin:.+}", echoAdmin)
+	rt.HandleFunc(http.MethodGet, "/hello/:name", echo)
 	http.ListenAndServe(":3000", rt)
 }

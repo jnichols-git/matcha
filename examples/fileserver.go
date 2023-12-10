@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jnichols-git/matcha/v2"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/internal/router"
 )
 
 type fileServer struct {
@@ -24,7 +24,7 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func FileServer(dir string) {
-	rt := router.Default()
-	rt.Handle(http.MethodGet, "/files/{filepath}+", &fileServer{dir})
+	rt := matcha.Router()
+	rt.Handle(http.MethodGet, "/files/:filepath+", &fileServer{dir})
 	http.ListenAndServe(":3000", rt)
 }

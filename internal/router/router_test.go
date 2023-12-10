@@ -150,11 +150,11 @@ var testRoutes = [][5]string{
 	{http.MethodGet, `/`, `/`, `/a`, "Got root"},
 	{http.MethodGet, `/hello/world`, "/hello/world", "/hello", "Hello, World!"},
 	{http.MethodGet, `/collection/`, "/collection/", "/collection", "Got root of /collection/"},
-	{http.MethodGet, `/collection/{item}`, "/collection/testItem", "/collection/testItem/more", "Got collection item testItem"},
-	{http.MethodGet, `/users/{id}[\d{4}]`, "/users/1234", "/users/abcd", "Got user 1234"},
+	{http.MethodGet, `/collection/:item`, "/collection/testItem", "/collection/testItem/more", "Got collection item testItem"},
+	{http.MethodGet, `/users/:id[\d{4}]`, "/users/1234", "/users/abcd", "Got user 1234"},
 	{http.MethodGet, `/file.txt`, "/file.txt", "/file", "Got file.txt"},
 	{http.MethodGet, `/files/`, "/files/", "/files", "Got root of /files/"},
-	{http.MethodGet, `/files/{filename}+`, "/files/test/file.txt", "/files/test/other.txt", "Got file /test/file.txt"},
+	{http.MethodGet, `/files/:filename+`, "/files/test/file.txt", "/files/test/other.txt", "Got file /test/file.txt"},
 }
 
 var testHandlers = []http.HandlerFunc{
@@ -251,10 +251,10 @@ func TestConcurrent(t *testing.T) {
 	r := Default()
 	r.Handle(http.MethodGet, "/", okHandler("root"))
 	r.HandleFunc(http.MethodGet, "/middlewareTest", genericValueHandler("mwkey"))
-	r.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
+	r.HandleRoute(route.Declare(http.MethodGet, "/:wildcard"), rpHandler("wildcard"))
 	r.HandleRouteFunc(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
-	r.Handle(http.MethodGet, `/route/{id}[[\w]{4}]`, rpHandler("id"))
-	r.HandleFunc(http.MethodGet, `/static/file/{filename}[\w+(?:\.\w+)?]+`, rpHandler("filename"))
+	r.Handle(http.MethodGet, `/route/:id[[\w]{4}]`, rpHandler("id"))
+	r.HandleFunc(http.MethodGet, `/static/file/:filename[\w+(?:\.\w+)?]+`, rpHandler("filename"))
 	r.Use(testMiddleware)
 	s := httptest.NewServer(r)
 	wg := sync.WaitGroup{}
@@ -394,7 +394,7 @@ func TestComposition(t *testing.T) {
 	api1 := Default()
 	api1.HandleFunc(http.MethodGet, "/hello", h1)
 	api1.HandleFunc(http.MethodPost, "/hello", h1)
-	api1.HandleFunc(http.MethodGet, "/hello/{name}", h1)
+	api1.HandleFunc(http.MethodGet, "/hello/:name", h1)
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/hello", nil)

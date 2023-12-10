@@ -8,15 +8,9 @@ import (
 )
 
 const (
-	// Part matching
-	regexp_wildcard = string(`/\[(.*?)\](.*)`)
-	regexp_regex    = string(`[/\]]{(.*)}`)
-	regexp_part     = string(`^(?:(\/[\w\.\~]*)|\/(\{.+\})?(\[.+\])?(\+)?)$`)
+	regexp_part = string(`^(?:(\/[\w\.\~]*)|\/(\:\w+)?(\[.+\])?(\+)?)$`)
 )
 
-// Regex used for parsing tokens
-var regexp_wildcard_compiled *regexp.Regexp = regexp.MustCompile(regexp_wildcard)
-var regexp_regex_compiled *regexp.Regexp = regexp.MustCompile(regexp_regex)
 var regexp_part_compiled *regexp.Regexp = regexp.MustCompile(regexp_part)
 
 type Part struct {
@@ -63,13 +57,13 @@ func (p Part) Multi() bool {
 func ParsePart(token string) (p Part, err error) {
 	groups := regex.Groups(regexp_part_compiled, token)
 	if groups == nil {
-		err = errors.New("provided Part expression does not match regex " + regexp_part)
+		err = errors.New("provided Part expression " + token + " does not match regex " + regexp_part)
 		return
 	}
 	for _, group := range groups {
 		switch group[0] {
-		case '{':
-			p.param = group[1 : len(group)-1]
+		case ':':
+			p.param = group[1:]
 		case '[':
 			p.pattern, err = regexp.Compile(group[1 : len(group)-1])
 		case '+':

@@ -34,31 +34,31 @@ import (
 // MockBoards API
 var apiRoutes = []benchRoute{
 	// Get/create posts
-	{method: http.MethodGet, path: "/{board}/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPut, path: "/{board}/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{board}/posts/{order}[new|top]", testPath: "/jnichols/posts/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:board/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPut, path: "/:board/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:board/posts/:order[new|top]", testPath: "/jnichols/posts/new", mws: api_mws, rqs: api_rqs},
 	// Get/update/delete post
-	{method: http.MethodPatch, path: "/{board}/posts/{id}", testPath: "/jnichols/posts/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodDelete, path: "/{board}/posts/{id}", testPath: "/jnichols/posts/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPatch, path: "/:board/posts/:id", testPath: "/jnichols/posts/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodDelete, path: "/:board/posts/:id", testPath: "/jnichols/posts/2719", mws: api_mws, rqs: api_rqs},
 	// Get/create comments
-	{method: http.MethodGet, path: "/{board}/posts/{id}/comments", testPath: "/jnichols/posts/2719/comments", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPut, path: "/{board}/posts/{id}/comments", testPath: "/jnichols/posts/2719/comments", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{board}/posts/{id}/comments/{order}[new|top]", testPath: "/jnichols/posts/2719/comments/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:board/posts/:id/comments", testPath: "/jnichols/posts/2719/comments", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPut, path: "/:board/posts/:id/comments", testPath: "/jnichols/posts/2719/comments", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:board/posts/:id/comments/:order[new|top]", testPath: "/jnichols/posts/2719/comments/new", mws: api_mws, rqs: api_rqs},
 	// Get/update/delete comment
-	{method: http.MethodGet, path: "/{board}/posts/{id}/comments/{id}", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodPatch, path: "/{board}/posts/{id}/comments/{id}", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodDelete, path: "/{board}/posts/{id}/comments/{id}", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:board/posts/:id/comments/:id", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodPatch, path: "/:board/posts/:id/comments/:id", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodDelete, path: "/:board/posts/:id/comments/:id", testPath: "/jnichols/posts/2719/comments/2719", mws: api_mws, rqs: api_rqs},
 	// Get user info
 	// Posts/comments
-	{method: http.MethodGet, path: "/{user}/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/posts/{order}{new|top}", testPath: "/jnichols/posts/new", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/comments", testPath: "/jnichols/comments", mws: api_mws, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/comments/{order}[new|top]", testPath: "/jnichols/comments/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/posts", testPath: "/jnichols/posts", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/posts/:order[new|top]", testPath: "/jnichols/posts/new", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/comments", testPath: "/jnichols/comments", mws: api_mws, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/comments/:order[new|top]", testPath: "/jnichols/comments/new", mws: api_mws, rqs: api_rqs},
 	// Liked/saved (requires client_id header)
-	{method: http.MethodGet, path: "/{user}/liked", testPath: "/jnichols/liked", mws: api_mws_auth, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/liked/{order}[new|top]", testPath: "/jnichols/liked/new", mws: api_mws_auth, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/saved", testPath: "/jnichols/saved", mws: api_mws_auth, rqs: api_rqs},
-	{method: http.MethodGet, path: "/{user}/saved/{order}[new|top]", testPath: "/jnichols/saved/new", mws: api_mws_auth, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/liked", testPath: "/jnichols/liked", mws: api_mws_auth, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/liked/:order[new|top]", testPath: "/jnichols/liked/new", mws: api_mws_auth, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/saved", testPath: "/jnichols/saved", mws: api_mws_auth, rqs: api_rqs},
+	{method: http.MethodGet, path: "/:user/saved/:order[new|top]", testPath: "/jnichols/saved/new", mws: api_mws_auth, rqs: api_rqs},
 }
 
 func choose() *benchRoute {
