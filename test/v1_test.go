@@ -80,12 +80,13 @@ func TestAPIv1(t *testing.T) {
 		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}
+	h := rt.Compile()
 	w := httptest.NewRecorder()
 	for i := 0; i < len(apiRoutes); i++ {
 		br := apiRoutes[i]
 		req := httptest.NewRequest(br.method, br.testPath, nil)
 		req.Header.Set("X-Platform-User-ID", "jnichols")
-		rt.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		if w.Code != 200 {
 			t.Fatal(br.method, br.path, br.testPath, w.Code)
 		}
@@ -105,13 +106,14 @@ func BenchmarkAPIv1(b *testing.B) {
 		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
 	}
+	h := rt.Compile()
 	b.Run(b.Name()+"-sequential", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			w := httptest.NewRecorder()
 			br := choose()
 			req := httptest.NewRequest(br.method, br.testPath, nil)
 			req.Header.Set("X-Platform-User-ID", "jnichols")
-			rt.ServeHTTP(w, req)
+			h.ServeHTTP(w, req)
 		}
 	})
 	b.Run(b.Name()+"-concurrent-10", func(b *testing.B) {
@@ -124,7 +126,7 @@ func BenchmarkAPIv1(b *testing.B) {
 					br := choose()
 					req := httptest.NewRequest(br.method, br.testPath, nil)
 					req.Header.Set("X-Platform-User-ID", "jnichols")
-					rt.ServeHTTP(w, req)
+					h.ServeHTTP(w, req)
 					wg.Done()
 				}()
 			}
@@ -148,7 +150,7 @@ func BenchmarkStrippedAPI(b *testing.B) {
 			br := choose()
 			req := httptest.NewRequest(br.method, br.testPath, nil)
 			req.Header.Set("X-Platform-User-ID", "jnichols")
-			rt.ServeHTTP(w, req)
+			rt.Compile().ServeHTTP(w, req)
 			if w.Code != 200 {
 				b.Fatal(w.Code)
 			}
@@ -164,7 +166,7 @@ func BenchmarkStrippedAPI(b *testing.B) {
 					br := choose()
 					req := httptest.NewRequest(br.method, br.testPath, nil)
 					req.Header.Set("X-Platform-User-ID", "jnichols")
-					rt.ServeHTTP(w, req)
+					rt.Compile().ServeHTTP(w, req)
 					wg.Done()
 				}()
 			}

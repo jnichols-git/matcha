@@ -8,8 +8,8 @@ import (
 
 	"github.com/jnichols-git/matcha/v2/internal/path"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/middleware"
 	"github.com/jnichols-git/matcha/v2/pkg/require"
+	"github.com/jnichols-git/matcha/v2/teaware"
 )
 
 // Route is the default behavior for router, which is to match requests exactly.
@@ -17,7 +17,7 @@ type Route struct {
 	origExpr   string
 	method     string
 	parts      []Part
-	middleware []middleware.Middleware
+	middleware []teaware.Middleware
 	required   []require.Required
 }
 
@@ -29,7 +29,7 @@ func ParseRoute(method, expr string) (*Route, error) {
 		origExpr:   "",
 		method:     method,
 		parts:      make([]Part, 0),
-		middleware: make([]middleware.Middleware, 0),
+		middleware: make([]teaware.Middleware, 0),
 		required:   make([]require.Required, 0),
 	}
 	var token string
@@ -104,7 +104,7 @@ func (route *Route) Execute(req *http.Request) *http.Request {
 	return req
 }
 
-func (route *Route) Use(mws ...middleware.Middleware) *Route {
+func (route *Route) Use(mws ...teaware.Middleware) *Route {
 	route.middleware = append(route.middleware, mws...)
 	return route
 }
@@ -114,7 +114,7 @@ func (route *Route) Require(rs ...require.Required) *Route {
 	return route
 }
 
-func (route *Route) Middleware() []middleware.Middleware {
+func (route *Route) Middleware() []teaware.Middleware {
 	return route.middleware
 }
 

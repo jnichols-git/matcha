@@ -40,24 +40,25 @@ func TestAPIv2(t *testing.T) {
 	v2 := router.Default()
 	for _, tr := range apiRoutes {
 		r := route.Declare(tr.method, tr.path)
-		r.Use(tr.mws...)
+		//r.Use(tr.mws...)
 		r.Require(tr.rqs...)
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}
-	v1.Mount("/v2", v2)
+	v1.Mount("/v2", v2.Compile())
+	h := v1.Compile()
 	w := httptest.NewRecorder()
 	for i := 0; i < len(apiRoutes); i++ {
 		br := apiRoutes[i]
 		req := httptest.NewRequest(br.method, br.testPath, nil)
 		req.Header.Set("X-Platform-User-ID", "jnichols")
-		v1.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		if w.Code != 200 {
 			t.Fatal(br.method, br.path, br.testPath, w.Code)
 		}
 		req = httptest.NewRequest(br.method, "/v2"+br.testPath, nil)
 		req.Header.Set("X-Platform-User-ID", "jnichols")
-		v1.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		if w.Code != 200 {
 			t.Fatal(br.method, br.path, br.testPath, w.Code)
 		}
@@ -72,19 +73,20 @@ func BenchmarkAPIv2(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		r.Use(tr.mws...)
+		//r.Use(tr.mws...)
 		r.Require(tr.rqs...)
 		v1.HandleRouteFunc(r, handleOK)
 		v2.HandleRouteFunc(r, handleOK)
 	}
-	v1.Mount("/v2", v2)
+	v1.Mount("/v2", v2.Compile())
+	h := v1.Compile()
 	b.Run(b.Name()+"-sequential", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			w := httptest.NewRecorder()
 			br := choosev2()
 			req := httptest.NewRequest(br.method, br.testPath, nil)
 			req.Header.Set("X-Platform-User-ID", "jnichols")
-			v1.ServeHTTP(w, req)
+			h.ServeHTTP(w, req)
 		}
 	})
 	b.Run(b.Name()+"-concurrent-10", func(b *testing.B) {
@@ -97,7 +99,7 @@ func BenchmarkAPIv2(b *testing.B) {
 					br := choosev2()
 					req := httptest.NewRequest(br.method, br.testPath, nil)
 					req.Header.Set("X-Platform-User-ID", "jnichols")
-					v1.ServeHTTP(w, req)
+					h.ServeHTTP(w, req)
 					wg.Done()
 				}()
 			}

@@ -7,11 +7,11 @@ import (
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
 	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/internal/tree"
-	"github.com/jnichols-git/matcha/v2/pkg/middleware"
+	"github.com/jnichols-git/matcha/v2/teaware"
 )
 
 type Router struct {
-	mws       []middleware.Middleware
+	mws       []teaware.Middleware
 	rtree     *tree.RouteTree
 	routes    map[int64]*route.Route
 	handlers  map[int64]http.Handler
@@ -21,7 +21,7 @@ type Router struct {
 
 func Default() *Router {
 	return &Router{
-		mws:       make([]middleware.Middleware, 0),
+		mws:       make([]teaware.Middleware, 0),
 		rtree:     tree.New(),
 		routes:    make(map[int64]*route.Route),
 		handlers:  make(map[int64]http.Handler),
@@ -33,13 +33,14 @@ func Default() *Router {
 // Attach middleware to the router.
 //
 // See interface Router.
-func (rt *Router) Use(mws ...middleware.Middleware) {
+func (rt *Router) Use(mws ...teaware.Middleware) {
 	rt.mws = append(rt.mws, mws...)
 }
 
 func register(rt *Router, r *route.Route, h http.Handler) {
 	id := rt.rtree.Add(r)
 	rt.routes[id] = r
+	h = teaware.Compile(h, r.Middleware()...)
 	if h != nil {
 		rt.handlers[id] = h
 	} else {
@@ -103,7 +104,7 @@ func (rt *Router) Mount(rpath string, h http.Handler, methods ...string) error {
 			http.MethodOptions, http.MethodHead, http.MethodTrace, http.MethodConnect,
 		}
 	}
-	trim := middleware.TrimPrefix(rpath)
+	trim := teaware.TrimPrefix(rpath)
 	rpath = path.MakePartial(rpath, "")
 	for _, method := range methods {
 		r, err := route.New(method, rpath)
@@ -123,16 +124,13 @@ func (rt *Router) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
-// Implements http.Handler.
-//
-// Serve request using the registered middleware, routes, and handlers.
-// Tree Router organizes routes by their 'prefixes' (first path elements) and serves based on the first
-// path element of the request. Since wildcard and regex parts do not statically evaluate, they are stored as "*".
-func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	req = middleware.ExecuteMiddleware(rt.mws, w, req)
-	if req == nil {
-		return
-	}
+func (rt *Router) Compile() http.Handler {
+	var h http.Handler = http.HandlerFunc(rt.matchRoute)
+	h = teaware.Compile(h, rt.mws...)
+	return h
+}
+
+func (rt *Router) matchRoute(w http.ResponseWriter, req *http.Request) {
 	leaf_id := rt.rtree.Match(req)
 	if leaf_id == tree.NO_LEAF_ID {
 		rt.notfound.ServeHTTP(w, req)
@@ -141,11 +139,6 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r := rt.routes[leaf_id]
 	req = rctx.PrepareRequestContext(req, route.NumParams(r))
 	reqWithCtx := r.Execute(req)
-	reqWithCtx = middleware.ExecuteMiddleware(r.Middleware(), w, reqWithCtx)
-	if reqWithCtx == nil {
-		rctx.ReturnRequestContext(req)
-		return
-	}
 	handler := rt.handlers[leaf_id]
 	if handler != nil {
 		handler.ServeHTTP(w, reqWithCtx)
@@ -153,7 +146,6 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 		return
 	}
-
 	rctx.ReturnRequestContext(req)
 	return
 }

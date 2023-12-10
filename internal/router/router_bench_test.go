@@ -48,10 +48,11 @@ func BenchmarkSingleRequests(b *testing.B) {
 		declareReq("/static/file/some/file/path.md"),
 	}
 	mockWriter := &mockResponseWriter{}
+	handler := rt.Compile()
 	for i := 0; i < b.N; i++ {
 		ri := rand.Int() % len(benchReqs)
 		r := benchReqs[ri]
-		rt.ServeHTTP(mockWriter, r)
+		handler.ServeHTTP(mockWriter, r)
 	}
 }
 
@@ -72,9 +73,10 @@ func BenchmarkBasicRouter(b *testing.B) {
 		declareReq("/static/file/some/file/path.md"),
 	}
 	mockWriter := &mockResponseWriter{}
+	handler := rt.Compile()
 	for i := 0; i < b.N; i++ {
 		for _, r := range benchReqs {
-			rt.ServeHTTP(mockWriter, r)
+			handler.ServeHTTP(mockWriter, r)
 		}
 	}
 }

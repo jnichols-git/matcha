@@ -13,5 +13,5 @@ func sayHello(w http.ResponseWriter, req *http.Request) {
 func HelloExample() {
 	rt := matcha.Router()
 	rt.HandleFunc(http.MethodGet, "/hello", sayHello)
-	http.ListenAndServe(":3000", rt)
+	http.ListenAndServe(":3000", rt.Compile())
 }
