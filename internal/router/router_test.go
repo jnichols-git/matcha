@@ -12,8 +12,8 @@ import (
 
 	"sync"
 
-	"github.com/jnichols-git/matcha/v2/pkg/cors"
-	"github.com/jnichols-git/matcha/v2/pkg/require"
+	"github.com/jnichols-git/matcha/v2/cors"
+	"github.com/jnichols-git/matcha/v2/require"
 	"github.com/jnichols-git/matcha/v2/teaware"
 
 	"github.com/jnichols-git/matcha/v2/internal/rctx"

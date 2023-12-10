@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jnichols-git/matcha/v2/cors"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/cors"
-	"github.com/jnichols-git/matcha/v2/pkg/require"
+	"github.com/jnichols-git/matcha/v2/require"
 	"github.com/jnichols-git/matcha/v2/teaware"
 )
 

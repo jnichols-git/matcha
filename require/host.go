@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jnichols-git/matcha/v2/pkg/regex"
+	"github.com/jnichols-git/matcha/v2/regex"
 )
 
 // getReqHost gets the host, port for an inbound server request.

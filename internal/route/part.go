@@ -4,7 +4,7 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/jnichols-git/matcha/v2/pkg/regex"
+	"github.com/jnichols-git/matcha/v2/regex"
 )
 
 const (

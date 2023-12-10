@@ -8,7 +8,7 @@ import (
 
 	"github.com/jnichols-git/matcha/v2/internal/path"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/pkg/require"
+	"github.com/jnichols-git/matcha/v2/require"
 	"github.com/jnichols-git/matcha/v2/teaware"
 )
 

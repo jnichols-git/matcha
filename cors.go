@@ -3,7 +3,7 @@ package matcha
 import (
 	"net/http"
 
-	"github.com/jnichols-git/matcha/v2/pkg/cors"
+	"github.com/jnichols-git/matcha/v2/cors"
 )
 
 // SetCORSHeaders sets CORS headers on the response according to your

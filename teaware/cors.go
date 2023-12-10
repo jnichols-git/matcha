@@ -3,7 +3,7 @@ package teaware
 import (
 	"net/http"
 
-	"github.com/jnichols-git/matcha/v2/pkg/cors"
+	"github.com/jnichols-git/matcha/v2/cors"
 )
 
 func Options(aco *cors.Options) Middleware {
