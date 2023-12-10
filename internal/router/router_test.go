@@ -309,7 +309,7 @@ func TestDeclare(t *testing.T) {
 	})
 }
 
-var aco = &cors.AccessControlOptions{
+var aco = &cors.Options{
 	AllowOrigin:      []string{"*"},
 	AllowMethods:     []string{"*"},
 	AllowHeaders:     []string{"*"},

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var aco1 = &AccessControlOptions{
+var aco1 = &Options{
 	AllowOrigin:      []string{"*"},
 	AllowMethods:     []string{"*"},
 	AllowHeaders:     []string{"*"},
@@ -13,7 +13,7 @@ var aco1 = &AccessControlOptions{
 	MaxAge:           1000,
 	AllowCredentials: false,
 }
-var aco2 = &AccessControlOptions{
+var aco2 = &Options{
 	AllowOrigin:      []string{"origin.com"},
 	AllowMethods:     []string{http.MethodGet, http.MethodPost},
 	AllowHeaders:     []string{"x-Header-1", "X-Header-2", "x-Header-3"},
@@ -38,12 +38,12 @@ var preflight_request = &http.Request{
 	},
 }
 
-func TestGetCORSRequestHeaders(t *testing.T) {
-	crh := GetCORSRequestHeaders(simple_request)
+func TestGetRequest(t *testing.T) {
+	crh := GetRequest(simple_request)
 	if crh.Origin != "origin.com" {
 		t.Errorf("expected origin 'origin.com', got '%s'", crh.Origin)
 	}
-	crh = GetCORSRequestHeaders(preflight_request)
+	crh = GetRequest(preflight_request)
 	if crh.Origin != "origin.com" {
 		t.Errorf("expected origin 'origin.com', got '%s'", crh.Origin)
 	}
@@ -55,50 +55,53 @@ func TestGetCORSRequestHeaders(t *testing.T) {
 	}
 }
 
-func BenchmarkGetCORSRequestHeaders(b *testing.B) {
+func BenchmarkGetRequest(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = GetCORSRequestHeaders(preflight_request)
+		_ = GetRequest(preflight_request)
 	}
 }
 
-func TestReflectCORSRequestHeaders(t *testing.T) {
-	crh := GetCORSRequestHeaders(simple_request)
-	resp_headers := ReflectCORSRequestHeaders(aco1, crh)
-	if len(resp_headers.AllowOrigin) != 1 || resp_headers.AllowOrigin[0] != "origin.com" {
-		t.Errorf("expected allow-origin 'origin.com', got %v", resp_headers.AllowOrigin)
+func TestReflectRequest(t *testing.T) {
+	crh := GetRequest(simple_request)
+	resp_headers := http.Header{}
+	ReflectRequest(aco1, crh, resp_headers)
+	if len(resp_headers.Values(AllowOrigin)) != 1 || resp_headers.Values(AllowOrigin)[0] != "origin.com" {
+		t.Errorf("expected allow-origin 'origin.com', got %v", resp_headers.Values(AllowOrigin))
 	}
-	if len(resp_headers.AllowMethods) != 1 || resp_headers.AllowMethods[0] != http.MethodGet {
-		t.Errorf("expected allow-methods 'GET', got %v", resp_headers.AllowMethods)
+	if len(resp_headers.Values(AllowMethods)) != 1 || resp_headers.Values(AllowMethods)[0] != http.MethodGet {
+		t.Errorf("expected allow-methods 'GET', got %v", resp_headers.Values(AllowMethods))
 	}
-	if len(resp_headers.AllowHeaders) != 0 {
-		t.Errorf("expected no allowed additional headers, got %v", resp_headers.AllowHeaders)
+	if len(resp_headers.Values(AllowHeaders)) != 0 {
+		t.Errorf("expected no allowed additional headers, got %v", resp_headers.Values(AllowHeaders))
 	}
-	if resp_headers.AllowCredentials {
+	if resp_headers.Get(AllowCredentials) != "false" {
 		t.Errorf("expected no allowed credentials")
 	}
 
-	crh = GetCORSRequestHeaders(preflight_request)
-	resp_headers = ReflectCORSRequestHeaders(aco2, crh)
-	if len(resp_headers.AllowOrigin) != 1 || resp_headers.AllowOrigin[0] != "origin.com" {
-		t.Errorf("expected allow-origin 'origin.com', got %v", resp_headers.AllowOrigin)
+	crh = GetRequest(preflight_request)
+	resp_headers = http.Header{}
+	ReflectRequest(aco2, crh, resp_headers)
+	if len(resp_headers.Values(AllowOrigin)) != 1 || resp_headers.Values(AllowOrigin)[0] != "origin.com" {
+		t.Errorf("expected allow-origin 'origin.com', got %v", resp_headers.Values(AllowOrigin))
 	}
-	if len(resp_headers.AllowMethods) != 1 || resp_headers.AllowMethods[0] != http.MethodPost {
-		t.Errorf("expected allow-methods 'POST', got %v", resp_headers.AllowMethods)
+	if len(resp_headers.Values(AllowMethods)) != 1 || resp_headers.Values(AllowMethods)[0] != http.MethodPost {
+		t.Errorf("expected allow-methods 'POST', got %v", resp_headers.Values(AllowMethods))
 	}
-	if len(resp_headers.AllowHeaders) != 2 || resp_headers.AllowHeaders[0] != "X-Header-1" || resp_headers.AllowHeaders[1] != "x-Header-2" {
-		t.Errorf("expected allow-headers X-Header-1 and X-Header-2, got %v", resp_headers.AllowHeaders)
+	if len(resp_headers.Values(AllowHeaders)) != 2 || resp_headers.Values(AllowHeaders)[0] != "X-Header-1" || resp_headers.Values(AllowHeaders)[1] != "x-Header-2" {
+		t.Errorf("expected allow-headers X-Header-1 and X-Header-2, got %v", resp_headers.Values(AllowHeaders))
 	}
-	if len(resp_headers.ExposeHeaders) != 1 || resp_headers.ExposeHeaders[0] != "x-Header-Out" {
-		t.Errorf("expected expose-headers x-Header-Out, got %v", resp_headers.ExposeHeaders)
+	if len(resp_headers.Values(ExposeHeaders)) != 1 || resp_headers.Values(ExposeHeaders)[0] != "x-Header-Out" {
+		t.Errorf("expected expose-headers x-Header-Out, got %v", resp_headers.Values(ExposeHeaders))
 	}
-	if resp_headers.AllowCredentials {
+	if resp_headers.Get(AllowCredentials) != "false" {
 		t.Errorf("expected no allowed credentials")
 	}
 }
 
-func BenchmarkReflectCORSRequestHeaders(b *testing.B) {
+func BenchmarkReflectRequest(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		crh := GetCORSRequestHeaders(simple_request)
-		_ = ReflectCORSRequestHeaders(aco1, crh)
+		h := http.Header{}
+		crh := GetRequest(simple_request)
+		ReflectRequest(aco1, crh, h)
 	}
 }
