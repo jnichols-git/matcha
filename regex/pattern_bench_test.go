@@ -15,8 +15,8 @@ func BenchmarkHostPattern(b *testing.B) {
 		}
 	})
 	b.Run("regex.Pattern-full", func(b *testing.B) {
-		rs, isrs, err := CompilePattern(`[.+\.jnichols\..+]`)
-		if err != nil || !isrs {
+		rs, err := CompilePattern(`[.+\.jnichols\..+]`)
+		if err != nil {
 			b.Fatal(err)
 		}
 		for i := 0; i < b.N; i++ {
@@ -24,8 +24,17 @@ func BenchmarkHostPattern(b *testing.B) {
 		}
 	})
 	b.Run("regex.Pattern-partial", func(b *testing.B) {
-		rs, isrs, err := CompilePattern(`[.+].jnichols.[.+]`)
-		if err != nil || !isrs {
+		rs, err := CompilePattern(`[.+].jnichols.[.+]`)
+		if err != nil {
+			b.Fatal(err)
+		}
+		for i := 0; i < b.N; i++ {
+			use(rs.Match("www.jnichols.info"))
+		}
+	})
+	b.Run("regex.Pattern-string", func(b *testing.B) {
+		rs, err := CompilePattern(`www.jnichols.info`)
+		if err != nil {
 			b.Fatal(err)
 		}
 		for i := 0; i < b.N; i++ {

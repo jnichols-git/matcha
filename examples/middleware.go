@@ -22,5 +22,5 @@ func MiddlewareExample() {
 	nameRoute, _ := matcha.Route(http.MethodGet, "/hello/:name")
 	nameRoute.Use(ValidateName)
 	router.HandleRouteFunc(nameRoute, echo)
-	http.ListenAndServe(":3000", router.Handler())
+	http.ListenAndServe(":3000", router)
 }

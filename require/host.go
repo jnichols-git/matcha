@@ -1,6 +1,7 @@
 package require
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -56,14 +57,14 @@ func Hosts(hns ...string) Required {
 	for _, hn := range hns {
 		var hf func(str string) bool
 		_, host, _ := splitHostPort(hn)
-		hpatt, isPatt, err := regex.CompilePattern(host)
+		hpatt, err := regex.CompilePattern(host)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 		hf = func(inHost string) bool {
 			_, inHost, _ = splitHostPort(inHost)
-			if !isPatt || err != nil {
-				return inHost == host
-			} else {
-				return hpatt.Match(inHost)
-			}
+			return hpatt.Match(inHost)
 		}
 		hmfs = append(hmfs, func(req *http.Request) bool {
 			return hf(req.Host)
@@ -94,14 +95,11 @@ func HostPorts(hns ...string) Required {
 	for _, hn := range hns {
 		var hf, pf func(str string) bool
 		scheme, host, port := splitHostPort(hn)
-		hpatt, isPatt, err := regex.CompilePattern(host)
-		hf = func(inHost string) bool {
-			if !isPatt || err != nil {
-				return inHost == host
-			} else {
-				return hpatt.Match(host)
-			}
+		hpatt, err := regex.CompilePattern(host)
+		if err != nil {
+			continue
 		}
+		hf = hpatt.Match
 		if port != "" {
 			ps := strings.Split(port, ",")
 			pfs := make([]func(inPort int64) bool, 0, len(ps))

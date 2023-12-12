@@ -3,11 +3,9 @@ package regex
 import "testing"
 
 func TestPattern(t *testing.T) {
-	rs, isrs, err := CompilePattern("[(api|www)].jnichols.[.*]")
+	rs, err := CompilePattern("[(api|www)].jnichols.[.*]")
 	if err != nil {
 		t.Errorf("expected expression to compile, got %s", err)
-	} else if !isrs {
-		t.Errorf("expected expression to compile to pattern")
 	}
 	if ok := rs.Match("api.jnichols.info"); !ok {
 		t.Error("expected match")
@@ -21,11 +19,9 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("jnichols.info"); ok {
 		t.Error("expected no match")
 	}
-	rs, isrs, err = CompilePattern("[.{4}.+]")
+	rs, err = CompilePattern("[.{4}.+]")
 	if err != nil {
 		t.Error(err)
-	} else if !isrs {
-		t.Errorf("expected expression to compile to pattern")
 	}
 	if ok := rs.Match("abcde"); !ok {
 		t.Error("expected match")
@@ -33,7 +29,7 @@ func TestPattern(t *testing.T) {
 	if ok := rs.Match("abcd"); ok {
 		t.Error("expected no match")
 	}
-	rs, _, _ = CompilePattern("[.+].jnichols.info")
+	rs, _ = CompilePattern("[.+].jnichols.info")
 	if ok := rs.Match("jnichols.info"); ok {
 		t.Error("expected no match")
 	}
@@ -41,22 +37,19 @@ func TestPattern(t *testing.T) {
 		t.Error("expected no match")
 	}
 
-	rs, isrs, err = CompilePattern("api.jnichols.info")
+	rs, err = CompilePattern("api.jnichols.info")
 	if err != nil {
 		t.Errorf("expected no error")
 	}
-	if isrs {
-		t.Errorf("static string is not a Pattern")
-	}
-	_, _, err = CompilePattern("[.+].jnichols.[.+")
+	_, err = CompilePattern("[.+].jnichols.[.+")
 	if err == nil {
 		t.Errorf("should fail with unbalanced braces")
 	}
-	_, _, err = CompilePattern("[[}{.*]")
+	_, err = CompilePattern("[[}{.*]")
 	if err == nil {
 		t.Errorf("should fail with invalid regex")
 	}
-	_, _, err = CompilePattern("[[]")
+	_, err = CompilePattern("[[]")
 	if err == nil {
 		t.Errorf("should fail with invalid regex")
 	}

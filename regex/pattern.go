@@ -100,18 +100,15 @@ func resolve(patt *Pattern, expr string, set []int) error {
 //
 // Returns patt, isPatt, err, where err != nil if the pattern is invalid and !isPatt
 // if the provided expression is valid, but not a pattern (a static string).
-func CompilePattern(expr string) (*Pattern, bool, error) {
-	// Static strings begone
-	if !strings.ContainsAny(expr, "[]") {
-		return nil, false, nil
-	}
+func CompilePattern(expr string) (*Pattern, error) {
 	patt := &Pattern{
 		fs:      make([]pmf, 0),
 		statics: make([]string, 0),
 	}
 	regexIndices, err := findAllRegexGroups(expr)
 	if err != nil || len(regexIndices) == 0 {
-		return nil, false, err
+		patt.statics = []string{expr}
+		return patt, err
 	}
 	var set, next []int
 	// Start with the first set
@@ -126,7 +123,7 @@ func CompilePattern(expr string) (*Pattern, bool, error) {
 		// For each set, resolve the token in the set
 		err = resolve(patt, expr, set)
 		if err != nil {
-			return nil, false, err
+			return nil, err
 		}
 		// Move to the next set OR whatever's in between this set and the next.
 		if set[1] == next[0] && setidx+1 < len(regexIndices) {
@@ -145,9 +142,9 @@ func CompilePattern(expr string) (*Pattern, bool, error) {
 	// Resolve the last set.
 	err = resolve(patt, expr, set)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
-	return patt, true, nil
+	return patt, nil
 }
 
 // findStatic finds the start index of the idx'th static element of the pattern.
@@ -160,6 +157,9 @@ func (patt *Pattern) findStatic(in string, idx int) int {
 
 // Match matches a pattern to a string.
 func (patt *Pattern) Match(str string) bool {
+	if len(patt.fs) == 0 {
+		return patt.statics[0] == str
+	}
 	static := 0
 	i := 0
 	for _, f := range patt.fs {
@@ -174,8 +174,5 @@ func (patt *Pattern) Match(str string) bool {
 			return false
 		}
 	}
-	if i != len(str) {
-		return false
-	}
-	return true
+	return i == len(str)
 }

@@ -38,7 +38,7 @@ func sayHello(w http.ResponseWriter, req *http.Request) {
 func HelloExample() {
 	rt := matcha.Router()
 	rt.HandleFunc(http.MethodGet, "/hello", sayHello)
-	http.ListenAndServe(":3000", rt.Handler())
+	http.ListenAndServe(":3000", rt)
 }
 ```
 
@@ -70,7 +70,7 @@ func echo(w http.ResponseWriter, req *http.Request) {
 func EchoExample() {
 	rt := matcha.Router()
 	rt.HandleFunc(http.MethodGet, "/hello/:name", echo)
-	http.ListenAndServe(":3000", rt.Handler())
+	http.ListenAndServe(":3000", rt)
 }
 ```
 
@@ -113,7 +113,7 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func FileServer(dir string) {
 	rt := matcha.Router()
 	rt.Handle(http.MethodGet, "/files/:filepath+", &fileServer{dir})
-	http.ListenAndServe(":3000", rt.Handler())
+	http.ListenAndServe(":3000", rt)
 }
 ```
 
@@ -133,8 +133,8 @@ func main() {
     api1 := matcha.Router()
     api2 := matcha.Router()
     // Register some handlers here.
-    api1.Mount("/v2", api2.Handler())
-    http.ListenAndServe(":3000", api1.Handler())
+    api1.Mount("/v2", api2)
+    http.ListenAndServe(":3000", api1)
 }
 ```
 
@@ -169,7 +169,7 @@ func MiddlewareExample() {
 	nameRoute, _ := matcha.Route(http.MethodGet, "/hello/:name")
 	nameRoute.Use(ValidateName)
 	router.HandleRouteFunc(nameRoute, echo)
-	http.ListenAndServe(":3000", router.Handler())
+	http.ListenAndServe(":3000", router)
 }
 
 ```

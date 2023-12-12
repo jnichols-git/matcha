@@ -13,6 +13,7 @@ import (
 type Router struct {
 	mws       []teaware.Middleware
 	rtree     *tree.RouteTree
+	compiled  http.Handler
 	routes    map[int64]*route.Route
 	handlers  map[int64]http.Handler
 	notfound  http.Handler
@@ -20,7 +21,7 @@ type Router struct {
 }
 
 func Default() *Router {
-	return &Router{
+	r := &Router{
 		mws:       make([]teaware.Middleware, 0),
 		rtree:     tree.New(),
 		routes:    make(map[int64]*route.Route),
@@ -28,6 +29,8 @@ func Default() *Router {
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
+	r.Reload()
+	return r
 }
 
 // Attach middleware to the router.
@@ -35,6 +38,7 @@ func Default() *Router {
 // See interface Router.
 func (rt *Router) Use(mws ...teaware.Middleware) {
 	rt.mws = append(rt.mws, mws...)
+	rt.Reload()
 }
 
 func register(rt *Router, r *route.Route, h http.Handler) {
@@ -46,6 +50,7 @@ func register(rt *Router, r *route.Route, h http.Handler) {
 	} else {
 		rt.handlers[id] = nil
 	}
+	rt.Reload()
 }
 
 // Add a route to the router.
@@ -114,6 +119,7 @@ func (rt *Router) Mount(rpath string, h http.Handler, methods ...string) error {
 		r.Use(trim)
 		rt.HandleRoute(r, h)
 	}
+	rt.Reload()
 	return nil
 }
 
@@ -124,10 +130,10 @@ func (rt *Router) AddNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
-func (rt *Router) Handler() http.Handler {
+func (rt *Router) Reload() {
 	var h http.Handler = http.HandlerFunc(rt.matchRoute)
 	h = teaware.Handler(h, rt.mws...)
-	return h
+	rt.compiled = h
 }
 
 func (rt *Router) matchRoute(w http.ResponseWriter, req *http.Request) {
@@ -147,5 +153,8 @@ func (rt *Router) matchRoute(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	rctx.ReturnRequestContext(req)
-	return
+}
+
+func (rt *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	rt.compiled.ServeHTTP(w, req)
 }
