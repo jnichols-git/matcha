@@ -36,10 +36,10 @@ func declareReq(path string) *http.Request {
 func BenchmarkSingleRequests(b *testing.B) {
 	rt := Default()
 	rt.HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root"))
-	rt.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/route/{id}{[\w]{4}}`), rpHandler("id"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}{\w+(?:\.\w+)?}+`), rpHandler("filename"))
+	rt.HandleRoute(route.Declare(http.MethodGet, "/:wildcard"), rpHandler("wildcard"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/route/:id[[\w]{4}]`), rpHandler("id"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/static/file/:filename[\w+(?:\.\w+)?]+`), rpHandler("filename"))
 	benchReqs := []*http.Request{
 		declareReq("/"),
 		declareReq("/wc"),
@@ -48,10 +48,11 @@ func BenchmarkSingleRequests(b *testing.B) {
 		declareReq("/static/file/some/file/path.md"),
 	}
 	mockWriter := &mockResponseWriter{}
+	handler := rt
 	for i := 0; i < b.N; i++ {
 		ri := rand.Int() % len(benchReqs)
 		r := benchReqs[ri]
-		rt.ServeHTTP(mockWriter, r)
+		handler.ServeHTTP(mockWriter, r)
 	}
 }
 
@@ -60,10 +61,10 @@ func BenchmarkSingleRequests(b *testing.B) {
 func BenchmarkBasicRouter(b *testing.B) {
 	rt := Default()
 	rt.HandleRoute(route.Declare(http.MethodGet, "/"), okHandler("root"))
-	rt.HandleRoute(route.Declare(http.MethodGet, "/{wildcard}"), rpHandler("wildcard"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/route/{[a-zA-Z]+}`), okHandler("letters"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/route/{id}{[\w]{4}}`), rpHandler("id"))
-	rt.HandleRoute(route.Declare(http.MethodGet, `/static/file/{filename}{\w+(?:\.\w+)?}+`), rpHandler("filename"))
+	rt.HandleRoute(route.Declare(http.MethodGet, "/:wildcard"), rpHandler("wildcard"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/route/[[a-zA-Z]+]`), okHandler("letters"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/route/:id[[\w]{4}]`), rpHandler("id"))
+	rt.HandleRoute(route.Declare(http.MethodGet, `/static/file/:filename[\w+(?:\.\w+)?]+`), rpHandler("filename"))
 	benchReqs := []*http.Request{
 		declareReq("/"),
 		declareReq("/wc"),
@@ -72,9 +73,10 @@ func BenchmarkBasicRouter(b *testing.B) {
 		declareReq("/static/file/some/file/path.md"),
 	}
 	mockWriter := &mockResponseWriter{}
+	handler := rt
 	for i := 0; i < b.N; i++ {
 		for _, r := range benchReqs {
-			rt.ServeHTTP(mockWriter, r)
+			handler.ServeHTTP(mockWriter, r)
 		}
 	}
 }

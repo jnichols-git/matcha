@@ -2,54 +2,55 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/jnichols-git/matcha/v2/badge.svg?branch=main)](https://coveralls.io/github/jnichols-git/matcha/v2?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jnichols-git/matcha/v2)](https://goreportcard.com/report/github.com/jnichols-git/matcha/v2)
-[![Discord Badge](https://img.shields.io/badge/Join%20us%20on-Discord-blue)](https://discord.gg/gCdJ6NPm)
 
-Matcha is an HTTP router designed for ease of use, power, and extensibility.
+Matcha is an HTTP router with lots of features and strong memory performance.
 
 ## Features
 
-- Flexible routing--handle your API specifications with ease
-- Extensible components for edge cases and integration with 3rd-party tools
-- High performance that scales to larger APIs
-- Comprehensive and passing test coverage, and extensive benchmarks to track performance on key features
-- Easy conversion from standard library; uses stdlib handler signatures and types
-- Zero dependencies, zero dependency management
+- Match wildcards, regex expressions, and partial routes
+- Extend route validation with middleware and requirements
+- Performant under load with complex APIs
 
 ## Installation
 
-`go get github.com/jnichols-git/matcha/v2@v1.2.2`
+`go get github.com/jnichols-git/matcha/v2`
 
 ## Basic Usage
 
-Here's a "Hello, World" example to introduce you to Matcha's syntax! It serves requests to `http://localhost:8080/hello`.
+You can use `matcha.Router` to create a new Router and `router.HandleFunc` to handle a request path.
 
 ```go
-package examples
+package main
 
 import (
-    "net/http"
+	"net/http"
 
-    "github.com/jnichols-git/matcha/v2/internal/router"
+	"github.com/jnichols-git/matcha/v2"
 )
 
 func sayHello(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("Hello, World!"))
+	w.Write([]byte("Hello, World!"))
 }
 
 func HelloExample() {
-    rt := router.Default()
-    rt.HandleFunc(http.MethodGet, "/hello", sayHello)
-    // or:
-    // rt.Handle(http.MethodGet, "/hello", http.HandlerFunc(sayHello))
-    http.ListenAndServe(":3000", rt)
+	rt := matcha.Router()
+	rt.HandleFunc(http.MethodGet, "/hello", sayHello)
+	http.ListenAndServe(":3000", rt)
 }
 ```
 
-For a step-by-step guide through Matcha's features, see our [User Guide](docs/user-guide.md).
+```sh
+$ go run ./examples/ hello
+$ curl localhost:3000/hello
+Hello, World!
+$
+```
+
+For more features, see our [User Guide](docs/user-guide.md).
 
 ## Performance
 
-Matcha has an extensive benchmark suite to help identify, document, and improve performance over time. Additionally, `/bench` contains a comprehensive benchmark API for "MockBoards", a fake website that just so happens to use all of the features of Matcha. The MockBoards API has the following:
+To help measure performance, we benchmark performance on a fake API spec for MockBoards.
 
 - 18 distinct endpoints, including
   - 4 endpoints requiring authorization using a "client_id" header
@@ -57,19 +58,16 @@ Matcha has an extensive benchmark suite to help identify, document, and improve 
 - 2 middleware components assigning a request ID and CORS headers
 - 1 requirement for target host on all endpoints
 
-The MockBoards benchmarks are run alongside an *offset benchmark* that measures the performance cost of setting up scaffolding
-for each request sent to calculate their final score. The values below represent performance numbers that you might expect
-to see in practice. Please keep in mind that performance varies by machine--you should run benchmarks on your own
-hardware to get a proper idea of how well Matcha's performance suits your needs.
+The benchmark checks performance against single sequential requests and bursts of 10 concurrent requests. An "offset" is also calculated for the cost of building requests. The results for each benchmark are `result / count - offset`
 
-### MockBoards API Spec Benchmark
+### MockBoards
 
 Benchmark | ns/request | B/request | allocs/request
 --- | --- | --- | ---
 Sequential | 2226 ns/request | 1909 bytes/request | 27 allocs/request
 Concurrent | 1953 ns/request | 1943 bytes/request | 29 allocs/request
 
-### MockBoards Mounted API (v2) Benchmark
+### MockBoards with v2
 
 This mounts a copy of the API at `/v2` and runs requests against both the v1 and v2 APIs.
 
@@ -78,9 +76,7 @@ Benchmark | ns/request | B/request | allocs/request
 Sequential | 2797 ns/request | 2046 bytes/request | 29 allocs/request
 Concurrent | 2097 ns/request | 2139 bytes/request | 30 allocs/request
 
-### MockBoards API Routing-Only Benchmark
-
-This is the v1 spec, but with the non-path features stripped out to give a better idea of pure routing costs.
+### MockBoards routing-only
 
 Benchmark | ns/request | B/request | allocs/request
 --- | --- | --- | ---

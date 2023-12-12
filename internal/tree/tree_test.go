@@ -7,14 +7,14 @@ import (
 
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
 	"github.com/jnichols-git/matcha/v2/internal/route"
-	"github.com/jnichols-git/matcha/v2/pkg/require"
+	"github.com/jnichols-git/matcha/v2/require"
 )
 
 func TestTree(t *testing.T) {
 	rtree := New()
-	rtree.Add(route.Declare(http.MethodGet, "/test/route/{p1}[[a-z]*]"))
-	rtree.Add(route.Declare(http.MethodGet, "/test/route/{p2}[[a-zA-Z]*]"))
-	rtree.Add(route.Declare(http.MethodGet, "/test/route/{ext}+"))
+	rtree.Add(route.Declare(http.MethodGet, "/test/route/:p1[[a-z]*]"))
+	rtree.Add(route.Declare(http.MethodGet, "/test/route/:p2[[a-zA-Z]*]"))
+	rtree.Add(route.Declare(http.MethodGet, "/test/route/:ext+"))
 	rtree.Add(route.Declare(http.MethodGet, "/test"))
 	rtree.Add(route.Declare(http.MethodGet, "/"))
 	req, _ := http.NewRequest(http.MethodGet, "http://test.com/test/route/lowercase", nil)

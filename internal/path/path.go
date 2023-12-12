@@ -8,9 +8,6 @@ import (
 // Return the next token from a path, starting at position last, and the position to use with the next call.
 // Next considers multiple consecutive slashes to act as a single slash.
 func Next(path string, last int) (string, int) {
-	if path == "" && last == 0 {
-		path = "/"
-	}
 	if last+1 > len(path) {
 		return "", -1
 	}
@@ -35,7 +32,7 @@ func Next(path string, last int) (string, int) {
 // This effectively appends /+ to the path.
 func MakePartial(path string, param string) string {
 	if param != "" {
-		param = "{" + param + "}"
+		param = ":" + param
 	}
 	i := len(path) - 1
 	if path[i-1:] == "/+" {
