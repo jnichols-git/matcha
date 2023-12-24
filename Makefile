@@ -1,6 +1,6 @@
 FORCE:
 
-test:
+test: FORCE
 	go test -coverprofile cicd/cover.out ./...
 
 cover: test

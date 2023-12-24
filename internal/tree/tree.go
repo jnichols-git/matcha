@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 
 	"github.com/jnichols-git/matcha/v2/internal/path"
-	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/require"
+	"github.com/jnichols-git/matcha/v2/route"
 )
 
 const NO_LEAF_ID = int64(0)

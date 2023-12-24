@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/jnichols-git/matcha/v2/internal/route"
-	"github.com/jnichols-git/matcha/v2/internal/router"
+	"github.com/jnichols-git/matcha/v2"
+	"github.com/jnichols-git/matcha/v2/route"
 )
 
 /*
@@ -73,9 +73,9 @@ func handleOK(w http.ResponseWriter, req *http.Request) {
 
 // Just to check!
 func TestAPIv1(t *testing.T) {
-	rt := router.Default()
+	rt := matcha.Router()
 	for _, tr := range apiRoutes {
-		r := route.Declare(tr.method, tr.path)
+		r, _ := matcha.Route(tr.method, tr.path)
 		r.Use(tr.mws...)
 		r.Require(tr.rqs...)
 		rt.HandleRouteFunc(r, handleOK)
@@ -96,7 +96,7 @@ func TestAPIv1(t *testing.T) {
 // BENCHMARKS: MockBoards API
 
 func BenchmarkAPIv1(b *testing.B) {
-	rt := router.Default()
+	rt := matcha.Router()
 	for _, tr := range apiRoutes {
 		r, err := route.New(tr.method, tr.path)
 		if err != nil {
@@ -136,7 +136,7 @@ func BenchmarkAPIv1(b *testing.B) {
 }
 
 func BenchmarkStrippedAPI(b *testing.B) {
-	rt := router.Default()
+	rt := matcha.Router()
 	for _, tr := range apiRoutes {
 		r, err := route.New(tr.method, tr.path)
 		if err != nil {

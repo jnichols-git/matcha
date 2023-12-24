@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/jnichols-git/matcha/v2/internal/route"
+	"github.com/jnichols-git/matcha/v2/route"
 )
 
 // mock response writer, taken from go-http-routing-benchmark

@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/internal/route"
-	"github.com/jnichols-git/matcha/v2/internal/router"
+	"github.com/jnichols-git/matcha/v2/route"
+	"github.com/jnichols-git/matcha/v2/router"
 )
 
 func Route(method, expr string) (r *route.Route, err error) {

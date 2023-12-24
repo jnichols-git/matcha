@@ -1,16 +1,15 @@
 # Matcha User Guide
 
-- [Matcha User Guide](#matcha-user-guide)
-	- [Basics](#basics)
-		- [Hello World](#hello-world)
-		- [Echo Server with Route Parameters](#echo-server-with-route-parameters)
-		- [File Server with Partial Routes](#file-server-with-partial-routes)
-	- [Advanced Usage](#advanced-usage)
-		- [Mounting Subrouters](#mounting-subrouters)
-		- [Middleware](#middleware)
-		- [Requirements](#requirements)
-	- [FAQ](#faq)
-		- [Why are some of my routes not matched when they should be?](#why-are-some-of-my-routes-not-matched-when-they-should-be)
+- [Basics](#basics)
+	- [Hello World](#hello-world)
+	- [Echo Server with Route Parameters](#echo-server-with-route-parameters)
+	- [File Server with Partial Routes](#file-server-with-partial-routes)
+- [Advanced Usage](#advanced-usage)
+	- [Mounting Subrouters](#mounting-subrouters)
+	- [Middleware](#middleware)
+	- [Requirements](#requirements)
+- [FAQ](#faq)
+	- [Why are some of my routes not matched when they should be?](#why-are-some-of-my-routes-not-matched-when-they-should-be)
 
 Hello! This is a step-by-step guide to using Matcha for HTTP handling in Go.
 
@@ -20,7 +19,9 @@ There are a few examples in the `examples` directory to show basic usage.
 
 ### Hello World
 
-You can use `matcha.Router` to create a new Router and `router.HandleFunc` to handle a request path.
+You can use `matcha.Router` to create a new Router and `router.HandleFunc` to
+handle a request path. Routers are type `*router.Router` if you need to store
+it.
 
 ```go
 package main
@@ -190,14 +191,12 @@ $
 Requirements are defined in `require` as a `func(*http.Request) bool`. If you need more tools to check routes, you can `Require` a requirement with any Route. If this function returns false for any request, the route is not matched, but it can still match any routes after.
 
 ```go
-webRoute, err := route.New(
+webRoute, err := matcha.Route(
     http.MethodGet, "/",
-    route.Require(require.HostPorts("https://[www.|]jnichols.info")),
-)
-apiRoute, err := route.New(
+).Require(require.HostPorts("https://[www.|]jnichols.info"))
+apiRoute, err := matcha.Route(
     http.MethodGet, "/",
-    require.HostPorts("https://api.jnichols.info"),
-)
+).Require(require.HostPorts("https://api.jnichols.info"))
 ```
 
 ## FAQ
