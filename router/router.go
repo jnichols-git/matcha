@@ -5,8 +5,8 @@ import (
 
 	"github.com/jnichols-git/matcha/v2/internal/path"
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/internal/route"
 	"github.com/jnichols-git/matcha/v2/internal/tree"
+	"github.com/jnichols-git/matcha/v2/route"
 	"github.com/jnichols-git/matcha/v2/teaware"
 )
 
@@ -29,16 +29,17 @@ func Default() *Router {
 		notfound:  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }),
 		maxParams: rctx.DefaultMaxParams,
 	}
-	r.Reload()
+	r.reload()
 	return r
 }
 
 // Attach middleware to the router.
 //
 // See interface Router.
-func (rt *Router) Use(mws ...teaware.Middleware) {
+func (rt *Router) Use(mws ...teaware.Middleware) *Router {
 	rt.mws = append(rt.mws, mws...)
-	rt.Reload()
+	rt.reload()
+	return rt
 }
 
 func register(rt *Router, r *route.Route, h http.Handler) {
@@ -50,7 +51,7 @@ func register(rt *Router, r *route.Route, h http.Handler) {
 	} else {
 		rt.handlers[id] = nil
 	}
-	rt.Reload()
+	rt.reload()
 }
 
 // Add a route to the router.
@@ -119,18 +120,18 @@ func (rt *Router) Mount(rpath string, h http.Handler, methods ...string) error {
 		r.Use(trim)
 		rt.HandleRoute(r, h)
 	}
-	rt.Reload()
+	rt.reload()
 	return nil
 }
 
 // Set the handler for instances where no route is found.
 //
 // See interface Router.
-func (rt *Router) AddNotFound(h http.Handler) {
+func (rt *Router) HandleNotFound(h http.Handler) {
 	rt.notfound = h
 }
 
-func (rt *Router) Reload() {
+func (rt *Router) reload() {
 	var h http.Handler = http.HandlerFunc(rt.matchRoute)
 	h = teaware.Handler(h, rt.mws...)
 	rt.compiled = h

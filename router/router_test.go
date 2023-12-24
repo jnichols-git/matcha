@@ -16,7 +16,7 @@ import (
 	"github.com/jnichols-git/matcha/v2/teaware"
 
 	"github.com/jnichols-git/matcha/v2/internal/rctx"
-	"github.com/jnichols-git/matcha/v2/internal/route"
+	"github.com/jnichols-git/matcha/v2/route"
 )
 
 // Return a handler that writes OK to all requests
@@ -325,7 +325,7 @@ func TestCORS(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 	r.Handle(http.MethodGet, "/", okHandler("ok"))
-	r.AddNotFound(nfHandler())
+	r.HandleNotFound(nfHandler())
 	s := httptest.NewServer(r)
 
 	runEvalRequest(t, s, "/", reqGenHeaders(http.MethodGet, http.Header{"Origin": {"test-origin"}}), map[string]any{

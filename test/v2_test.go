@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/jnichols-git/matcha/v2/internal/route"
-	"github.com/jnichols-git/matcha/v2/internal/router"
+	"github.com/jnichols-git/matcha/v2/route"
+	"github.com/jnichols-git/matcha/v2/router"
 )
 
 /*
